@@ -1,0 +1,105 @@
+"use client";
+
+const COLORS: Record<string, [string, string, string?]> = {
+  US: ["#3c3b6e", "#b22234", "#fff"],
+  CA: ["#ff0000", "#fff"],
+  MX: ["#006847", "#ce1126", "#fff"],
+  BR: ["#009c3b", "#ffdf00", "#002776"],
+  GB: ["#012169", "#c8102e", "#fff"],
+  DE: ["#000", "#dd0000", "#ffce00"],
+  FR: ["#002395", "#ed2939", "#fff"],
+  NL: ["#ae1c28", "#21468b", "#fff"],
+  ES: ["#aa151b", "#f1bf00"],
+  IT: ["#009246", "#ce2b37", "#fff"],
+  PL: ["#fff", "#dc143c"],
+  AU: ["#00008b", "#ff0000", "#fff"],
+  NZ: ["#00247d", "#cc142b", "#fff"],
+  JP: ["#fff", "#bc002d"],
+  KR: ["#fff", "#cd2e3a", "#0047a0"],
+  SG: ["#ed2939", "#fff"],
+  IN: ["#ff9933", "#138808", "#fff"],
+  HK: ["#de2910", "#fff"],
+  CN: ["#de2910", "#ffde00"],
+  ZA: ["#007a4d", "#de3831", "#002395"],
+  NG: ["#008751", "#fff"],
+  EG: ["#ce1126", "#fff", "#000"],
+  CL: ["#0039a6", "#d52b1e", "#fff"],
+  AR: ["#74acdf", "#fff", "#f6b40e"],
+  SE: ["#006aa7", "#fecc00"],
+};
+
+export default function Flag({ code, className = "" }: { code: string; className?: string }) {
+  const cc = (code || "US").toUpperCase();
+  const [a, b, c] = COLORS[cc] || ["#64748b", "#94a3b8", "#fff"];
+
+  return (
+    <span
+      className={`inline-flex overflow-hidden rounded-[2px] border border-black/15 shrink-0 ${className}`}
+      style={{ width: 18, height: 12 }}
+      title={cc}
+    >
+      <svg viewBox="0 0 18 12" width="18" height="12" aria-hidden>
+        {cc === "US" ? (
+          <>
+            <rect width="18" height="12" fill="#b22234" />
+            {[1, 3, 5, 7, 9, 11].map((y) => (
+              <rect key={y} y={y} width="18" height="1" fill="#fff" />
+            ))}
+            <rect width="7.5" height="6.5" fill="#3c3b6e" />
+            {[0, 1, 2, 3].map((row) =>
+              Array.from({ length: row % 2 === 0 ? 4 : 3 }).map((_, i) => (
+                <circle
+                  key={`${row}-${i}`}
+                  cx={1 + i * 1.7 + (row % 2 === 0 ? 0 : 0.8)}
+                  cy={1 + row * 1.4}
+                  r="0.35"
+                  fill="#fff"
+                />
+              ))
+            )}
+          </>
+        ) : cc === "JP" ? (
+          <>
+            <rect width="18" height="12" fill="#fff" />
+            <circle cx="9" cy="6" r="3.2" fill="#bc002d" />
+          </>
+        ) : cc === "DE" ? (
+          <>
+            <rect width="18" height="4" fill="#000" />
+            <rect y="4" width="18" height="4" fill="#dd0000" />
+            <rect y="8" width="18" height="4" fill="#ffce00" />
+          </>
+        ) : cc === "FR" || cc === "IT" || cc === "NG" || cc === "MX" ? (
+          <>
+            <rect width="6" height="12" fill={a} />
+            <rect x="6" width="6" height="12" fill={c || "#fff"} />
+            <rect x="12" width="6" height="12" fill={b} />
+          </>
+        ) : cc === "NL" || cc === "DE" || cc === "EG" ? (
+          <>
+            <rect width="18" height="4" fill={a} />
+            <rect y="4" width="18" height="4" fill={c || "#fff"} />
+            <rect y="8" width="18" height="4" fill={b} />
+          </>
+        ) : cc === "PL" ? (
+          <>
+            <rect width="18" height="6" fill="#fff" />
+            <rect y="6" width="18" height="6" fill="#dc143c" />
+          </>
+        ) : cc === "CA" ? (
+          <>
+            <rect width="18" height="12" fill="#ff0000" />
+            <rect x="4.5" width="9" height="12" fill="#fff" />
+            <polygon points="9,2 10,5.5 13.5,5.5 10.7,7.5 11.7,11 9,9 6.3,11 7.3,7.5 4.5,5.5 8,5.5" fill="#ff0000" />
+          </>
+        ) : (
+          <>
+            <rect width="18" height="12" fill={a} />
+            <rect y="8" width="18" height="4" fill={b} />
+            {c ? <circle cx="6" cy="5" r="2.2" fill={c} /> : null}
+          </>
+        )}
+      </svg>
+    </span>
+  );
+}

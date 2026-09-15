@@ -1,0 +1,23 @@
+{
+  "generatedAt": "2026-09-15T10:16:59.564Z",
+  "wallets": {
+    "BTC": {
+      "derivationPath": "m/84'/0'/0'/0/index",
+      "publicKey": "034d20a84a31bad86288d23e1b8cf9600a3edd187a8423b65a4ff3ed26bc0f95bb",
+      "chainCode": "ea9f4e878fa725948ec29ee2697a5aac3105154c9071e8febd6675f22e5d66f4",
+      "publicExtendedKey": "xpub6Bry1ztFQy8F5cc5sSrdWtMTkd5fmega2hsyRui6GUmVevt2t4YoTjxQ1Yk7i4kMCYtYzZQe5mDyFpuQnqPKNBdjyKcNqXPFJayQqL5c1Cw"
+    },
+    "LTC": {
+      "derivationPath": "m/84'/2'/0'/0/index",
+      "publicKey": "03c001722e0127904b1374dd57c748fac7bcdaa58ac248cf74b97dc88f67ca3b04",
+      "chainCode": "b3270a7f2820dedcbf28e7785f77749ea1eb51a298b5133e49646cee423360e4",
+      "publicExtendedKey": "xpub6CJrXuqdxwrEisaa4R7Z8F2DYziB8hT1mE54YUoQn3ur7iYaXxCiPqtwJqcMhqvk7w7E5WFLYMA1PHc5roK36PQ2okyMzJ5NKzZK3NkYLBY"
+    },
+    "TRON": {
+      "derivationPath": "m/44'/195'/0'/0/index",
+      "publicKey": "023ce0ebcb8c6cf0690760b9849f22d923d9c0349e9d81b73256f282278d0f53ca",
+      "chainCode": "4df4a24761ff81d49c198729937324acea6ddc3aa1d4f46e4772f1d55974df54",
+      "publicExtendedKey": "xpub6F5bxwv6dNiLzjiFpzQSn83Waua722Nu7PpNu6WTzLtH6cCry7adWL63Tw9vmj4JJ5VFdTgdCuirncq8ZsguoX1HypkstL89Ut8NMMJdf3u"
+    }
+  }
+}

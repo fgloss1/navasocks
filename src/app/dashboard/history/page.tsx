@@ -1,0 +1,296 @@
+﻿"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+
+interface HistoryItem {
+  id: number;
+  listingId: number | null;
+  purchasedAt: string;
+
+  ip: string;
+  port: number;
+  countryCode: string;
+  city: string;
+  isp: string;
+
+  locked: boolean;
+
+  provider: string | null;
+  transportHost: string | null;
+  transportPort: number | null;
+
+  accessUsername: string | null;
+  accessHost: string | null;
+  accessPort: number | null;
+
+  publicAccessHost: string | null;
+  publicAccessPort: number | null;
+
+  price: string | null;
+  proxyType: string | null;
+}
+
+const NAV = [
+  { id: "proxy", label: "Proxy Market", href: "/dashboard" },
+  { id: "inventory", label: "My Proxies", href: "/dashboard?tab=inventory" },
+  { id: "history", label: "History", href: "/dashboard/history" },
+  { id: "payments", label: "Payments", href: "/dashboard?tab=payments" },
+  { id: "tools", label: "IP Tools", href: "/dashboard?tab=tools" },
+];
+
+export default function HistoryPage() {
+  const [items, setItems] = useState<HistoryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [copied, setCopied] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await fetch("/api/history", {
+          cache: "no-store",
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data?.error || "Failed to load history.");
+        }
+
+        if (!cancelled) {
+          setItems(data.history || []);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(
+            err instanceof Error
+              ? err.message
+              : "Failed to load history.",
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const copyEndpoint = async (item: HistoryItem) => {
+    const host =
+      item.publicAccessHost ||
+      item.accessHost ||
+      item.ip;
+
+    const port =
+      item.publicAccessPort ||
+      item.accessPort ||
+      item.port;
+
+    const endpoint = host + ":" + port;
+
+    await navigator.clipboard.writeText(endpoint);
+    setCopied(endpoint);
+
+    window.setTimeout(() => setCopied(""), 1600);
+  };
+
+  return (
+    <main className="min-h-screen bg-[#07101d] text-slate-100">
+      <div className="w-full max-w-[1900px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+
+        <div>
+          <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-cyan-400 mb-1">
+            NAVA SOCKS Control Plane
+          </p>
+
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
+            Proxy <span className="text-cyan-400">History</span>
+          </h1>
+
+          <p className="text-sm text-slate-400 mt-1">
+            Purchased proxies and customer-facing endpoint history.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-2 border-b border-slate-800 pb-px">
+          {NAV.map((item) => (
+            <Link
+              key={item.id}
+              href={item.href}
+              className={`px-4 py-2.5 text-xs font-semibold rounded-t-xl border-x border-t transition ${
+                item.id === "history"
+                  ? "bg-[#0e1628] text-cyan-300 border-cyan-700/50"
+                  : "text-slate-400 border-transparent hover:text-white"
+              }`}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+
+        <section className="bg-[#0e1628] border border-cyan-900/40 rounded-2xl overflow-hidden">
+
+          <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-bold">Purchased proxies</h2>
+              <p className="text-xs text-slate-500 mt-1">
+                {items.length} record{items.length === 1 ? "" : "s"}
+              </p>
+            </div>
+
+            {copied && (
+              <span className="text-[11px] font-mono text-emerald-300">
+                Copied: {copied}
+              </span>
+            )}
+          </div>
+
+          {loading && (
+            <div className="px-5 py-10 text-sm text-slate-500">
+              Loading proxy history...
+            </div>
+          )}
+
+          {!loading && error && (
+            <div className="px-5 py-10 text-sm text-red-300">
+              {error}
+            </div>
+          )}
+
+          {!loading && !error && items.length === 0 && (
+            <div className="px-5 py-10 text-sm text-slate-500">
+              No purchased proxies yet.
+            </div>
+          )}
+
+          {!loading && !error && items.length > 0 && (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[1750px] text-xs">
+
+                <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wide">
+                  <tr>
+                    <th className="px-4 py-3 text-left">IP</th>
+                    <th className="px-4 py-3 text-left">Location</th>
+                    <th className="px-4 py-3 text-left">IP:PORT / COPY</th>
+                    <th className="px-4 py-3 text-left">Type</th>
+                    <th className="px-4 py-3 text-left">Note</th>
+                    <th className="px-4 py-3 text-left">Online Status</th>
+                    <th className="px-4 py-3 text-left">Traffic / Proxy Bought</th>
+                    <th className="px-4 py-3 text-left">Price</th>
+                    <th className="px-4 py-3 text-left">ISP</th>
+                    <th className="px-4 py-3 text-left">Purchased</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {items.map((item) => {
+                    const host =
+                      item.publicAccessHost ||
+                      item.accessHost ||
+                      item.ip;
+
+                    const port =
+                      item.publicAccessPort ||
+                      item.accessPort ||
+                      item.port;
+
+                    const endpoint = host + ":" + port;
+
+                    return (
+                      <tr
+                        key={item.id}
+                        className="border-t border-slate-800/80 hover:bg-cyan-950/10"
+                      >
+
+                        <td className="px-4 py-3 whitespace-nowrap font-mono text-cyan-200">
+                          {item.ip}
+                        </td>
+
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <span className="font-semibold text-slate-200">
+                            {item.countryCode || "—"}
+                          </span>
+
+                          <span className="text-slate-400 ml-2">
+                            {item.city || "—"}
+                          </span>
+                        </td>
+
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-emerald-300">
+                              {endpoint}
+                            </span>
+
+                            <button
+                              type="button"
+                              onClick={() => void copyEndpoint(item)}
+                              className="rounded-md border border-cyan-900/60 px-2 py-1 text-[10px] font-black text-cyan-300 hover:bg-cyan-500/10"
+                            >
+                              COPY
+                            </button>
+                          </div>
+                        </td>
+
+                        <td className="px-4 py-3 whitespace-nowrap text-slate-300">
+                          {item.proxyType || (item.provider ? "ISP" : "—")}
+                        </td>
+
+                        <td className="px-4 py-3 whitespace-nowrap text-slate-500">
+                          —
+                        </td>
+
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <span className="text-emerald-300">
+                            Active
+                          </span>
+
+                          <span className="ml-2 text-slate-500">
+                            {item.locked ? "Locked" : "Open"}
+                          </span>
+                        </td>
+
+                        <td className="px-4 py-3 whitespace-nowrap text-slate-500">
+                          —
+                        </td>
+
+                        <td className="px-4 py-3 whitespace-nowrap font-mono text-emerald-300">
+                          {item.price
+                            ? "$" + Number(item.price).toFixed(2)
+                            : "—"}
+                        </td>
+
+                        <td className="px-4 py-3 whitespace-nowrap text-slate-300">
+                          {item.isp || "—"}
+                        </td>
+
+                        <td className="px-4 py-3 whitespace-nowrap font-mono text-slate-400">
+                          {new Date(item.purchasedAt).toLocaleString()}
+                        </td>
+
+                      </tr>
+                    );
+                  })}
+                </tbody>
+
+              </table>
+            </div>
+          )}
+        </section>
+      </div>
+    </main>
+  );
+}

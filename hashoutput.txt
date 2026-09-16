@@ -1,0 +1,352 @@
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $File = "C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\dashboard\page.tsx"
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""
+
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "===== CURRENT DASHBOARD STATE =====" -ForegroundColor Cyan
+===== CURRENT DASHBOARD STATE =====
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""
+
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $Lines = Get-Content -LiteralPath $File
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> for ($i = 1; $i -le $Lines.Count; $i++) {
+>>     if (
+>>         $Lines[$i-1] -match 'toolInput|toolResult|useState|resetFilters'
+>>     ) {
+>>         $Start = [Math]::Max(1, $i - 2)
+>>         $End   = [Math]::Min($Lines.Count, $i + 3)
+>>
+>>         Write-Host ""
+>>         Write-Host "LINES $Start-$End" -ForegroundColor Yellow
+>>
+>>         for ($j = $Start; $j -le $End; $j++) {
+>>             "{0,4}: {1}" -f $j, $Lines[$j-1]
+>>         }
+>>     }
+>> }
+
+LINES 1-6
+   1: "use client";
+   2:
+   3: import { useCallback, useEffect, useMemo, useState, Suspense } from "react";
+   4: import { useSearchParams } from "next/navigation";
+   5: import Link from "next/link";
+   6: import Navbar from "@/components/Navbar";
+
+LINES 172-177
+ 172:   const tab = searchParams.get("tab") || "proxy";
+ 173:
+ 174:   const [user, setUser] = useState<UserProfile | null>(null);
+ 175:   const [listings, setListings] = useState<Listing[]>([]);
+ 176:   const [owned, setOwned] = useState<Owned[]>([]);
+ 177:   const [transactions, setTransactions] = useState<any[]>([]);
+
+LINES 173-178
+ 173:
+ 174:   const [user, setUser] = useState<UserProfile | null>(null);
+ 175:   const [listings, setListings] = useState<Listing[]>([]);
+ 176:   const [owned, setOwned] = useState<Owned[]>([]);
+ 177:   const [transactions, setTransactions] = useState<any[]>([]);
+ 178:   const [loading, setLoading] = useState(true);
+
+LINES 174-179
+ 174:   const [user, setUser] = useState<UserProfile | null>(null);
+ 175:   const [listings, setListings] = useState<Listing[]>([]);
+ 176:   const [owned, setOwned] = useState<Owned[]>([]);
+ 177:   const [transactions, setTransactions] = useState<any[]>([]);
+ 178:   const [loading, setLoading] = useState(true);
+ 179:   const [region, setRegion] = useState("usa");
+
+LINES 175-180
+ 175:   const [listings, setListings] = useState<Listing[]>([]);
+ 176:   const [owned, setOwned] = useState<Owned[]>([]);
+ 177:   const [transactions, setTransactions] = useState<any[]>([]);
+ 178:   const [loading, setLoading] = useState(true);
+ 179:   const [region, setRegion] = useState("usa");
+ 180:   const [stateFilter, setStateFilter] = useState("");
+
+LINES 176-181
+ 176:   const [owned, setOwned] = useState<Owned[]>([]);
+ 177:   const [transactions, setTransactions] = useState<any[]>([]);
+ 178:   const [loading, setLoading] = useState(true);
+ 179:   const [region, setRegion] = useState("usa");
+ 180:   const [stateFilter, setStateFilter] = useState("");
+ 181:   const [filters, setFilters] = useState({
+
+LINES 177-182
+ 177:   const [transactions, setTransactions] = useState<any[]>([]);
+ 178:   const [loading, setLoading] = useState(true);
+ 179:   const [region, setRegion] = useState("usa");
+ 180:   const [stateFilter, setStateFilter] = useState("");
+ 181:   const [filters, setFilters] = useState({
+ 182:     ip: "",
+
+LINES 178-183
+ 178:   const [loading, setLoading] = useState(true);
+ 179:   const [region, setRegion] = useState("usa");
+ 180:   const [stateFilter, setStateFilter] = useState("");
+ 181:   const [filters, setFilters] = useState({
+ 182:     ip: "",
+ 183:     domain: "",
+
+LINES 179-184
+ 179:   const [region, setRegion] = useState("usa");
+ 180:   const [stateFilter, setStateFilter] = useState("");
+ 181:   const [filters, setFilters] = useState({
+ 182:     ip: "",
+ 183:     domain: "",
+ 184:     state: "",
+
+LINES 189-194
+ 189:     added: "any",
+ 190:   });
+ 191:   const [sort, setSort] = useState("added");
+ 192:   const [cart, setCart] = useState<Listing[]>([]);
+ 193:   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
+ 194:   const [refundProxy, setRefundProxy] = useState<Owned | null>(null);
+
+LINES 190-195
+ 190:   });
+ 191:   const [sort, setSort] = useState("added");
+ 192:   const [cart, setCart] = useState<Listing[]>([]);
+ 193:   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
+ 194:   const [refundProxy, setRefundProxy] = useState<Owned | null>(null);
+ 195:   const [refundReason, setRefundReason] = useState("proxy_not_browsing");
+
+LINES 191-196
+ 191:   const [sort, setSort] = useState("added");
+ 192:   const [cart, setCart] = useState<Listing[]>([]);
+ 193:   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
+ 194:   const [refundProxy, setRefundProxy] = useState<Owned | null>(null);
+ 195:   const [refundReason, setRefundReason] = useState("proxy_not_browsing");
+ 196:   const [refundDescription, setRefundDescription] = useState("");
+
+LINES 192-197
+ 192:   const [cart, setCart] = useState<Listing[]>([]);
+ 193:   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
+ 194:   const [refundProxy, setRefundProxy] = useState<Owned | null>(null);
+ 195:   const [refundReason, setRefundReason] = useState("proxy_not_browsing");
+ 196:   const [refundDescription, setRefundDescription] = useState("");
+ 197:   const [refundSubmitting, setRefundSubmitting] = useState(false);
+
+LINES 193-198
+ 193:   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
+ 194:   const [refundProxy, setRefundProxy] = useState<Owned | null>(null);
+ 195:   const [refundReason, setRefundReason] = useState("proxy_not_browsing");
+ 196:   const [refundDescription, setRefundDescription] = useState("");
+ 197:   const [refundSubmitting, setRefundSubmitting] = useState(false);
+ 198:   const [refundClock, setRefundClock] = useState(Date.now());
+
+LINES 194-199
+ 194:   const [refundProxy, setRefundProxy] = useState<Owned | null>(null);
+ 195:   const [refundReason, setRefundReason] = useState("proxy_not_browsing");
+ 196:   const [refundDescription, setRefundDescription] = useState("");
+ 197:   const [refundSubmitting, setRefundSubmitting] = useState(false);
+ 198:   const [refundClock, setRefundClock] = useState(Date.now());
+ 199:   const [detailTab, setDetailTab] = useState<"info" | "geo" | "blacklists">("info");
+
+LINES 195-200
+ 195:   const [refundReason, setRefundReason] = useState("proxy_not_browsing");
+ 196:   const [refundDescription, setRefundDescription] = useState("");
+ 197:   const [refundSubmitting, setRefundSubmitting] = useState(false);
+ 198:   const [refundClock, setRefundClock] = useState(Date.now());
+ 199:   const [detailTab, setDetailTab] = useState<"info" | "geo" | "blacklists">("info");
+ 200:   const [buying, setBuying] = useState(false);
+
+LINES 196-201
+ 196:   const [refundDescription, setRefundDescription] = useState("");
+ 197:   const [refundSubmitting, setRefundSubmitting] = useState(false);
+ 198:   const [refundClock, setRefundClock] = useState(Date.now());
+ 199:   const [detailTab, setDetailTab] = useState<"info" | "geo" | "blacklists">("info");
+ 200:   const [buying, setBuying] = useState(false);
+ 201:   const [notice, setNotice] = useState("");
+
+LINES 197-202
+ 197:   const [refundSubmitting, setRefundSubmitting] = useState(false);
+ 198:   const [refundClock, setRefundClock] = useState(Date.now());
+ 199:   const [detailTab, setDetailTab] = useState<"info" | "geo" | "blacklists">("info");
+ 200:   const [buying, setBuying] = useState(false);
+ 201:   const [notice, setNotice] = useState("");
+ 202:   const [copied, setCopied] = useState("");
+
+LINES 198-203
+ 198:   const [refundClock, setRefundClock] = useState(Date.now());
+ 199:   const [detailTab, setDetailTab] = useState<"info" | "geo" | "blacklists">("info");
+ 200:   const [buying, setBuying] = useState(false);
+ 201:   const [notice, setNotice] = useState("");
+ 202:   const [copied, setCopied] = useState("");
+ 203:   const [payOpen, setPayOpen] = useState(false);
+
+LINES 199-204
+ 199:   const [detailTab, setDetailTab] = useState<"info" | "geo" | "blacklists">("info");
+ 200:   const [buying, setBuying] = useState(false);
+ 201:   const [notice, setNotice] = useState("");
+ 202:   const [copied, setCopied] = useState("");
+ 203:   const [payOpen, setPayOpen] = useState(false);
+ 204:   const [toolInput, setToolInput] = useState("");
+
+LINES 200-205
+ 200:   const [buying, setBuying] = useState(false);
+ 201:   const [notice, setNotice] = useState("");
+ 202:   const [copied, setCopied] = useState("");
+ 203:   const [payOpen, setPayOpen] = useState(false);
+ 204:   const [toolInput, setToolInput] = useState("");
+ 205:   const [toolResult, setToolResult] = useState("");
+
+LINES 201-206
+ 201:   const [notice, setNotice] = useState("");
+ 202:   const [copied, setCopied] = useState("");
+ 203:   const [payOpen, setPayOpen] = useState(false);
+ 204:   const [toolInput, setToolInput] = useState("");
+ 205:   const [toolResult, setToolResult] = useState("");
+ 206:   const [listingDetails, setListingDetails] = useState<ListingDetails | null>(null);
+
+LINES 202-207
+ 202:   const [copied, setCopied] = useState("");
+ 203:   const [payOpen, setPayOpen] = useState(false);
+ 204:   const [toolInput, setToolInput] = useState("");
+ 205:   const [toolResult, setToolResult] = useState("");
+ 206:   const [listingDetails, setListingDetails] = useState<ListingDetails | null>(null);
+ 207:   const [detailsLoading, setDetailsLoading] = useState(false);
+
+LINES 203-208
+ 203:   const [payOpen, setPayOpen] = useState(false);
+ 204:   const [toolInput, setToolInput] = useState("");
+ 205:   const [toolResult, setToolResult] = useState("");
+ 206:   const [listingDetails, setListingDetails] = useState<ListingDetails | null>(null);
+ 207:   const [detailsLoading, setDetailsLoading] = useState(false);
+ 208:   const [revealedIp, setRevealedIp] = useState("");
+
+LINES 204-209
+ 204:   const [toolInput, setToolInput] = useState("");
+ 205:   const [toolResult, setToolResult] = useState("");
+ 206:   const [listingDetails, setListingDetails] = useState<ListingDetails | null>(null);
+ 207:   const [detailsLoading, setDetailsLoading] = useState(false);
+ 208:   const [revealedIp, setRevealedIp] = useState("");
+ 209:   const [revealedIps, setRevealedIps] = useState<Record<number, string>>({});
+
+LINES 205-210
+ 205:   const [toolResult, setToolResult] = useState("");
+ 206:   const [listingDetails, setListingDetails] = useState<ListingDetails | null>(null);
+ 207:   const [detailsLoading, setDetailsLoading] = useState(false);
+ 208:   const [revealedIp, setRevealedIp] = useState("");
+ 209:   const [revealedIps, setRevealedIps] = useState<Record<number, string>>({});
+ 210:   const [revealingIp, setRevealingIp] = useState(false);
+
+LINES 206-211
+ 206:   const [listingDetails, setListingDetails] = useState<ListingDetails | null>(null);
+ 207:   const [detailsLoading, setDetailsLoading] = useState(false);
+ 208:   const [revealedIp, setRevealedIp] = useState("");
+ 209:   const [revealedIps, setRevealedIps] = useState<Record<number, string>>({});
+ 210:   const [revealingIp, setRevealingIp] = useState(false);
+ 211:   const [currentPage, setCurrentPage] = useState(1);
+
+LINES 207-212
+ 207:   const [detailsLoading, setDetailsLoading] = useState(false);
+ 208:   const [revealedIp, setRevealedIp] = useState("");
+ 209:   const [revealedIps, setRevealedIps] = useState<Record<number, string>>({});
+ 210:   const [revealingIp, setRevealingIp] = useState(false);
+ 211:   const [currentPage, setCurrentPage] = useState(1);
+ 212:   const [pageSize] = useState(25);
+
+LINES 208-213
+ 208:   const [revealedIp, setRevealedIp] = useState("");
+ 209:   const [revealedIps, setRevealedIps] = useState<Record<number, string>>({});
+ 210:   const [revealingIp, setRevealingIp] = useState(false);
+ 211:   const [currentPage, setCurrentPage] = useState(1);
+ 212:   const [pageSize] = useState(25);
+ 213:   const [totalPages, setTotalPages] = useState(1);
+
+LINES 209-214
+ 209:   const [revealedIps, setRevealedIps] = useState<Record<number, string>>({});
+ 210:   const [revealingIp, setRevealingIp] = useState(false);
+ 211:   const [currentPage, setCurrentPage] = useState(1);
+ 212:   const [pageSize] = useState(25);
+ 213:   const [totalPages, setTotalPages] = useState(1);
+ 214:
+
+LINES 210-215
+ 210:   const [revealingIp, setRevealingIp] = useState(false);
+ 211:   const [currentPage, setCurrentPage] = useState(1);
+ 212:   const [pageSize] = useState(25);
+ 213:   const [totalPages, setTotalPages] = useState(1);
+ 214:
+ 215:   const load = useCallback(async () => {
+
+LINES 211-216
+ 211:   const [currentPage, setCurrentPage] = useState(1);
+ 212:   const [pageSize] = useState(25);
+ 213:   const [totalPages, setTotalPages] = useState(1);
+ 214:
+ 215:   const load = useCallback(async () => {
+ 216:     setLoading(true);
+
+LINES 498-503
+ 498:   };
+ 499:
+ 500:   const resetFilters = () => {
+ 501:     setFilters({ ip: "", domain: "", state: "", city: "", isp: "", zip: "", type: "any", added: "any" });
+ 502:     setStateFilter("");
+ 503:   };
+
+LINES 708-713
+ 708:                       <option value="price">Price</option>
+ 709:                     </select>
+ 710:                     <button onClick={resetFilters} className="text-[11px] text-rose-400 inline-flex items-center gap-1 ml-auto">
+ 711:                       <RotateCcw className="w-3 h-3" /> Reset
+ 712:                     </button>
+ 713:                   </div>
+
+LINES 1439-1444
+1439:                 </div>
+1440:                 <input
+1441:                   value={toolInput}
+1442:                   onChange={(e) => setToolInput(e.target.value)}
+1443:                   placeholder="Paste IP or wallet"
+1444:                   className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono outline-none focus:border-cyan-500"
+
+LINES 1440-1445
+1440:                 <input
+1441:                   value={toolInput}
+1442:                   onChange={(e) => setToolInput(e.target.value)}
+1443:                   placeholder="Paste IP or wallet"
+1444:                   className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono outline-none focus:border-cyan-500"
+1445:                 />
+
+LINES 1446-1451
+1446:                 <button
+1447:                   onClick={() =>
+1448:                     setToolResult(
+1449:                       toolInput
+1450:                         ? `${toolInput} Ãƒâ€šÃ‚Â· risk 12/100 Ãƒâ€šÃ‚Â· ISP/residential Ãƒâ€šÃ‚Â· not listed on spamhaus`
+1451:                         : "Enter an IP or address first"
+
+LINES 1447-1452
+1447:                   onClick={() =>
+1448:                     setToolResult(
+1449:                       toolInput
+1450:                         ? `${toolInput} Ãƒâ€šÃ‚Â· risk 12/100 Ãƒâ€šÃ‚Â· ISP/residential Ãƒâ€šÃ‚Â· not listed on spamhaus`
+1451:                         : "Enter an IP or address first"
+1452:                     )
+
+LINES 1448-1453
+1448:                     setToolResult(
+1449:                       toolInput
+1450:                         ? `${toolInput} Ãƒâ€šÃ‚Â· risk 12/100 Ãƒâ€šÃ‚Â· ISP/residential Ãƒâ€šÃ‚Â· not listed on spamhaus`
+1451:                         : "Enter an IP or address first"
+1452:                     )
+1453:                   }
+
+LINES 1456-1461
+1456:                   Scan
+1457:                 </button>
+1458:                 {toolResult && <p className="text-xs font-mono text-emerald-300 bg-slate-950 border border-slate-800 rounded-xl p-3">{toolResult}</p>}
+1459:               </div>
+1460:               <div className="bg-[#0e1628] border border-cyan-900/40 rounded-2xl p-5 space-y-2">
+1461:                 <div className="flex items-center gap-2">
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""
+
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "===== NO FILES MODIFIED =====" -ForegroundColor Green
+===== NO FILES MODIFIED =====
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>

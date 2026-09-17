@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Navbar from "@/components/Navbar";
 
 interface HistoryItem {
   id: number;
@@ -37,6 +38,7 @@ const NAV = [
   { id: "history", label: "History", href: "/dashboard/history" },
   { id: "payments", label: "Payments", href: "/dashboard?tab=payments" },
   { id: "tools", label: "IP Tools", href: "/dashboard?tab=tools" },
+  { id: "support", label: "Support", href: "/dashboard?tab=support" },
 ];
 
 export default function HistoryPage() {
@@ -108,7 +110,9 @@ export default function HistoryPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#07101d] text-slate-100">
+    <>
+      <Navbar />
+      <main className="min-h-screen bg-[#07101d] text-slate-100">
       <div className="w-full max-w-[1900px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
         <div>
@@ -291,6 +295,9 @@ export default function HistoryPage() {
           )}
         </section>
       </div>
-    </main>
+      </main>
+    </>
   );
 }
+
+

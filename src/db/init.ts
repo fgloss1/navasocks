@@ -1,4 +1,4 @@
-﻿import { db } from "./index";
+import { db } from "./index";
 import { sql } from "drizzle-orm";
 
 
@@ -153,6 +153,32 @@ export async function initDb() {
         locked BOOLEAN NOT NULL DEFAULT TRUE,
         created_at TIMESTAMP NOT NULL DEFAULT NOW()
       );
+
+      CREATE TABLE IF NOT EXISTS support_tickets (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        owned_proxy_id INTEGER REFERENCES owned_proxies(id) ON DELETE CASCADE,
+        transaction_id TEXT REFERENCES transactions(id) ON DELETE SET NULL,
+        type TEXT NOT NULL DEFAULT 'refund_request',
+        reason TEXT NOT NULL,
+        description TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'open',
+        refund_amount NUMERIC(12, 2),
+        admin_notes TEXT,
+        reviewed_at TIMESTAMP,
+        refunded_at TIMESTAMP,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+
+      CREATE INDEX IF NOT EXISTS support_tickets_user_idx
+        ON support_tickets (user_id);
+
+      CREATE INDEX IF NOT EXISTS support_tickets_owned_proxy_idx
+        ON support_tickets (owned_proxy_id);
+
+      CREATE INDEX IF NOT EXISTS support_tickets_status_idx
+        ON support_tickets (status);
       -- STAGE5C_PAYMENT_INTENT_SCHEMA
       CREATE TABLE IF NOT EXISTS crypto_deposit_addresses (
         id TEXT PRIMARY KEY,

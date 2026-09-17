@@ -262,3 +262,20 @@ export const ownedProxies = pgTable("owned_proxies", {
   publicAccessPort: integer("public_access_port"),
 });
 
+export const supportTickets = pgTable("support_tickets", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  ownedProxyId: integer("owned_proxy_id").references(() => ownedProxies.id, { onDelete: "cascade" }),
+  transactionId: text("transaction_id").references(() => transactions.id, { onDelete: "set null" }),
+  type: text("type").default("refund_request").notNull(),
+  reason: text("reason").notNull(),
+  description: text("description").notNull(),
+  status: text("status").default("open").notNull(),
+  refundAmount: numeric("refund_amount", { precision: 12, scale: 2 }),
+  adminNotes: text("admin_notes"),
+  reviewedAt: timestamp("reviewed_at"),
+  refundedAt: timestamp("refunded_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+

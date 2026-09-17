@@ -10,7 +10,7 @@ import PaymentModal from "@/components/PaymentModal";
 import { US_STATES, REGIONS } from "@/lib/geo";
 import {
   ShoppingCart,
-  Lock,
+    MessageCircle,Lock,
   Unlock,
   Filter,
   Star,
@@ -99,6 +99,7 @@ interface Owned {
   accessPort?: number | null;
   publicAccessHost?: string | null;
   publicAccessPort?: number | null;
+  createdAt?: string;
 }
 
 interface UserProfile {
@@ -115,7 +116,8 @@ const TABS = [
   { id: "inventory", label: "My Proxies" },
   { id: "history", label: "History" },
   { id: "payments", label: "Payments" },
-  { id: "tools", label: "IP Tools" },
+  { id: "tools", label: "IP Tools" },
+  { id: "support", label: "Support" },
 ];
 
 function shortenIspName(value: string): string {
@@ -164,6 +166,8 @@ function shortenIspName(value: string): string {
 
   return shortened;
 }
+const REFUNDS_ENABLED = false;
+
 function DashboardInner() {
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab") || "proxy";
@@ -188,13 +192,30 @@ function DashboardInner() {
   const [sort, setSort] = useState("added");
   const [cart, setCart] = useState<Listing[]>([]);
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
+  const [refundProxy, setRefundProxy] = useState<Owned | null>(null);
+  const [refundReason, setRefundReason] = useState("proxy_not_browsing");
+  const [refundDescription, setRefundDescription] = useState("");
+  const [refundSubmitting, setRefundSubmitting] = useState(false);
+  const [refundClock, setRefundClock] = useState(Date.now());
   const [detailTab, setDetailTab] = useState<"info" | "geo" | "blacklists">("info");
   const [buying, setBuying] = useState(false);
   const [notice, setNotice] = useState("");
   const [copied, setCopied] = useState("");
   const [payOpen, setPayOpen] = useState(false);
   const [toolInput, setToolInput] = useState("");
-  const [toolResult, setToolResult] = useState("");
+  const [toolResult, setToolResult] = useState("");
+  const [supportCategory, setSupportCategory] = useState("General");
+  const [supportSubject, setSupportSubject] = useState("");
+  const [supportMessage, setSupportMessage] = useState("");
+  const [supportSubmitting, setSupportSubmitting] = useState(false);
+  const [supportNotice, setSupportNotice] = useState("");
+  const [supportTickets, setSupportTickets] = useState<any[]>([]);
+  const [supportHistoryLoading, setSupportHistoryLoading] = useState(false);
+  const [selectedSupportTicketId, setSelectedSupportTicketId] = useState<number | null>(null);
+  const [supportConversation, setSupportConversation] = useState<any[]>([]);
+  const [supportConversationLoading, setSupportConversationLoading] = useState(false);
+  const [supportReply, setSupportReply] = useState("");
+  const [supportReplySubmitting, setSupportReplySubmitting] = useState(false);
   const [listingDetails, setListingDetails] = useState<ListingDetails | null>(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [revealedIp, setRevealedIp] = useState("");
@@ -237,6 +258,14 @@ function DashboardInner() {
       setLoading(false);
     }
   }, [region, stateFilter, filters.ip, filters.domain, filters.city, filters.isp, filters.zip, filters.type, sort, currentPage, pageSize]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setRefundClock(Date.now());
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, []);
 
     useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -427,6 +456,140 @@ function DashboardInner() {
     setTimeout(() => setCopied(""), 1600);
   };
 
+  const submitRefundRequest = async () => {
+    if (!refundProxy || refundSubmitting) return;
+
+    const description = refundDescription.trim();
+
+    if (description.length < 10) {
+      setNotice("Please describe the proxy problem in at least 10 characters.");
+      return;
+    }
+
+    setRefundSubmitting(true);
+
+    try {
+      const res = await fetch("/api/support/tickets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ownedProxyId: refundProxy.id,
+          reason: refundReason,
+          description,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setNotice(data.error || "Unable to create refund request.");
+        return;
+      }
+
+      setRefundProxy(null);
+      setRefundDescription("");
+      setRefundReason("proxy_not_browsing");
+      setNotice(
+        data.ticket?.id
+          ? `Refund request #${data.ticket.id} created.`
+          : "Refund request created."
+      );
+    } catch {
+      setNotice("Unable to create refund request.");
+    } finally {
+      setRefundSubmitting(false);
+    }
+  };
+
+  const getRefundRemainingMs = (item: Owned) => {
+    if (!item.createdAt) return 0;
+
+    const purchasedAt = new Date(item.createdAt).getTime();
+    if (!Number.isFinite(purchasedAt)) return 0;
+
+    return Math.max(0, purchasedAt + 10 * 60 * 1000 - refundClock);
+  };
+
+  const createSupportTicket = async () => {
+    const subject = supportSubject.trim();
+    const message = supportMessage.trim();
+
+    if (!subject || !message) {
+      setSupportNotice("Subject and message are required.");
+      return;
+    }
+
+    setSupportSubmitting(true);
+    setSupportNotice("");
+
+    try {
+      const response = await fetch("/api/support/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          category: supportCategory,
+          subject,
+          message,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setSupportNotice(
+          data?.error || "Unable to create support ticket."
+        );
+        return;
+      }
+
+      setSupportSubject("");
+      setSupportMessage("");
+      setSupportCategory("General");
+
+      setSupportNotice(
+        data?.ticket?.id
+          ? `Ticket #${data.ticket.id} created successfully.`
+          : "Ticket created successfully."
+      );
+    } catch (error) {
+      console.error("Support ticket error:", error);
+      setSupportNotice("Unable to create support ticket.");
+    } finally {
+      setSupportSubmitting(false);
+    }
+  };
+  const loadSupportTickets = async () => {
+    setSupportHistoryLoading(true);
+
+    try {
+      const response = await fetch("/api/support/create", {
+        method: "GET",
+        cache: "no-store",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setSupportNotice(
+          data?.error || "Unable to load support tickets."
+        );
+        return;
+      }
+
+      setSupportTickets(
+        Array.isArray(data?.tickets)
+          ? data.tickets
+          : []
+      );
+    } catch (error) {
+      console.error("Load support tickets error:", error);
+      setSupportNotice("Unable to load support tickets.");
+    } finally {
+      setSupportHistoryLoading(false);
+    }
+  };
   const resetFilters = () => {
     setFilters({ ip: "", domain: "", state: "", city: "", isp: "", zip: "", type: "any", added: "any" });
     setStateFilter("");
@@ -443,6 +606,13 @@ function DashboardInner() {
 
   const regionMeta = REGIONS.find((r) => r.id === region);
 
+  useEffect(() => {
+    if (tab !== "support") {
+      return;
+    }
+
+    void loadSupportTickets();
+  }, [tab]);
   return (
     <div className="min-h-screen bg-[#080d19] text-white flex flex-col">
       <Navbar />
@@ -454,7 +624,7 @@ function DashboardInner() {
         </div>
 
         <div className="relative w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+          <div className={`flex flex-col lg:flex-row lg:items-end justify-between gap-4 ${tab === "support" ? "hidden" : ""}`}>
             <div>
               <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-cyan-400 mb-1">NAVA SOCKS Control Plane</p>
               <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
@@ -470,7 +640,7 @@ function DashboardInner() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className={`grid grid-cols-2 lg:grid-cols-4 gap-3 ${tab === "support" ? "hidden" : ""}`}>
             {[
               { label: "Account balance", value: `$${(user?.balance || 0).toFixed(2)}`, icon: Wallet, tone: "text-emerald-400" },
               { label: "Owned proxies", value: String(owned.length), icon: Server, tone: "text-cyan-300" },
@@ -701,11 +871,11 @@ function DashboardInner() {
                                       disabled={revealingIp || !!revealedIps[row.id]}
                                       className="font-mono text-cyan-200 hover:text-cyan-100 underline underline-offset-2 disabled:no-underline disabled:cursor-default"
                                     >
-                                      {revealedIps[row.id] || row.ipMasked || "—"}
+                                      {revealedIps[row.id] || row.ipMasked || "ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â"}
                                     </button>
                                     {!revealedIps[row.id] && !revealingIp && (
                                       <span className="pointer-events-none absolute left-1/2 bottom-full z-50 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-md border border-slate-700 bg-slate-900 px-2.5 py-1.5 text-xs font-medium text-cyan-200 shadow-lg group-hover:block">
-                                        Reveal IP · $0.05
+                                        Reveal IP Ãƒâ€šÃ‚Â· $0.05
                                       </span>
                                     )}
                                   </span>
@@ -884,10 +1054,10 @@ function DashboardInner() {
                                  <Flag code={selectedListing.countryCode} />
                                  <div className="min-w-0">
                                    <p className="text-sm font-bold text-slate-100">
-                                     {selectedListing.country || "â€”Â"}
+                                     {selectedListing.country || "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"}
                                    </p>
                                    <p className="text-slate-400">
-                                     {selectedListing.state || "â€”Â"}, {selectedListing.city || "â€”Â"}, {selectedListing.zip || "â€”Â"}
+                                     {selectedListing.state || "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"}, {selectedListing.city || "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"}, {selectedListing.zip || "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"}
                                    </p>
                                  </div>
                                </div>
@@ -904,19 +1074,19 @@ function DashboardInner() {
                                  <div className="flex justify-between gap-4 px-3 py-2.5">
                                    <span className="text-slate-500">Domain</span>
                                    <span className="text-right text-slate-200 break-all">
-                                     {selectedListing.domain || "â€”Â"}
+                                     {selectedListing.domain || "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"}
                                    </span>
                                  </div>
 
                                  <div className="flex justify-between gap-4 px-3 py-2.5">
                                    <span className="text-slate-500">ORG</span>
-                                    <span className="text-right text-slate-200">{listingDetails?.network.org || selectedListing.isp || "â€”Â"}</span>
+                                    <span className="text-right text-slate-200">{listingDetails?.network.org || selectedListing.isp || "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"}</span>
                                  </div>
 
                                  <div className="flex justify-between gap-4 px-3 py-2.5">
                                    <span className="text-slate-500">ISP</span>
                                    <span className="text-right text-slate-200">
-                                     {selectedListing.isp || "â€”Â"}
+                                     {selectedListing.isp || "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"}
                                    </span>
                                  </div>
 
@@ -939,13 +1109,13 @@ function DashboardInner() {
 
                                  <div className="flex justify-between gap-4 px-3 py-2.5">
                                    <span className="text-slate-500">IP Type</span>
-                                    <span className="text-right text-slate-200">{listingDetails?.network.ipType || selectedListing.proxyType || "â€”Â"}</span>
+                                    <span className="text-right text-slate-200">{listingDetails?.network.ipType || selectedListing.proxyType || "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"}</span>
                                  </div>
 
                                  <div className="flex justify-between gap-4 px-3 py-2.5">
                                    <span className="text-slate-500">Type</span>
                                    <span className="text-right text-slate-200">
-                                     {selectedListing.proxyType || "â€”Â"}
+                                     {selectedListing.proxyType || "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"}
                                    </span>
                                  </div>
 
@@ -990,13 +1160,13 @@ function DashboardInner() {
                                            disabled={revealingIp || !!revealedIp || !!revealedIps[selectedListing.id]}
                                            className="font-mono text-cyan-200 hover:text-cyan-100 underline underline-offset-2 disabled:no-underline disabled:cursor-default"
                                          >
-                                           {revealedIp || revealedIps[selectedListing.id] || selectedListing.ipMasked || "—"}
+                                           {revealedIp || revealedIps[selectedListing.id] || selectedListing.ipMasked || "ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â"}
                                          </button>
                                          {!revealedIp && !revealedIps[selectedListing.id] && !revealingIp && (
                                            <span
                                              className="pointer-events-none absolute left-1/2 bottom-full z-50 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-md border border-slate-700 bg-slate-900 px-2.5 py-1.5 text-xs font-medium text-cyan-200 shadow-lg group-hover:block"
                                            >
-                                             Reveal IP · $0.05
+                                             Reveal IP Ãƒâ€šÃ‚Â· $0.05
                                            </span>
                                          )}
                                        </div>
@@ -1015,7 +1185,7 @@ function DashboardInner() {
                                  <div className="flex justify-between gap-4 px-3 py-2.5">
                                    <span className="text-slate-500">Speed</span>
                                    <span className="text-right text-slate-200">
-                                     {selectedListing.speedLabel || "â€”Â"}
+                                     {selectedListing.speedLabel || "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"}
                                    </span>
                                  </div>
 
@@ -1144,28 +1314,28 @@ function DashboardInner() {
                              <div className="flex justify-between gap-3">
                                <span className="text-slate-500">Region</span>
                                <span className="text-slate-200">
-                                 {selectedListing.region || "â€”Â"}
+                                 {selectedListing.region || "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"}
                                </span>
                              </div>
 
                              <div className="flex justify-between gap-3">
                                <span className="text-slate-500">State</span>
                                <span className="text-slate-200">
-                                 {selectedListing.state || "â€”Â"}
+                                 {selectedListing.state || "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"}
                                </span>
                              </div>
 
                              <div className="flex justify-between gap-3">
                                <span className="text-slate-500">City</span>
                                <span className="text-slate-200">
-                                 {selectedListing.city || "â€”Â"}
+                                 {selectedListing.city || "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"}
                                </span>
                              </div>
 
                              <div className="flex justify-between gap-3">
                                <span className="text-slate-500">ZIP</span>
                                <span className="font-mono text-slate-200">
-                                 {selectedListing.zip || "â€”Â"}
+                                 {selectedListing.zip || "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"}
                                </span>
                              </div>
                            </>
@@ -1237,7 +1407,7 @@ function DashboardInner() {
                     <Zap className="w-4 h-4 text-cyan-400" />
                     <h3 className="text-sm font-bold">My proxies</h3>
                   </div>
-                  <div className="p-3 max-h-[340px] overflow-visible space-y-1">
+                  <div className="p-3 max-h-[340px] overflow-y-auto space-y-1">
                     {owned.length === 0 && <p className="text-xs text-slate-500 px-1 py-2">No purchased endpoints yet.</p>}
                     {owned.map((item) => (
                       <div key={item.id} className="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-slate-950/80">
@@ -1249,10 +1419,24 @@ function DashboardInner() {
                             <Flag code={item.countryCode} /> {item.city}
                           </p>
                         </button>
+                        <div className="flex items-center gap-2">
+                          {REFUNDS_ENABLED && (
+                            <button
+                              type="button"
+                              onClick={() => setRefundProxy(item)}
+                              disabled={getRefundRemainingMs(item) <= 0}
+                              className="text-[10px] font-black uppercase tracking-wide text-amber-300 hover:text-amber-200"
+                            >
+                              {getRefundRemainingMs(item) > 0
+                                ? `ASK REFUND Ã‚Â· ${Math.ceil(getRefundRemainingMs(item) / 60000)}m`
+                                : "REFUND EXPIRED"}
+                            </button>
+                          )}
                         <button onClick={() => toggleLock(item)} className="text-slate-500 hover:text-cyan-300">
                           {item.locked ? "" : ""}
                         </button>
                       </div>
+                        </div>
                     ))}
                   </div>
                   {copied && (
@@ -1346,6 +1530,416 @@ function DashboardInner() {
             </div>
           )}
 
+                    {tab === "support" && (
+            <div className="space-y-5">
+
+              <div>
+                <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-cyan-400 mb-1">
+                  NAVA SOCKS Control Plane
+                </p>
+
+                <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
+                  <span className="text-cyan-400">Support</span>
+                </h1>
+
+                <p className="text-sm text-slate-400 mt-1">
+                  Customer support tickets and ongoing conversations.
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+
+                <div className="bg-[#0e1628] border border-slate-800 rounded-2xl p-5">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-cyan-400 font-mono">
+                    Support Tickets
+                  </p>
+
+                  <h3 className="text-sm font-bold mt-2">
+                    Create a ticket
+                  </h3>
+
+                  <p className="text-xs text-slate-500 mt-2 leading-5">
+                    Contact support when you need help with your account,
+                    proxies, payments, or another issue.
+                  </p>
+
+                  <div className="mt-5 space-y-3">
+
+                    <div>
+                      <label className="block text-[10px] uppercase tracking-wider text-slate-500 font-mono mb-1.5">
+                        Category
+                      </label>
+
+                      <select
+                        value={supportCategory}
+                        onChange={(e) => setSupportCategory(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs outline-none focus:border-cyan-500"
+                      >
+                        <option value="General">General</option>
+                        <option value="Proxy">Proxy</option>
+                        <option value="Billing">Billing</option>
+                        <option value="Account">Account</option>
+                        <option value="Technical">Technical</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] uppercase tracking-wider text-slate-500 font-mono mb-1.5">
+                        Subject
+                      </label>
+
+                      <input
+                        value={supportSubject}
+                        onChange={(e) => setSupportSubject(e.target.value)}
+                        placeholder="What do you need help with?"
+                        maxLength={160}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs outline-none focus:border-cyan-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] uppercase tracking-wider text-slate-500 font-mono mb-1.5">
+                        Message
+                      </label>
+
+                      <textarea
+                        value={supportMessage}
+                        onChange={(e) => setSupportMessage(e.target.value)}
+                        placeholder="Describe your issue..."
+                        rows={6}
+                        maxLength={5000}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs outline-none focus:border-cyan-500 resize-y"
+                      />
+                    </div>
+
+                    {supportNotice && (
+                      <div className="rounded-xl border border-cyan-900/50 bg-cyan-950/20 px-3 py-2 text-xs text-cyan-300">
+                        {supportNotice}
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={createSupportTicket}
+                      disabled={supportSubmitting}
+                      className="w-full px-4 py-2.5 rounded-xl bg-cyan-500 text-slate-950 text-xs font-bold hover:bg-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {supportSubmitting
+                        ? "CREATING TICKET..."
+                        : "CREATE TICKET"}
+                    </button>
+
+                  </div>
+                </div>
+
+                <div className="bg-[#0e1628] border border-slate-800 rounded-2xl p-5">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-cyan-400 font-mono">
+                    Your Requests
+                  </p>
+
+                  <h3 className="text-sm font-bold mt-2">
+                    Support history
+                  </h3>
+
+                  <p className="text-xs text-slate-500 mt-2 leading-5">
+                    Your submitted tickets and support conversations will
+                    appear here.
+                  </p>
+
+                  <div className="mt-5 grid lg:grid-cols-[0.8fr_1.2fr] gap-4">
+
+                    <div className="space-y-3 min-w-0">
+                      {supportHistoryLoading ? (
+                        <div className="text-xs text-slate-500 font-mono">
+                          Loading tickets...
+                        </div>
+                      ) : supportTickets.length === 0 ? (
+                        <div className="text-xs text-slate-600 font-mono">
+                          No tickets yet
+                        </div>
+                      ) : (
+                        supportTickets.map((ticket) => {
+                          const ticketId = Number(ticket.id);
+                          const selected = selectedSupportTicketId === ticketId;
+
+                          return (
+                            <button
+                              key={ticket.id}
+                              type="button"
+                              className={[
+                                "w-full text-left rounded-xl border p-4 transition",
+                                selected
+                                  ? "border-cyan-700 bg-cyan-950/20"
+                                  : "border-slate-800 bg-slate-950/60 hover:border-slate-700",
+                              ].join(" ")}
+                              onClick={async () => {
+                                setSelectedSupportTicketId(ticketId);
+                                setSupportConversationLoading(true);
+                                setSupportConversation([]);
+
+                                try {
+                                  const response = await fetch(
+                                    `/api/support/create?ticketId=${encodeURIComponent(ticketId)}`,
+                                    { cache: "no-store" }
+                                  );
+
+                                  const data = await response.json();
+
+                                  if (!response.ok) {
+                                    throw new Error(
+                                      data?.error || "Unable to load conversation."
+                                    );
+                                  }
+
+                                  setSupportConversation(
+                                    Array.isArray(data?.messages)
+                                      ? data.messages
+                                      : []
+                                  );
+                                } catch (error) {
+                                  console.error(
+                                    "Load support conversation error:",
+                                    error
+                                  );
+                                  setSupportConversation([]);
+                                } finally {
+                                  setSupportConversationLoading(false);
+                                }
+                              }}
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                  <p className="text-[10px] uppercase tracking-wider text-cyan-400 font-mono">
+                                    Ticket #{ticket.id}
+                                  </p>
+
+                                  <h4 className="text-sm font-bold text-slate-100 mt-1 truncate">
+                                    {ticket.subject}
+                                  </h4>
+
+                                  <p className="text-[10px] text-slate-500 mt-1">
+                                    {ticket.category}
+                                    {ticket.createdAt
+                                      ? ` Â· ${new Date(ticket.createdAt).toLocaleString()}`
+                                      : ""}
+                                  </p>
+                                </div>
+
+                                <span className="shrink-0 rounded-md border border-emerald-900/60 bg-emerald-950/20 text-xs font-black uppercase font-mono text-emerald-300 px-2.5 py-1.5">
+                                  {String(ticket.status || "open").toUpperCase()}
+                                </span>
+                              </div>
+
+                              <p className="text-xs text-slate-400 mt-3 whitespace-pre-wrap leading-5 line-clamp-3">
+                                {ticket.message}
+                              </p>
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
+
+                    <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 min-w-0">
+                      {selectedSupportTicketId === null ? (
+                        <div className="min-h-[220px] flex items-center justify-center text-center">
+                          <div>
+                            <p className="text-xs uppercase tracking-wider text-slate-500 font-mono">
+                              Select a ticket
+                            </p>
+                            <p className="text-xs text-slate-600 mt-2">
+                              Choose a request on the left to view its conversation.
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+
+                          {(() => {
+                            const selectedTicket = supportTickets.find(
+                              (ticket) =>
+                                Number(ticket.id) === selectedSupportTicketId
+                            );
+
+                            return (
+                              <div className="flex items-start justify-between gap-3 border-b border-slate-800 pb-4">
+                                <div className="min-w-0">
+                                  <p className="text-[10px] uppercase tracking-[0.18em] text-cyan-400 font-mono">
+                                    Ticket #{selectedSupportTicketId}
+                                  </p>
+
+                                  <h4 className="text-sm font-bold text-slate-100 mt-1 truncate">
+                                    {selectedTicket?.subject || "Support ticket"}
+                                  </h4>
+
+                                  <p className="text-[10px] text-slate-500 mt-1">
+                                    {selectedTicket?.category || "General"}
+                                  </p>
+                                </div>
+
+                                <span className="shrink-0 rounded-md border border-emerald-900/60 bg-emerald-950/20 text-xs font-black uppercase font-mono text-emerald-300 px-2.5 py-1.5">
+                                  {String(
+                                    selectedTicket?.status || "open"
+                                  ).toUpperCase()}
+                                </span>
+                              </div>
+                            );
+                          })()}
+
+                          <div className="mt-4 space-y-3 max-h-[420px] overflow-y-auto pr-1">
+                            {supportConversationLoading ? (
+                              <div className="text-xs text-slate-500 font-mono">
+                                Loading conversation...
+                              </div>
+                            ) : supportConversation.length === 0 ? (
+                              <div className="text-xs text-slate-600 font-mono">
+                                No conversation messages yet
+                              </div>
+                            ) : (
+                              supportConversation.map((message) => (
+                                <div
+                                  key={message.id}
+                                  className="rounded-xl border border-slate-800 bg-slate-900/50 p-3"
+                                >
+                                  <div className="flex items-center justify-between gap-3">
+                                    <p className="text-[10px] uppercase tracking-wider font-bold font-mono text-slate-400">
+                                      {message.senderType === "customer"
+                                        ? "You"
+                                        : "Support"}
+                                    </p>
+
+                                    {message.createdAt ? (
+                                      <p className="text-[9px] text-slate-600">
+                                        {new Date(
+                                          message.createdAt
+                                        ).toLocaleString()}
+                                      </p>
+                                    ) : null}
+                                  </div>
+
+                                  <p className="text-xs text-slate-300 mt-2 whitespace-pre-wrap leading-5">
+                                    {message.message}
+                                  </p>
+                                </div>
+                              ))
+                            )}
+                          </div>
+
+                          <div className="mt-4 pt-4 border-t border-slate-800">
+                            <textarea
+                              value={supportReply}
+                              onChange={(e) => setSupportReply(e.target.value)}
+                              placeholder="Type your reply..."
+                              rows={4}
+                              maxLength={5000}
+                              disabled={supportReplySubmitting}
+                              className="w-full resize-none bg-slate-950 border border-slate-800 rounded-xl px-3 py-3 text-xs text-slate-200 placeholder:text-slate-600 outline-none focus:border-cyan-600 disabled:opacity-50"
+                            />
+
+                            <div className="mt-2 flex items-center justify-between gap-3">
+                              <span className="text-[10px] text-slate-600 font-mono">
+                                {supportReply.length}/5000
+                              </span>
+
+                              <button
+                                type="button"
+                                disabled={
+                                  supportReplySubmitting ||
+                                  !supportReply.trim()
+                                }
+                                onClick={async () => {
+                                  const message = supportReply.trim();
+
+                                  if (
+                                    !message ||
+                                    selectedSupportTicketId === null
+                                  ) {
+                                    return;
+                                  }
+
+                                  setSupportReplySubmitting(true);
+
+                                  try {
+                                    const response = await fetch(
+                                      "/api/support/create",
+                                      {
+                                        method: "POST",
+                                        headers: {
+                                          "Content-Type": "application/json",
+                                        },
+                                        body: JSON.stringify({
+                                          ticketId: selectedSupportTicketId,
+                                          message,
+                                        }),
+                                      }
+                                    );
+
+                                    const data = await response.json();
+
+                                    if (!response.ok) {
+                                      throw new Error(
+                                        data?.error ||
+                                          "Unable to send reply."
+                                      );
+                                    }
+
+                                    setSupportReply("");
+                                    setSupportConversation(
+                                      Array.isArray(data?.messages)
+                                        ? data.messages
+                                        : []
+                                    );
+
+                                    if (data?.ticket) {
+                                      setSupportTickets((current) =>
+                                        current.map((ticket) =>
+                                          Number(ticket.id) ===
+                                          selectedSupportTicketId
+                                            ? {
+                                                ...ticket,
+                                                status:
+                                                  data.ticket.status,
+                                                updatedAt:
+                                                  data.ticket.updatedAt,
+                                              }
+                                            : ticket
+                                        )
+                                      );
+                                    }
+                                  } catch (error) {
+                                    console.error(
+                                      "Send support reply error:",
+                                      error
+                                    );
+                                    window.alert(
+                                      error instanceof Error
+                                        ? error.message
+                                        : "Unable to send reply."
+                                    );
+                                  } finally {
+                                    setSupportReplySubmitting(false);
+                                  }
+                                }}
+                                className="rounded-lg border border-cyan-800 bg-cyan-950/40 px-4 py-2 text-[10px] font-black uppercase tracking-wider text-cyan-300 transition hover:bg-cyan-900/40 disabled:cursor-not-allowed disabled:opacity-40"
+                              >
+                                {supportReplySubmitting
+                                  ? "SENDING..."
+                                  : "SEND REPLY"}
+                              </button>
+                            </div>
+                          </div>
+
+                        </div>
+                      )}
+                    </div>
+
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          )}
+
           {tab === "tools" && (
             <div className="grid md:grid-cols-2 gap-4">
               <div className="bg-[#0e1628] border border-cyan-900/40 rounded-2xl p-5 space-y-3">
@@ -1363,7 +1957,7 @@ function DashboardInner() {
                   onClick={() =>
                     setToolResult(
                       toolInput
-                        ? `${toolInput} Â· risk 12/100 Â· ISP/residential Â· not listed on spamhaus`
+                        ? `${toolInput} ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· risk 12/100 ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· ISP/residential ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· not listed on spamhaus`
                         : "Enter an IP or address first"
                     )
                   }
@@ -1378,8 +1972,8 @@ function DashboardInner() {
                   <Activity className="w-4 h-4 text-cyan-400" />
                   <h2 className="text-sm font-bold">Gateway endpoints</h2>
                 </div>
-                <p className="font-mono text-xs text-cyan-200">pr.navasocks.net:7000 Â· HTTP</p>
-                <p className="font-mono text-xs text-cyan-200">pr.navasocks.net:1080 Â· SOCKS5</p>
+                <p className="font-mono text-xs text-cyan-200">pr.navasocks.net:7000 · HTTP</p>
+                <p className="font-mono text-xs text-cyan-200">pr.navasocks.net:1080 · SOCKS5</p>
                 <p className="text-[11px] text-slate-500">Use purchased IP:port or rotating user/pass credentials from inventory.</p>
               </div>
             </div>
@@ -1408,6 +2002,16 @@ export default function DashboardPage() {
     </Suspense>
   );
 }
+
+
+
+
+
+
+
+
+
+
 
 
 

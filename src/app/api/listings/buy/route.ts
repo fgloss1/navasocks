@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { db } from "@/db";
 import { proxyListings, ownedProxies, users, transactions } from "@/db/schema";
@@ -113,6 +113,7 @@ export async function POST(req: Request) {
             city: listing.city,
             isp: listing.isp,
             locked: true,
+            createdAt: new Date(),
             provider: listing.provider,
             transportHost: listing.transportHost,
             transportPort: listing.transportPort,

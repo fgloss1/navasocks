@@ -1,454 +1,162 @@
-﻿===== LISTING TYPE =====
-
-> interface Listing {
-    id: number;
-    ipMasked: string;
-    ipFull: string;
-    port: number;
-    domain: string;
-    country: string;
-    countryCode: string;
-    region: string;
-    state: string;
-    city: string;
-    isp: string;
-    zip: string;
-    speedLabel: string;
-    speedKbps: number;
-    ping: number;
-    proxyType: string;
-    addedDays: number;
-    price: string;
-    status: string;
-  }
-  
-> interface ListingDetails {
-    listingId: number;
-    location: {
-      country: string | null;
-      countryCode: string | null;
-      region: string | null;
-      state: string | null;
-      city: string | null;
-      zip: string | null;
-      zone: string | null;
-    };
-    network: {
-      org: string | null;
-      isp: string | null;
-      domain: string | null;
-      reverseDns: string | null;
-      hostname: string | null;
-      ipType: string | null;
-    };
-    risk: {
-      blacklisted: boolean | null;
-      scamalytics: number | null;
-      ipqs: number | null;
-    };
-    quality?: {
-      proxyQuality: string | null;
-    };
-    traffic?: {
-      includedGb: string | null;
-      usedGb: string | null;
-      protocol: string | null;
-    };
-  }
-  
-  interface Owned {
-    id: number;
-
-===== SELECTED LISTING =====
-      added: "any",
-    });
-    const [sort, setSort] = useState("added");
-    const [cart, setCart] = useState<Listing[]>([]);
->   const [selectedListing, setSelectedListing] = 
-useState<Listing | null>(null);
-    const [refundProxy, setRefundProxy] = useState<Owned | 
-null>(null);
-    const [refundReason, setRefundReason] = 
-useState("proxy_not_browsing");
-    const [refundDescription, setRefundDescription] = 
-useState("");
-    const [refundSubmitting, setRefundSubmitting] = 
-useState(false);
-    const [refundClock, setRefundClock] = useState(Date.now());
-    const [detailTab, setDetailTab] = useState<"info" | "geo" | 
-"blacklists">("info");
-    const [buying, setBuying] = useState(false);
-    const [notice, setNotice] = useState("");
-    }, [region, stateFilter, filters.ip, filters.domain, 
-filters.city, filters.isp, filters.zip, filters.type, sort]);
-  
-    useEffect(() => {
-      let cancelled = false;
->     if (!selectedListing) {
-        setListingDetails(null);
-        setDetailsLoading(false);
-        return;
-      }
-      setListingDetails({
->       listingId: selectedListing.id,
-        location: {
->         country: selectedListing.country || null,
->         countryCode: selectedListing.countryCode || null,
->         region: selectedListing.region || null,
->         state: selectedListing.state || null,
->         city: selectedListing.city || null,
->         zip: selectedListing.zip || null,
-          zone: null,
-        },
-        network: {
-          org: null,
->         isp: selectedListing.isp || null,
->         domain: selectedListing.domain || null,
-          reverseDns: null,
-          hostname: null,
-          ipType: null,
-        },
-        risk: { blacklisted: null, scamalytics: null, ipqs: null 
-},
-      });
-      setRevealedIp("");
-      setRevealingIp(false);
-      setDetailsLoading(true);
-  
->     void 
-fetch(`/api/listings/details?id=\${selectedListing.id}`, { 
-cache: "no-store" })
-        .then(async (res) => {
-          if (!res.ok) throw new Error(`Details request failed: 
-\${res.status}`);
-          return res.json();
-        })
-        .then((data: ListingDetails) => {
-          if (!cancelled) setListingDetails(data);
-        })
-        .catch((error) => console.error("Listing details 
-error:", error))
-        .finally(() => { if (!cancelled) 
-setDetailsLoading(false); });
-  
-      return () => { cancelled = true; };
->   }, [selectedListing?.id]);
-  
-    const addToCart = (row: Listing) => {
-      if (cart.find((c) => c.id === row.id)) return;
-      setCart((prev) => [...prev, row]);
-    };
-  
-    const removeFromCart = (id: number) => setCart((prev) => 
-prev.filter((c) => c.id !== id));
-    const cartTotal = cart.reduce((s, c) => s + 
-parseFloat(c.price), 0);
-  
-    const revealIp = async (listingId?: number) => {
->     const targetId = listingId ?? selectedListing?.id;
-      if (!targetId || revealingIp) return;
-      if (revealedIps[targetId]) return;
-  
-      setRevealingIp(true);
-      setNotice("");
-      try {
-        const res = await fetch("/api/listings/reveal", {
-          method: "POST",
-        if (!res.ok) throw new Error(data?.error || "Unable to 
-reveal IP.");
-  
-        const fullIp = String(data?.ip || "");
-        setRevealedIps((prev) => ({ ...prev, [targetId]: fullIp 
-}));
->       if (selectedListing?.id === targetId) 
-setRevealedIp(fullIp);
-        setNotice("IP revealed. \$0.05 charged.");
-      } catch (error) {
-        setNotice(error instanceof Error ? error.message : 
-"Unable to reveal IP.");
-      } finally {
-        setRevealingIp(false);
-      }
-    };
-  
-            setUser((u) => (u ? { ...u, balance: data.balance } 
-: u));
-          }
-          setCart((prev) => prev.filter((c) => 
-!target.includes(c.id)));
-          setNotice(`Provisioned \${data.purchased?.length || 
-target.length} NAVA SOCKS endpoint(s)`);
->         setSelectedListing(null);
-          setListingDetails(null);
-          setDetailTab("info");
-          load();
-        }
-      } catch {
-        setNotice("Purchase failed");
-      } finally {
-        setBuying(false);
-                          )}
-                          {visibleListings.map((row) => {
-                            const hot = parseFloat(row.price) < 
-0.6 || row.city === "New York";
-                            return (
->                             <tr key={row.id} onClick={() => 
-setSelectedListing(row)} className="border-t border-slate-800/80 
-hover:bg-cyan-950/20 cursor-pointer">
-                                <td className="px-2 py-2 
-text-left">
-                                  <span className="inline-flex 
-items-center gap-1.5">
-                                    <Flag code={row.countryCode} 
-/>
-                                    <span className="relative 
-inline-flex group">
-                                      <button type="button" 
-onClick={(e) => { e.stopPropagation(); revealIp(row.id); }} 
-disabled={revealingIp || !!revealedIps[row.id]} 
-className="font-mono text-cyan-200 hover:text-cyan-100 underline 
-underline-offset-2 disabled:no-underline 
-disabled:cursor-default">
-                                        {revealedIps[row.id] || 
-row.ipMasked || "—"}
-                                      </button>
-                                      {!revealedIps[row.id] && 
-!revealingIp && (
-                  </div>
-                </div>
-                <aside className="xl:col-span-3 min-w-0 w-full 
-space-y-4 xl:sticky xl:top-24 h-fit">
-                  <div className="bg-[#0e1628] border 
-border-cyan-900/40 rounded-2xl overflow-hidden">
->                   {selectedListing && (
-                      <>
-                        <div className="px-4 py-3 border-b 
-border-slate-800">
->                         <div className="flex items-center 
-gap-2"><Activity className="w-4 h-4 text-cyan-400" /><h3 
-className="text-sm font-bold">IP DETAILS</h3>{(() => { const 
-ownedItem = owned.find((item) => item.ip === 
-selectedListing.ipFull); return ownedItem ? (<div 
-className="mt-3 flex items-center justify-between rounded-lg 
-border border-emerald-900/50 bg-emerald-950/20 px-3 
-py-2"><div><p className="text-[10px] text-emerald-300 font-black 
-tracking-wide">PURCHASED PROXY</p><p className="text-[10px] 
-text-slate-400 font-mono mt-0.5">{ownedItem.locked ? "ACCESS: 
-LOCKED" : "ACCESS: OPEN"}</p></div><button type="button" 
-onClick={() => toggleLock(ownedItem)} className="text-[10px] 
-font-mono text-cyan-300 hover:text-cyan-100">{ownedItem.locked ? 
-"UNLOCK" : "LOCK"}</button></div>) : null; })()}</div>
-                          <div className="mt-3 flex flex-wrap 
-gap-2">
-                            {(["info", "geo", "blacklists"] as 
-const).map((tabKey) => (
-                              <button key={tabKey} onClick={() 
-=> setDetailTab(tabKey)} className={`px-3 py-2 rounded-lg border 
-text-xs font-black tracking-wide transition ${detailTab === 
-tabKey ? tabKey === "info" ? "border-cyan-400 bg-cyan-400/15 
-text-cyan-200" : tabKey === "geo" ? "border-violet-400 
-bg-violet-400/15 text-violet-200" : "border-amber-400 
-bg-amber-400/15 text-amber-200" : tabKey === "info" ? 
-"border-cyan-900/60 text-cyan-400 hover:bg-cyan-500/10" : tabKey 
-=== "geo" ? "border-violet-900/60 text-violet-400 
-hover:bg-violet-500/10" : "border-amber-900/60 text-amber-400 
-hover:bg-amber-500/10"}`}>{tabKey.toUpperCase()}</button>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="p-4 space-y-3 text-xs">
-                          {detailTab === "info" && (
-                            <>
->                             <div className="rounded-xl border 
-border-slate-800 bg-slate-950/50 p-3"><div className="flex 
-items-start gap-3"><Flag code={selectedListing.countryCode} 
-/><div className="min-w-0"><p className='text-sm font-bold 
-text-slate-100'>{selectedListing.country || '-'}</p><p 
-className='text-slate-400'>{selectedListing.state || '-'}, 
-{selectedListing.city || '-'}, {selectedListing.zip || 
-'-'}</p></div></div></div>
-                              <div className="rounded-xl border 
-border-slate-800 bg-slate-950/40 overflow-hidden">
-                                <div className="px-3 py-2 
-border-b border-slate-800"><p className="text-[11px] font-black 
-tracking-wider text-cyan-400 uppercase">Proxy</p></div>
-                                <div className="divide-y 
-divide-slate-800/80">
->                                 <div className="flex 
-justify-between gap-4 px-3 py-2.5"><span 
-className="text-slate-500">Domain</span><span 
-className="text-right text-slate-200 
-break-all">{selectedListing.domain || "-"}</span></div>
->                                 <div className="flex 
-justify-between gap-4 px-3 py-2.5"><span 
-className="text-slate-500">ORG</span><span className="text-right 
-text-slate-200">{listingDetails?.network.org || 
-selectedListing.isp || "-"}</span></div>
->                                 <div className="flex 
-justify-between gap-4 px-3 py-2.5"><span 
-className="text-slate-500">ISP</span><span className="text-right 
-text-slate-200">{selectedListing.isp || "-"}</span></div>
-                                  <div className="flex 
-justify-between gap-4 px-3 py-2.5"><span 
-className="text-slate-500">Zone</span><span 
-className="text-right 
-text-slate-200">{listingDetails?.location.zone || 
-"Checking..."}</span></div>
-                                  <div className="flex 
-justify-between gap-4 px-3 py-2.5"><span 
-className="text-slate-500">Proxy quality</span><span 
-className="text-right font-semibold 
-text-emerald-300">{listingDetails?.quality?.proxyQuality || 
-"Calculating..."}</span></div>
->                                 <div className="flex 
-justify-between gap-4 px-3 py-2.5"><span 
-className="text-slate-500">Added</span><span 
-className="text-right 
-text-slate-200">{selectedListing.addedDays} days</span></div>
->                                 <div className="flex 
-justify-between gap-4 px-3 py-2.5"><span 
-className="text-slate-500">IP Type</span><span 
-className="text-right 
-text-slate-200">{listingDetails?.network.ipType || 
-selectedListing.proxyType || "-"}</span></div>
->                                 <div className="flex 
-justify-between gap-4 px-3 py-2.5"><span 
-className="text-slate-500">Type</span><span 
-className="text-right text-slate-200">{selectedListing.proxyType 
-|| "-"}</span></div>
->                                 <div className="flex 
-justify-between gap-4 px-3 py-2.5"><span 
-className="text-slate-500">Ping</span><span 
-className="text-right font-mono 
-text-slate-200">{selectedListing.ping} ms</span></div>
-                                  <div className="flex 
-justify-between gap-4 px-3 py-2.5"><span 
-className="text-slate-500">Blacklisted</span><span 
-className="text-right text-slate-200">{detailsLoading ? 
-"Loading..." : listingDetails?.risk.blacklisted ? "Yes" : 
-"No"}</span></div>
-                                </div>
-                              </div>
-                              <div className="rounded-xl border 
-border-slate-800 bg-slate-950/40 overflow-hidden">
-                                <div className="px-3 py-2 
-border-b border-slate-800"><p className="text-[11px] font-black 
-tracking-wider text-cyan-400 uppercase">Network</p></div>
-                                <div className="divide-y 
-divide-slate-800/80">
->                                 <div className="flex 
-items-center justify-between gap-4 px-3 py-2.5"><span 
-className="text-slate-500">IP</span><button type="button" 
-onClick={() => revealIp()} disabled={revealingIp || !!revealedIp 
-|| !!revealedIps[selectedListing.id]} className="font-mono 
-text-cyan-200 underline">{revealedIp || 
-revealedIps[selectedListing.id] || selectedListing.ipMasked || 
-"—"}</button></div>
->                                 <div className="flex 
-justify-between gap-4 px-3 py-2.5"><span 
-className="text-slate-500">Speed</span><span 
-className="text-right 
-text-slate-200">{selectedListing.speedLabel || "-"}</span></div>
-                                  <div className="flex 
-justify-between gap-4 px-3 py-2.5"><span 
-className="text-slate-500">DNS</span><span className="text-right 
-text-slate-200 truncate 
-max-w-[120px]">{listingDetails?.network.reverseDns || "No PTR 
-record"}</span></div>
-                                </div>
-                              </div>
-                              <div className="px-4 py-3 border-t 
-border-slate-800 flex gap-2">
->                               <button type="button" 
-onClick={() => addToCart(selectedListing)} className={`flex-1 
-py-2 rounded-xl border text-xs font-black ${cart.some((c) => 
-c.id === selectedListing.id) ? "bg-cyan-500 text-slate-950" : 
-"text-cyan-300 border-cyan-800"}`}>CART</button>
->                               <button type="button" 
-disabled={buying} onClick={() => checkout([selectedListing.id])} 
-className="flex-1 py-2 rounded-xl bg-gradient-to-r 
-from-emerald-400 to-cyan-500 text-slate-950 font-bold 
-text-xs">BUY \${selectedListing.price}</button>
-                              </div>
-                            </>
-                          )}
->                         {detailTab === "geo" && <div 
-className="space-y-2 font-mono text-slate-300"><div>City: 
-{selectedListing.city}</div><div>ZIP: 
-{selectedListing.zip}</div></div>}
-                          {detailTab === "blacklists" && <div 
-className="p-2 text-slate-400">Connected to existing risk matrix 
-modules.</div>}
-                        </div>
-                      </>
-                    )}
-                  </div>
-  
-                  {cart.length > 0 && (
-                    <div className="bg-[#0e1628] border 
-border-cyan-900/40 rounded-2xl p-3 space-y-2">
-
-===== DETAILS REQUEST =====
-        risk: { blacklisted: null, scamalytics: null, ipqs: null 
-},
-      });
-      setRevealedIp("");
-      setRevealingIp(false);
-      setDetailsLoading(true);
-  
->     void 
-fetch(`/api/listings/details?id=\${selectedListing.id}`, { 
-cache: "no-store" })
-        .then(async (res) => {
-          if (!res.ok) throw new Error(`Details request failed: 
-\${res.status}`);
-          return res.json();
-        })
-        .then((data: ListingDetails) => {
-          if (!cancelled) setListingDetails(data);
-        })
-        .catch((error) => console.error("Listing details 
-error:", error))
-
-===== ROW CLICK =====
-    });
-    const [sort, setSort] = useState("added");
-    const [cart, setCart] = useState<Listing[]>([]);
->   const [selectedListing, setSelectedListing] = 
-useState<Listing | null>(null);
-    const [refundProxy, setRefundProxy] = useState<Owned | 
-null>(null);
-    const [refundReason, setRefundReason] = 
-useState("proxy_not_browsing");
-    const [refundDescription, setRefundDescription] = 
-useState("");
-    const [refundSubmitting, setRefundSubmitting] = 
-useState(false);
-    const [refundClock, setRefundClock] = useState(Date.now());
-    const [detailTab, setDetailTab] = useState<"info" | "geo" | 
-"blacklists">("info");
-                          {visibleListings.map((row) => {
-                            const hot = parseFloat(row.price) < 
-0.6 || row.city === "New York";
-                            return (
->                             <tr key={row.id} onClick={() => 
-setSelectedListing(row)} className="border-t border-slate-800/80 
-hover:bg-cyan-950/20 cursor-pointer">
-                                <td className="px-2 py-2 
-text-left">
-                                  <span className="inline-flex 
-items-center gap-1.5">
-                                    <Flag code={row.countryCode} 
-/>
-                                    <span className="relative 
-inline-flex group">
-                                      <button type="button" 
-onClick={(e) => { e.stopPropagation(); revealIp(row.id); }} 
-disabled={revealingIp || !!revealedIps[row.id]} 
-className="font-mono text-cyan-200 hover:text-cyan-100 underline 
-underline-offset-2 disabled:no-underline 
-disabled:cursor-default">
-                                        {revealedIps[row.id] || 
-row.ipMasked || "—"}
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $ErrorActionPreference = "Stop"
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $File = "C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\dashboard\page.tsx"
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> if (-not (Test-Path $File)) {
+>>     throw "Dashboard file not found: $File"
+>> }
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $content = Get-Content $File -Raw
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""
 
 
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "===== DASHBOARD PAYMENT/GATEWAY INSPECTION =====" -ForegroundColor Cyan
+===== DASHBOARD PAYMENT/GATEWAY INSPECTION =====
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""
+
+
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $patterns = @(
+>>     "Accepted Gateways",
+>>     "Accepted gateways",
+>>     "Automated crypto payments",
+>>     "USDTBTCLTC",
+>>     "USDT",
+>>     "BTC",
+>>     "LTC",
+>>     "crypto payments",
+>>     "gateway"
+>> )
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> foreach ($pattern in $patterns) {
+>>     Write-Host ""
+>>     Write-Host "--- SEARCH: $pattern ---" -ForegroundColor Yellow
+>>
+>>     $matches = Select-String `
+>>         -Path $File `
+>>         -Pattern $pattern `
+>>         -CaseSensitive:$false `
+>>         -Context 5,12
+>>
+>>     if ($matches) {
+>>         $matches | ForEach-Object {
+>>             Write-Host "Line $($_.LineNumber):" -ForegroundColor Green
+>>             Write-Host $_.Context.PreContext
+>>             Write-Host $_.Line -ForegroundColor White
+>>             Write-Host $_.Context.PostContext
+>>             Write-Host ""
+>>         }
+>>     }
+>>     else {
+>>         Write-Host "No match."
+>>     }
+>> }
+
+--- SEARCH: Accepted Gateways ---
+No match.
+
+--- SEARCH: Accepted gateways ---
+No match.
+
+--- SEARCH: Automated crypto payments ---
+No match.
+
+--- SEARCH: USDTBTCLTC ---
+No match.
+
+--- SEARCH: USDT ---
+Line 218:
+const REFUNDS_ENABLED = false;  function PaymentLogo({   method, }: {
+  method: "USDT" | "BTC" | "LTC";
+}) {   if (method === "USDT") {     return (       <div         className="w-11 h-11 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-300 text-xl font-black"         aria-label="Tether USDT"         title="Tether USDT"       >         ₮       </div>     );   }
+
+Line 220:
+function PaymentLogo({   method, }: {   method: "USDT" | "BTC" | "LTC"; }) {
+  if (method === "USDT") {
+    return (       <div         className="w-11 h-11 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-300 text-xl font-black"         aria-label="Tether USDT"         title="Tether USDT"       >         ₮       </div>     );   }    if (method === "BTC") {
+
+Line 224:
+}) {   if (method === "USDT") {     return (       <div         className="w-11 h-11 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-300 text-xl font-black"
+        aria-label="Tether USDT"
+        title="Tether USDT"       >         ₮       </div>     );   }    if (method === "BTC") {     return (       <div         className="w-11 h-11 rounded-full bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-300 text-xl font-black"         aria-label="Bitcoin BTC"
+
+Line 225:
+  if (method === "USDT") {     return (       <div         className="w-11 h-11 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-300 text-xl font-black"         aria-label="Tether USDT"
+        title="Tether USDT"
+      >         ₮       </div>     );   }    if (method === "BTC") {     return (       <div         className="w-11 h-11 rounded-full bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-300 text-xl font-black"         aria-label="Bitcoin BTC"         title="Bitcoin BTC"
+
+Line 1663:
+              <h2 className="text-sm font-bold">Add balance</h2>               <p className="text-sm text-slate-400">                 Current wallet: <span className="text-emerald-400 font-mono">${(user?.balance || 0).toFixed(2)}</span>               </p>               <p className="text-xs text-slate-500">
+                Crypto (USDT / BTC / LTC) credits your NAVA SOCKS balance, then you buy individual IPs from the market.
+              </p>               <button                 onClick={() => setPayOpen(true)}                 className="px-4 py-2.5 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs font-mono"               >                 Open checkout               </button>             </div>           )}                      {tab === "support" && (             <div className="space-y-5">
+
+
+--- SEARCH: BTC ---
+Line 218:
+const REFUNDS_ENABLED = false;  function PaymentLogo({   method, }: {
+  method: "USDT" | "BTC" | "LTC";
+}) {   if (method === "USDT") {     return (       <div         className="w-11 h-11 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-300 text-xl font-black"         aria-label="Tether USDT"         title="Tether USDT"       >         ₮       </div>     );   }
+
+Line 232:
+        ₮       </div>     );   }
+  if (method === "BTC") {
+    return (       <div         className="w-11 h-11 rounded-full bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-300 text-xl font-black"         aria-label="Bitcoin BTC"         title="Bitcoin BTC"       >         ₿       </div>     );   }    return (
+
+Line 236:
+   if (method === "BTC") {     return (       <div         className="w-11 h-11 rounded-full bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-300 text-xl font-black"
+        aria-label="Bitcoin BTC"
+        title="Bitcoin BTC"       >         ₿       </div>     );   }    return (     <div       className="w-11 h-11 rounded-full bg-slate-400/10 border border-slate-500/40 flex items-center justify-center text-slate-200 text-xl font-black"       aria-label="Litecoin LTC"       title="Litecoin LTC"
+
+Line 237:
+  if (method === "BTC") {     return (       <div         className="w-11 h-11 rounded-full bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-300 text-xl font-black"         aria-label="Bitcoin BTC"
+        title="Bitcoin BTC"
+      >         ₿       </div>     );   }    return (     <div       className="w-11 h-11 rounded-full bg-slate-400/10 border border-slate-500/40 flex items-center justify-center text-slate-200 text-xl font-black"       aria-label="Litecoin LTC"       title="Litecoin LTC"     >
+
+Line 1663:
+              <h2 className="text-sm font-bold">Add balance</h2>               <p className="text-sm text-slate-400">                 Current wallet: <span className="text-emerald-400 font-mono">${(user?.balance || 0).toFixed(2)}</span>               </p>               <p className="text-xs text-slate-500">
+                Crypto (USDT / BTC / LTC) credits your NAVA SOCKS balance, then you buy individual IPs from the market.
+              </p>               <button                 onClick={() => setPayOpen(true)}                 className="px-4 py-2.5 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs font-mono"               >                 Open checkout               </button>             </div>           )}                      {tab === "support" && (             <div className="space-y-5">
+
+
+--- SEARCH: LTC ---
+Line 218:
+const REFUNDS_ENABLED = false;  function PaymentLogo({   method, }: {
+  method: "USDT" | "BTC" | "LTC";
+}) {   if (method === "USDT") {     return (       <div         className="w-11 h-11 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-300 text-xl font-black"         aria-label="Tether USDT"         title="Tether USDT"       >         ₮       </div>     );   }
+
+Line 247:
+  }    return (     <div       className="w-11 h-11 rounded-full bg-slate-400/10 border border-slate-500/40 flex items-center justify-center text-slate-200 text-xl font-black"
+      aria-label="Litecoin LTC"
+      title="Litecoin LTC"     >       Ł     </div>   ); }  function DashboardInner() {   const searchParams = useSearchParams();   const tab = searchParams.get("tab") || "proxy";    const [user, setUser] = useState<UserProfile | null>(null);
+
+Line 248:
+   return (     <div       className="w-11 h-11 rounded-full bg-slate-400/10 border border-slate-500/40 flex items-center justify-center text-slate-200 text-xl font-black"       aria-label="Litecoin LTC"
+      title="Litecoin LTC"
+    >       Ł     </div>   ); }  function DashboardInner() {   const searchParams = useSearchParams();   const tab = searchParams.get("tab") || "proxy";    const [user, setUser] = useState<UserProfile | null>(null);   const [listings, setListings] = useState<Listing[]>([]);
+
+Line 1663:
+              <h2 className="text-sm font-bold">Add balance</h2>               <p className="text-sm text-slate-400">                 Current wallet: <span className="text-emerald-400 font-mono">${(user?.balance || 0).toFixed(2)}</span>               </p>               <p className="text-xs text-slate-500">
+                Crypto (USDT / BTC / LTC) credits your NAVA SOCKS balance, then you buy individual IPs from the market.
+              </p>               <button                 onClick={() => setPayOpen(true)}                 className="px-4 py-2.5 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs font-mono"               >                 Open checkout               </button>             </div>           )}                      {tab === "support" && (             <div className="space-y-5">
+
+
+--- SEARCH: crypto payments ---
+No match.
+
+--- SEARCH: gateway ---
+Line 2122:
+                {toolResult && <p className="text-xs font-mono text-emerald-300 bg-slate-950 border border-slate-800 rounded-xl p-3">{toolResult}</p>}               </div>               <div className="bg-[#0e1628] border border-cyan-900/40 rounded-2xl p-5 sm:p-6 space-y-2">                 <div className="flex items-center gap-2">                   <Activity className="w-4 h-4 text-cyan-400" />
+                  <h2 className="text-sm font-bold">Gateway endpoints</h2>
+                </div>                 <p className="font-mono text-xs text-cyan-200">pr.navasocks.net:7000 - HTTP</p>                 <p className="font-mono text-xs text-cyan-200">pr.navasocks.net:1080 - SOCKS5</p>                 <p className="text-[11px] text-slate-500">Use purchased IP:port or rotating user/pass credentials from inventory.</p>               </div>             </div>           )}         </div>       </main>        <Footer />
+
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""
+
+
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "===== END INSPECTION =====" -ForegroundColor Cyan
+
+===== END INSPECTION =====
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "NO FILES WERE MODIFIED." -ForegroundColor Green
+NO FILES WERE MODIFIED.
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>

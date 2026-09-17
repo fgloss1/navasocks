@@ -198,6 +198,7 @@ function DashboardInner() {
   const [listingDetails, setListingDetails] = useState<ListingDetails | null>(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [revealedIp, setRevealedIp] = useState("");
+  const [revealedIps, setRevealedIps] = useState<Record<number, string>>({});
   const [revealingIp, setRevealingIp] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(25);
@@ -332,8 +333,11 @@ function DashboardInner() {
   const removeFromCart = (id: number) => setCart((prev) => prev.filter((c) => c.id !== id));
   const cartTotal = cart.reduce((s, c) => s + parseFloat(c.price), 0);
 
-  const revealIp = async () => {
-    if (!selectedListing?.id || revealingIp || revealedIp) return;
+  const revealIp = async (listingId?: number) => {
+    const targetId = listingId ?? selectedListing?.id;
+
+    if (!targetId || revealingIp) return;
+    if (revealedIps[targetId]) return;
 
     setRevealingIp(true);
     setNotice("");
@@ -342,7 +346,7 @@ function DashboardInner() {
       const res = await fetch("/api/listings/reveal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: selectedListing.id }),
+        body: JSON.stringify({ id: targetId }),
       });
 
       const data = await res.json().catch(() => ({}));
@@ -351,7 +355,17 @@ function DashboardInner() {
         throw new Error(data?.error || "Unable to reveal IP.");
       }
 
-      setRevealedIp(String(data?.ip || ""));
+      const fullIp = String(data?.ip || "");
+
+      setRevealedIps((prev) => ({
+        ...prev,
+        [targetId]: fullIp,
+      }));
+
+      if (selectedListing?.id === targetId) {
+        setRevealedIp(fullIp);
+      }
+
       setNotice("IP revealed. $0.05 charged.");
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Unable to reveal IP.");
@@ -677,8 +691,23 @@ function DashboardInner() {
                               <td className="px-2 py-2 whitespace-nowrap text-left">
                                 <span className="inline-flex items-center gap-1.5">
                                   <Flag code={row.countryCode} />
-                                  <span className="font-mono text-cyan-200">
-                                    {row.ipMasked}
+                                  <span className="relative inline-flex group">
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        revealIp(row.id);
+                                      }}
+                                      disabled={revealingIp || !!revealedIps[row.id]}
+                                      className="font-mono text-cyan-200 hover:text-cyan-100 underline underline-offset-2 disabled:no-underline disabled:cursor-default"
+                                    >
+                                      {revealedIps[row.id] || row.ipMasked || "—"}
+                                    </button>
+                                    {!revealedIps[row.id] && !revealingIp && (
+                                      <span className="pointer-events-none absolute left-1/2 bottom-full z-50 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-md border border-slate-700 bg-slate-900 px-2.5 py-1.5 text-xs font-medium text-cyan-200 shadow-lg group-hover:block">
+                                        Reveal IP · $0.05
+                                      </span>
+                                    )}
                                   </span>
                                 </span>
                               </td>
@@ -954,15 +983,31 @@ function DashboardInner() {
                                    <span className="text-slate-500">IP</span>
                                    <div className="flex items-center gap-3">
                                      <span className="font-mono text-cyan-200">
-                                       {revealedIp || selectedListing.ipMasked || "—"}
+                                       <div className="relative group">
+                                         <button
+                                           type="button"
+                                           onClick={() => revealIp()}
+                                           disabled={revealingIp || !!revealedIp || !!revealedIps[selectedListing.id]}
+                                           className="font-mono text-cyan-200 hover:text-cyan-100 underline underline-offset-2 disabled:no-underline disabled:cursor-default"
+                                         >
+                                           {revealedIp || revealedIps[selectedListing.id] || selectedListing.ipMasked || "—"}
+                                         </button>
+                                         {!revealedIp && !revealedIps[selectedListing.id] && !revealingIp && (
+                                           <span
+                                             className="pointer-events-none absolute left-1/2 bottom-full z-50 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-md border border-slate-700 bg-slate-900 px-2.5 py-1.5 text-xs font-medium text-cyan-200 shadow-lg group-hover:block"
+                                           >
+                                             Reveal IP · $0.05
+                                           </span>
+                                         )}
+                                       </div>
                                      </span>
                                      <button
                                        type="button"
-                                       onClick={revealIp}
-                                       disabled={revealingIp || !!revealedIp}
+                                       onClick={() => revealIp()}
+                                       disabled={revealingIp || !!revealedIp || !!revealedIps[selectedListing.id]}
                                        className="whitespace-nowrap text-cyan-300 hover:text-cyan-200 underline underline-offset-2 font-semibold"
                                      >
-                                       {revealedIp ? "IP REVEALED" : revealingIp ? "REVEALING..." : "Reveal IP - $0.05"}
+                                       {revealedIp || revealedIps[selectedListing.id] ? "IP REVEALED" : revealingIp ? "REVEALING..." : "Reveal IP - $0.05"}
                                      </button>
                                    </div>
                                  </div>
@@ -1363,6 +1408,10 @@ export default function DashboardPage() {
     </Suspense>
   );
 }
+
+
+
+
 
 
 

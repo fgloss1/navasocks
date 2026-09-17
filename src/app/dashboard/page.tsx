@@ -197,6 +197,8 @@ function DashboardInner() {
   const [toolResult, setToolResult] = useState("");
   const [listingDetails, setListingDetails] = useState<ListingDetails | null>(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
+  const [revealedIp, setRevealedIp] = useState("");
+  const [revealingIp, setRevealingIp] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(25);
   const [totalPages, setTotalPages] = useState(1);
@@ -283,6 +285,8 @@ function DashboardInner() {
     },
   });
 
+      setRevealedIp("");
+      setRevealingIp(false);
   setDetailsLoading(true);
 
   void fetch(`/api/listings/details?id=${selectedListing.id}`, {
@@ -327,6 +331,34 @@ function DashboardInner() {
 
   const removeFromCart = (id: number) => setCart((prev) => prev.filter((c) => c.id !== id));
   const cartTotal = cart.reduce((s, c) => s + parseFloat(c.price), 0);
+
+  const revealIp = async () => {
+    if (!selectedListing?.id || revealingIp || revealedIp) return;
+
+    setRevealingIp(true);
+    setNotice("");
+
+    try {
+      const res = await fetch("/api/listings/reveal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: selectedListing.id }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Unable to reveal IP.");
+      }
+
+      setRevealedIp(String(data?.ip || ""));
+      setNotice("IP revealed. $0.05 charged.");
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Unable to reveal IP.");
+    } finally {
+      setRevealingIp(false);
+    }
+  };
 
   const checkout = async (ids?: number[]) => {
     const target = ids || cart.map((c) => c.id);
@@ -922,14 +954,15 @@ function DashboardInner() {
                                    <span className="text-slate-500">IP</span>
                                    <div className="flex items-center gap-3">
                                      <span className="font-mono text-cyan-200">
-                                       {selectedListing.ipMasked || "â€”Â"}
+                                       {revealedIp || selectedListing.ipMasked || "—"}
                                      </span>
                                      <button
                                        type="button"
-                                       onClick={() => setNotice("IP reveal is reserved for the billing stage.")}
+                                       onClick={revealIp}
+                                       disabled={revealingIp || !!revealedIp}
                                        className="whitespace-nowrap text-cyan-300 hover:text-cyan-200 underline underline-offset-2 font-semibold"
                                      >
-                                       Reveal IP - $0.05
+                                       {revealedIp ? "IP REVEALED" : revealingIp ? "REVEALING..." : "Reveal IP - $0.05"}
                                      </button>
                                    </div>
                                  </div>
@@ -1330,6 +1363,7 @@ export default function DashboardPage() {
     </Suspense>
   );
 }
+
 
 
 

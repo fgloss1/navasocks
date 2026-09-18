@@ -1,1 +1,390 @@
-PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $ErrorActionPreference = "Stop"                              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $ProjectRoot = "C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks"              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $Navbar = Join-Path $ProjectRoot "src\components\Navbar.tsx" PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $BackupRoot = "C:\Users\Sire-F\OneDrive\Desktop\navasocks-navbar-backups"                                    PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Set-Location $ProjectRoot                                    PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> if (!(Test-Path $Navbar)) {                                  >>     throw "Navbar.tsx not found."            >> }                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ============================================================                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # 1. BACKUP CURRENT FILE                                     PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ============================================================                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $Stamp = Get-Date -Format "yyyyMMdd_HHmmss"                  PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $Backup = Join-Path $BackupRoot "NAVBAR_TRUE_FAR_RIGHT_$Stamp"                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> New-Item -ItemType Directory -Force -Path $Backup | Out-Null PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Copy-Item $Navbar (Join-Path $Backup "Navbar.tsx") -Force    PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""                                                                                                PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "BACKUP CREATED:" -ForegroundColor Green          BACKUP CREATED:                                 PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host $Backup                                           C:\Users\Sire-F\OneDrive\Desktop\navasocks-navbar-backups\NAVBAR_TRUE_FAR_RIGHT_20260918_180752 PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $Text = Get-Content $Navbar -Raw                             PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ============================================================                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # 2. FIND THE CURRENT LANGUAGE + THEME CONTROL BLOCK         PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ============================================================                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $ThemeMarker = 'onClick={() => setDark(!dark)}'              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $ThemeIndex = $Text.IndexOf($ThemeMarker)                    PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> if ($ThemeIndex -lt 0) {                                     >>     throw "Theme toggle was not found."      >> }                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $ControlsStart = $Text.LastIndexOf("<div", $ThemeIndex)      PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> if ($ControlsStart -lt 0) {                                  >>     throw "Language/Theme controls container was not found."                                 >> }                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # Match controls outer div.                                  PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $Depth = 0   PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $Cursor = $ControlsStart                                     PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $ControlsEnd = -1                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> while ($Cursor -lt $Text.Length) {                           >>     $Open = $Text.IndexOf("<div", $Cursor)   >>     $Close = $Text.IndexOf("</div>", $Cursor)>>                                              >>     if ($Open -ge 0 -and $Open -lt $Close) { >>         $Depth++                             >>         $Cursor = $Open + 4                  >>         continue                             >>     }                                        >>                                              >>     if ($Close -ge 0) {                      >>         $Depth--                             >>         $Cursor = $Close + 6                 >>                                              >>         if ($Depth -eq 0) {                  >>             $ControlsEnd = $Cursor           >>             break                            >>         }                                    >>                                              >>         continue                             >>     }                                        >>                                              >>     break                                    >> }                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> if ($ControlsEnd -lt 0) {                                    >>     throw "Controls closing div was not found."                                              >> }                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $Controls = $Text.Substring(                                 >>     $ControlsStart,                          >>     $ControlsEnd - $ControlsStart            >> ).Trim()                                     PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> if ($Controls -notmatch 'aria-label="Select language"') {    >>     throw "Language selector was not found inside controls."                                 >> }                                            Language selector was not found inside          controls.                                       At line:2 char:5                                +     throw "Language selector was not found    inside controls."                               +     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~                                     + CategoryInfo          : OperationStopped     : (Language select...nside controls.:Strin     g) [], RuntimeException                           + FullyQualifiedErrorId : Language selecto     r was not found inside controls.                                                             PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> if ($Controls -notmatch 'setDark\(!dark\)') {                >>     throw "Theme toggle was not found inside controls."                                      >> }                                            Theme toggle was not found inside controls.     At line:2 char:5                                +     throw "Theme toggle was not found inside  controls."                                      +     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ~~~~~~~~~~                                          + CategoryInfo          : OperationStopped     : (Theme toggle wa...nside controls.:Strin     g) [], RuntimeException                           + FullyQualifiedErrorId : Theme toggle was      not found inside controls.                                                                  PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ============================================================                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # 3. REMOVE CONTROLS FROM CURRENT LOCATION                   PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ============================================================                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $TextWithoutControls =                                       >>     $Text.Substring(0, $ControlsStart) +     >>     $Text.Substring($ControlsEnd)            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ============================================================                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # 4. FIND THE MAIN NAVBAR ROW                                PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ============================================================                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $RowMarker = '<div className="flex items-center justify-between h-16">'                                      PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $RowStart = $TextWithoutControls.IndexOf($RowMarker)         PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> if ($RowStart -lt 0) {                                       >>     throw "Main navbar row was not found."   >> }                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # Match the main row closing div.                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $Depth = 0   PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $Cursor = $RowStart                                          PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $RowEnd = -1 PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> while ($Cursor -lt $TextWithoutControls.Length) {            >>     $Open = $TextWithoutControls.IndexOf("<div", $Cursor)                                    >>     $Close = $TextWithoutControls.IndexOf("</div>", $Cursor)                                 >>                                              >>     if ($Open -ge 0 -and $Open -lt $Close) { >>         $Depth++                             >>         $Cursor = $Open + 4                  >>         continue                             >>     }                                        >>                                              >>     if ($Close -ge 0) {                      >>         $Depth--                             >>         $Cursor = $Close + 6                 >>                                              >>         if ($Depth -eq 0) {                  >>             $RowEnd = $Cursor                >>             break                            >>         }                                    >>                                              >>         continue                             >>     }                                        >>                                              >>     break                                    >> }                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> if ($RowEnd -lt 0) {                                         >>     throw "Main navbar row closing div was not found."                                       >> }                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ============================================================                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # 5. MAKE THE ROW A POSITIONING CONTAINER                    PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ============================================================                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $NewRowMarker = '<div className="relative flex items-center justify-between h-16">'                          PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $WorkingText = $TextWithoutControls.Replace(                 >>     $RowMarker,                              >>     $NewRowMarker                            >> )                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ============================================================                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # 6. CREATE TRUE FAR-RIGHT CONTROL POSITION                  PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ============================================================                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $Controls = $Controls.Replace(                               >>     'className="relative ml-auto flex shrink-0 items-center gap-2"',                         >>     'className="absolute right-0 top-1/2 z-30 flex -translate-y-1/2 items-center gap-2"'     >> )                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $Controls = $Controls.Replace(                               >>     'className="relative flex items-center gap-2"',                                          >>     'className="absolute right-0 top-1/2 z-30 flex -translate-y-1/2 items-center gap-2"'     >> )                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $Controls = $Controls.Replace(                               >>     'className="ml-auto relative flex items-center gap-2"',                                  >>     'className="absolute right-0 top-1/2 z-30 flex -translate-y-1/2 items-center gap-2"'     >> )                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # Remove any leftover ml-auto from controls.                 PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $Controls = $Controls.Replace("ml-auto ", "")                PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ============================================================                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # 7. KEEP ACCOUNT / TOP-UP GROUP CLEAR OF FAR-RIGHT CONTROLS PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ============================================================                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $WorkingText = $WorkingText.Replace(                         >>     '<div className="hidden md:flex flex-1 items-center justify-end gap-3">',                >>     '<div className="hidden md:flex items-center gap-3 mr-44">'                              >> )                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $WorkingText = $WorkingText.Replace(                         >>     '<div className="hidden md:flex items-center gap-3">',                                   >>     '<div className="hidden md:flex items-center gap-3 mr-44">'                              >> )                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ============================================================                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # 8. RE-FIND MAIN ROW AFTER CLASS CHANGES                    PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ============================================================                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $RowStart = $WorkingText.IndexOf($NewRowMarker)              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> if ($RowStart -lt 0) {                                       >>     throw "Modified main navbar row was not found."                                          >> }                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $Depth = 0   PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $Cursor = $RowStart                                          PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $RowEnd = -1 PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> while ($Cursor -lt $WorkingText.Length) {                    >>     $Open = $WorkingText.IndexOf("<div", $Cursor)                                            >>     $Close = $WorkingText.IndexOf("</div>", $Cursor)                                         >>                                              >>     if ($Open -ge 0 -and $Open -lt $Close) { >>         $Depth++                             >>         $Cursor = $Open + 4                  >>         continue                             >>     }                                        >>                                              >>     if ($Close -ge 0) {                      >>         $Depth--                             >>         $Cursor = $Close + 6                 >>                                              >>         if ($Depth -eq 0) {                  >>             $RowEnd = $Cursor                >>             break                            >>         }                                    >>                                              >>         continue                             >>     }                                        >>                                              >>     break                                    >> }                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> if ($RowEnd -lt 0) {                                         >>     throw "Modified main row closing div was not found."                                     >> }                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # Insert the independent far-right group at the end of the row.                                              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $InsertBefore = $RowEnd - 6                                  PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $IndentedControls = (                                        >>     $Controls.Trim().Split([Environment]::NewLine) |                                         >>     ForEach-Object {                         >>         if ($_.Trim().Length -eq 0) {        >>             ""                               >>         }                                    >>         else {                               >>             "        " + $_.Trim()           >>         }                                    >>     }                                        >> ) -join "`r`n"                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $FinalText = >>     $WorkingText.Substring(0, $InsertBefore) +                                               >>     "`r`n" +                                 >>     $IndentedControls +                      >>     "`r`n      " +                           >>     $WorkingText.Substring($InsertBefore)    PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Set-Content $Navbar $FinalText -Encoding UTF8                PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ============================================================                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # 9. VERIFY FINAL STRUCTURE                                  PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ============================================================                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $Verify = Get-Content $Navbar -Raw                           PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $LanguagePos = $Verify.IndexOf('aria-label="Select language"')                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $ThemePos = $Verify.IndexOf('onClick={() => setDark(!dark)}')                                                PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $MobilePos = $Verify.IndexOf("/* Mobile hamburger */")       PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $AbsolutePos = $Verify.IndexOf('absolute right-0 top-1/2')   PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> if ($AbsolutePos -lt 0) {                                    >>     throw "Verification failed: far-right positioning class was not found."                  >> }                                            Verification failed: far-right positioning      class was not found.                            At line:2 char:5                                +     throw "Verification failed: far-right     positioning class was not f ...                 +     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~~~~~~~~~                            + CategoryInfo          : OperationStopped     : (Verification fa... was not found.:Strin     g) [], RuntimeException                           + FullyQualifiedErrorId : Verification fai     led: far-right positioning class was not f     ound.                                                                                         PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> if ($LanguagePos -lt 0) {                                    >>     throw "Verification failed: language selector missing."                                  >> }                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> if ($ThemePos -lt $LanguagePos) {                            >>     throw "Verification failed: theme is not after language."                                >> }                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> if ($MobilePos -ge 0 -and $AbsolutePos -gt $MobilePos) {     >>     throw "Verification failed: controls were placed after mobile section."                  >> }                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> if (([regex]::Matches(                                       >>     $Verify,                                 >>     [regex]::Escape('aria-label="Select language"')                                          >> )).Count -ne 1) {                            >>     throw "Verification failed: language selector count is not 1."                           >> }                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> if (([regex]::Matches(                                       >>     $Verify,                                 >>     [regex]::Escape('onClick={() => setDark(!dark)}')                                        >> )).Count -ne 1) {                            >>     throw "Verification failed: theme toggle count is not 1."                                >> }                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""                                                                                                PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "============================================" -ForegroundColor Green                             ============================================    PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "FAR-RIGHT POSITION VERIFIED" -ForegroundColor Green                                              FAR-RIGHT POSITION VERIFIED                     PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "============================================" -ForegroundColor Green                             ============================================    PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "Language -> Theme"                               Language -> Theme                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "Theme is pinned to the far-right edge."          Theme is pinned to the far-right edge.          PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "Account / TOP UP area has reserved space."       Account / TOP UP area has reserved space.       PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""                                                                                                PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ============================================================                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # 10. BUILD  PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ============================================================                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "Running npm run build..." -ForegroundColor Cyan  Running npm run build...                        PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> npm run build                                                npm notice run build                            npm notice run next build                       ▲ Next.js 16.3.5 (Turbopack)                    - Environments: .env.local                      ✓ Running next.config.ts took 107ms                                                               Creating an optimized production build ...                                                    > Build error occurred                          Error: Turbopack build failed with 1 error:     ./src/components/Navbar.tsx:219:11              Error: Expected '</', got '}'                     217 |                                           218 |                                         > 219 |             )}                                |           ^                               220 |                                           221 |             <button                       222 |                                                                                         Parsing ecmascript source code failed                                                           Import traces:                                    Client Component Browser:                         ./src/components/Navbar.tsx [Client Component Browser]                                          ./src/app/dashboard/history/page.tsx [Client Component Browser]                                 ./src/app/dashboard/history/page.tsx [Server Component]                                                                                       Client Component SSR:                             ./src/components/Navbar.tsx [Client Component SSR]                                              ./src/app/dashboard/history/page.tsx [Client Component SSR]                                     ./src/app/dashboard/history/page.tsx [Server Component]                                                                                                                                         at <unknown> (./src/components/Navbar.tsx:219:11)                                           PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> if ($LASTEXITCODE -ne 0) {                                   >>     throw "BUILD FAILED."                    >> }                                            BUILD FAILED.                                   At line:2 char:5                                +     throw "BUILD FAILED."                     +     ~~~~~~~~~~~~~~~~~~~~~                         + CategoryInfo          : OperationStopped     : (BUILD FAILED.:String) [], RuntimeExcept     ion                                               + FullyQualifiedErrorId : BUILD FAILED.                                                     PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""                                                                                                PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "============================================" -ForegroundColor Green                             ============================================    PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "BUILD PASSED" -ForegroundColor Green             BUILD PASSED                                    PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "============================================" -ForegroundColor Green                             ============================================    PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""                                                                                                PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "Backup:" -ForegroundColor Cyan                   Backup:                                         PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host $Backup                                           C:\Users\Sire-F\OneDrive\Desktop\navasocks-navbar-backups\NAVBAR_TRUE_FAR_RIGHT_20260918_180752 PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""                                                                                                PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "Refresh http://localhost:3000" -ForegroundColor Yellow                                       
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
+import {Shield,
+  Zap,
+  Server,
+  Key,
+  User,
+  LogOut,
+  Sliders,
+  DollarSign,
+  Activity,
+  Menu,
+  X,
+  ExternalLink,
+  Sun,
+  Moon,
+  ChevronDown,
+} from "lucide-react";
+import {
+  SITE_LANGUAGES,
+  useSitePreferences,
+} from "@/components/SitePreferences";
+
+interface UserProfile {
+  id: number;
+  email: string;
+  name: string;
+  role: string;
+  balance: number;
+  twoFactorEnabled: boolean;
+}
+
+export default function Navbar() {
+  const { dark, setDark, language, setLanguage } = useSitePreferences();
+  const [languageOpen, setLanguageOpen] = useState(false);
+
+  const selectedLanguage =
+    SITE_LANGUAGES.find((item) => item.code === language) ?? SITE_LANGUAGES[0];
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
+
+  
+
+  const fetchUser = async () => {
+    try {
+      const res = await fetch("/api/auth/me");
+      const data = await res.json();
+      if (data?.user) {
+        setUser(data.user);
+      } else {
+        setUser(null);
+      }
+    } catch {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+    
+
+    useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void fetchUser();
+  }, [pathname]);
+const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    setUser(null);
+    router.push("/");
+  };
+
+  return (
+    <header className="sticky top-0 z-50 bg-[#0b101b]/90 backdrop-blur-md border-b border-cyan-900/30 text-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+        
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 via-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform">
+                <Zap className="w-5 h-5 text-white fill-current" />
+              </div>
+              <div>
+                <span className="text-xl font-black tracking-tight text-white flex items-center gap-1">
+                  NAVA<span className="text-cyan-400"> SOCKS</span>
+                </span>
+                <span className="text-[10px] uppercase font-mono tracking-widest text-cyan-500/80 -mt-1 block">
+                  Enterprise Proxy Grid
+                </span>
+              </div>
+            </Link>
+
+            {/* Live Uptime Pill */}
+            <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-emerald-400 text-xs font-mono ml-4">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>75M+ IPs Online (99.98%)</span>
+            </div>
+          </div>
+
+          {/* Nav links */}
+          <nav className="hidden lg:flex items-center gap-6 text-sm font-medium text-slate-300">
+            <Link href="/#pricing" className="hover:text-cyan-400 transition-colors">
+              Pricing & Plans
+            </Link>
+            <Link href="/#features" className="hover:text-cyan-400 transition-colors">
+              Network Specs
+            </Link>
+            <Link href="/#nodes" className="hover:text-cyan-400 transition-colors">
+              Global Nodes
+            </Link>
+          </nav>
+
+          {/* Right Action buttons */}
+          <div className="hidden md:flex flex-1 items-center justify-end gap-3">
+            {user ? (
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/dashboard"
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all flex items-center gap-1.5 ${
+                    pathname === "/dashboard"
+                      ? "bg-cyan-500 text-slate-950 border-cyan-400"
+                      : "bg-slate-900/80 text-cyan-300 border-cyan-800/60 hover:bg-cyan-950/40"
+                  }`}
+                >
+                  <Activity className="w-3.5 h-3.5" />
+                  Dashboard
+                </Link>
+
+                <div className="h-6 w-px bg-slate-800 mx-1" />
+
+                <div className="flex items-center gap-2 pl-1 text-xs">
+          <Link
+            href="/dashboard?tab=payments"
+            className="px-3.5 py-1.5 text-xs font-black rounded-lg bg-emerald-400 text-slate-950 border border-emerald-300 hover:bg-emerald-300 transition-all shadow-md shadow-emerald-500/20"
+          >
+            TOP UP
+          </Link>
+                  <div className="text-right">
+                    <p className="font-semibold text-slate-200 leading-tight">{user.name}</p>
+                    <p className="text-[11px] text-emerald-400 font-mono">${user.balance.toFixed(2)}</p>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    title="Sign Out"
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2.5">
+                <Link
+                  href="/auth/login"
+                  className="px-3.5 py-1.5 text-xs font-medium text-slate-300 hover:text-white transition"
+                >
+                  Log In
+                </Link>
+
+                <Link
+                  href="/auth/signup"
+                  className="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 shadow-md shadow-cyan-500/20 transition-all font-mono"
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
+          
+            <div className="relative ml-auto flex shrink-0 items-center gap-2">
+
+
+
+
+
+            <button
+
+            type="button"
+
+            onClick={() => setLanguageOpen((open: boolean) => !open)}
+
+            aria-label="Select language"
+
+            aria-expanded={languageOpen}
+
+            className="flex h-9 items-center gap-2 rounded-md border border-white/15 bg-transparent px-2.5 text-sm text-white/85 transition hover:border-white/30 hover:text-white"
+
+            >
+
+            <span className="text-base leading-none">{selectedLanguage.flag}</span>
+
+            <span className="hidden sm:inline">{selectedLanguage.name}</span>
+
+            <ChevronDown
+
+            className={`h-3.5 w-3.5 transition-transform ${
+
+            languageOpen ? "rotate-180" : ""
+
+            }`}
+
+            strokeWidth={1.5}
+
+            />
+
+            </button>
+
+
+
+            {languageOpen && (
+
+            <div className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-md border border-white/10 bg-[#111318] p-1 shadow-2xl">
+
+            {SITE_LANGUAGES.map((item) => {
+
+            const active = item.code === language;
+
+
+
+            return (
+
+            <button
+
+            key={item.code}
+
+            type="button"
+
+            onClick={() => {
+
+            setLanguage(item.code);
+
+            setLanguageOpen(false);
+
+            }}
+
+            className={`flex w-full items-center gap-3 rounded px-3 py-2 text-left text-sm transition ${
+
+            active
+
+            ? "bg-blue-600 text-white"
+
+            : "text-white/80 hover:bg-white/10 hover:text-white"
+
+            }`}
+
+            >
+
+            <span className="text-base leading-none">{item.flag}</span>
+
+            <span>{item.name}</span>
+
+            </button>
+
+            );
+
+            })}
+
+            </div>
+
+            )}
+
+            <button
+
+            type="button"
+
+            onClick={() => setDark(!dark)}
+
+            aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
+
+            title={dark ? "Light mode" : "Dark mode"}
+
+            className="flex h-9 w-9 items-center justify-center rounded-md border border-white/15 bg-transparent text-white/80 transition hover:border-white/30 hover:text-white"
+
+            >
+
+            {dark ? (
+
+            <Sun className="h-[16px] w-[16px]" strokeWidth={1.5} />
+
+            ) : (
+
+            <Moon className="h-[16px] w-[16px]" strokeWidth={1.5} />
+
+            )}
+
+            </button>
+
+            </div>
+          </div>
+
+          {/* Mobile hamburger */}
+          <div className="flex md:hidden">
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
+        
+          
+        </div>
+          
+
+      </div>
+
+      {/* Mobile Drawer */}
+      {mobileMenuOpen && (
+        <div className="md:hidden bg-[#0c121f] border-b border-slate-800 px-4 pt-2 pb-6 space-y-3">
+          <Link
+            href="/#pricing"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block py-2 text-sm text-slate-300 hover:text-cyan-400"
+          >
+            Pricing & Plans
+          </Link>
+          <Link
+            href="/#features"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block py-2 text-sm text-slate-300 hover:text-cyan-400"
+          >
+            Network Specs
+          </Link>
+          <Link
+            href="/#nodes"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block py-2 text-sm text-slate-300 hover:text-cyan-400"
+          >
+            Global Nodes
+          </Link>
+
+          <div className="pt-3 border-t border-slate-800 space-y-2">
+            {user ? (
+              <>
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block w-full text-center py-2 text-sm font-semibold rounded-lg bg-cyan-500 text-slate-950"
+                >
+                  Open Dashboard
+                </Link>
+                
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="block w-full text-center py-2 text-sm text-rose-400"
+                >
+                  Sign Out ({user.email})
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/auth/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block w-full text-center py-2 text-sm text-slate-300 hover:text-white"
+                >
+                  Log In
+                </Link>
+                <Link
+                  href="/auth/signup"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block w-full text-center py-2 text-sm font-semibold rounded-lg bg-cyan-500 text-slate-950"
+                >
+                  Create Account
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </header>
+  );
+}
+
+
+
+
+
+
+
+
+

@@ -1,1 +1,466 @@
-PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $ErrorActionPreference = "Stop"                              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $ProjectRoot = "C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks"              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Set-Location $ProjectRoot                                    PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $Stamp = Get-Date -Format "yyyyMMdd_HHmmss"                  PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $BackupRoot = "C:\Users\Sire-F\OneDrive\Desktop\navasocks-navbar-backups\NAVBAR_THEME_$Stamp"                PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""                                                PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "===== NAVA SOCKS NAVBAR THEME/LANGUAGE UPGRADE =====" -ForegroundColor Cyan                      ===== NAVA SOCKS NAVBAR THEME/LANGUAGE UPGRADE =====                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""                                                PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ------------------------------------------------------------                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # 1. SAFETY BACKUP                                           PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ------------------------------------------------------------                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> New-Item -ItemType Directory -Force -Path $BackupRoot | Out-Null                                             PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $FilesToBackup = @(                                          >>     "src\components\Navbar.tsx",             >>     "src\components\AppHeader.tsx",          >>     "src\app\layout.tsx"                     >> )                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> foreach ($RelativePath in $FilesToBackup) {                  >>     $Source = Join-Path $ProjectRoot $RelativePath                                           >>     if (Test-Path $Source) {                 >>         $Destination = Join-Path $BackupRoot $RelativePath                                   >>         $DestinationDir = Split-Path $Destination -Parent                                    >>         New-Item -ItemType Directory -Force -Path $DestinationDir | Out-Null                 >>         Copy-Item $Source $Destination -Force>>     }                                        >> }                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "Backup created:" -ForegroundColor Green          Backup created:                                 PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host $BackupRoot                                       C:\Users\Sire-F\OneDrive\Desktop\navasocks-navbar-backups\NAVBAR_THEME_20260918_174211          PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""                                                PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ------------------------------------------------------------                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # 2. CREATE SHARED SITE PREFERENCES                          PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ------------------------------------------------------------                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $PreferencesPath = Join-Path $ProjectRoot "src\components\SitePreferences.tsx"                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $PreferencesContent = @'                                     >> "use client";                                >>                                              >> import { createContext, useContext, useEffect, useMemo, useState } from "react";             >>                                              >> export const SITE_LANGUAGES = [              >>   { code: "en", name: "English", flag: "🇬🇧" },                                               >>   { code: "de", name: "Deutsch", flag: "🇩🇪" },                                               >>   { code: "es", name: "Español", flag: "🇪🇸" },                                               >>   { code: "fr", name: "Français", flag: "🇫🇷" },                                              >>   { code: "ja", name: "日本語", flag: "🇯🇵" },>>   { code: "ko", name: "한국어", flag: "🇰🇷" },>>   { code: "it", name: "Italiano", flag: "🇮🇹" },                                              >>   { code: "pl", name: "Polski", flag: "🇵🇱" },>>   { code: "pt", name: "Português", flag: "🇵🇹" },                                             >>   { code: "ru", name: "Русский", flag: "🇷🇺" },                                               >>   { code: "zh", name: "简体中文", flag: "🇨🇳" },                                              >>   { code: "es-ar", name: "Español AR", flag: "🇦🇷" },                                         >>   { code: "tr", name: "Türkçe", flag: "🇹🇷" },>> ] as const;                                  >>                                              >> export type SiteLanguage = (typeof SITE_LANGUAGES)[number]["code"];                          >>                                              >> type SitePreferencesContextValue = {         >>   dark: boolean;                             >>   language: SiteLanguage;                    >>   toggleDark: () => void;                    >>   setLanguage: (language: SiteLanguage) => void;                                             >> };                                           >>                                              >> const SitePreferencesContext =               >>   createContext<SitePreferencesContextValue | null>(null);                                   >>                                              >> export function SitePreferencesProvider({    >>   children,                                  >> }: {                                         >>   children: React.ReactNode;                 >> }) {                                         >>   const [dark, setDark] = useState(true);    >>   const [language, setLanguageState] = useState<SiteLanguage>("en");                         >>   const [ready, setReady] = useState(false); >>                                              >>   useEffect(() => {                          >>     const savedTheme = window.localStorage.getItem("navasocks-theme");                       >>     const savedLanguage = window.localStorage.getItem("navasocks-language");                 >>                                              >>     if (savedTheme === "light") {            >>       setDark(false);                        >>     } else {                                 >>       setDark(true);                         >>     }                                        >>                                              >>     if (                                     >>       savedLanguage &&                       >>       SITE_LANGUAGES.some((item) => item.code === savedLanguage)                             >>     ) {                                      >>       setLanguageState(savedLanguage as SiteLanguage);                                       >>     }                                        >>                                              >>     setReady(true);                          >>   }, []);                                    >>                                              >>   useEffect(() => {                          >>     if (!ready) return;                      >>                                              >>     document.documentElement.classList.toggle("dark", dark);                                 >>     document.documentElement.style.colorScheme = dark ? "dark" : "light";                    >>     window.localStorage.setItem("navasocks-theme", dark ? "dark" : "light");                 >>   }, [dark, ready]);                         >>                                              >>   useEffect(() => {                          >>     if (!ready) return;                      >>     window.localStorage.setItem("navasocks-language", language);                             >>   }, [language, ready]);                     >>                                              >>   const value = useMemo(                     >>     () => ({                                 >>       dark,                                  >>       language,                              >>       toggleDark: () => setDark((current) => !current),                                      >>       setLanguage: (nextLanguage: SiteLanguage) =>                                           >>         setLanguageState(nextLanguage),      >>     }),                                      >>     [dark, language]                         >>   );                                         >>                                              >>   return (                                   >>     <SitePreferencesContext.Provider value={value}>                                          >>       {children}                             >>     </SitePreferencesContext.Provider>       >>   );                                         >> }                                            >>                                              >> export function useSitePreferences() {       >>   const context = useContext(SitePreferencesContext);                                        >>                                              >>   if (!context) {                            >>     throw new Error(                         >>       "useSitePreferences must be used inside SitePreferencesProvider"                       >>     );                                       >>   }                                          >>                                              >>   return context;                            >> }                                            >> '@                                           PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Set-Content -Path $PreferencesPath -Value $PreferencesContent -Encoding UTF8                                 PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ------------------------------------------------------------                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # 3. READ EXISTING NAVBAR                                    PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ------------------------------------------------------------                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $NavbarPath = Join-Path $ProjectRoot "src\components\Navbar.tsx"                                             PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> if (!(Test-Path $NavbarPath)) {                              >>     throw "Navbar.tsx was not found."        >> }                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $NavbarOriginal = Get-Content -Path $NavbarPath -Raw         PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ------------------------------------------------------------                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # 4. MODIFY NAVBAR TARGETED                                  PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ------------------------------------------------------------                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $NavbarUpdated = $NavbarOriginal                             PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # Add icons for theme/language controls.                     PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $NavbarUpdated = $NavbarUpdated.Replace(                     >> 'import { Shield, Zap, Server, Key, User, LogOut, Sliders, DollarSign, Activity, Menu, X, ExternalLink } from "lucide-react";',              >> 'import { Shield, Zap, Server, Key, User, LogOut, Sliders, DollarSign, Activity, Menu, X, ExternalLink, Sun, Moon, ChevronDown } from "lucide-react";'                                       >> )                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # Add shared preference import.                              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $NavbarUpdated = $NavbarUpdated.Replace(                     >> 'import Navbar',                             >> 'import Navbar'                              >> )                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> if ($NavbarUpdated -notmatch 'SitePreferences') {            >>     $NavbarUpdated = $NavbarUpdated.Replace( >>         'import { useRouter, usePathname } from "next/navigation";',                         >>         'import { useRouter, usePathname } from "next/navigation";' + "`r`n" +               >>         'import { SITE_LANGUAGES, useSitePreferences } from "@/components/SitePreferences";' >>     )                                        >> }                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # Add preference hook immediately after component declaration.                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $ComponentPattern = 'export default function Navbar\(\) \{'  PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> if ($NavbarUpdated -match $ComponentPattern -and $NavbarUpdated -notmatch 'const \{ dark, language, toggleDark, setLanguage \} = useSitePreferences\(\);') { >>     $NavbarUpdated = [regex]::Replace(       >>         $NavbarUpdated,                      >>         $ComponentPattern,                   >>         'export default function Navbar() {' + "`r`n" +                                      >>         '  const { dark, language, toggleDark, setLanguage } = useSitePreferences();',       >>         1                                    >>     )                                        >> }                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # Add language menu state.                                   PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> if ($NavbarUpdated -notmatch 'languageOpen') {               >>     $NavbarUpdated = $NavbarUpdated.Replace( >>         'const [mobileOpen, setMobileOpen] = useState(false);',                              >>         'const [mobileOpen, setMobileOpen] = useState(false);' + "`r`n" +                    >>         '  const [languageOpen, setLanguageOpen] = useState(false);'                         >>     )                                        >> }                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # Add controls before the existing right-side actions.       PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $Controls = @'                                               >>           <div className="hidden md:flex items-center gap-2 ml-3">                           >>             <button                          >>               type="button"                  >>               onClick={toggleDark}           >>               aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}           >>               title={dark ? "Light mode" : "Dark mode"}                                      >>               className="h-9 w-9 rounded-md border border-cyan-900/50 bg-[#0b101b]/70 flex items-center justify-center text-slate-300 hover:text-white hover:border-cyan-500/60 transition"  >>             >                                >>               {dark ? (                      >>                 <Sun className="h-4 w-4" strokeWidth={1.5} />                                >>               ) : (                          >>                 <Moon className="h-4 w-4" strokeWidth={1.5} />                               >>               )}                             >>             </button>                        >>                                              >>             <div className="relative">       >>               <button                        >>                 type="button"                >>                 onClick={() => setLanguageOpen((open) => !open)}                             >>                 aria-haspopup="menu"         >>                 aria-expanded={languageOpen} >>                 className="h-9 min-w-[42px] rounded-md border border-cyan-900/50 bg-[#0b101b]/70 px-2 flex items-center gap-1.5 text-sm text-slate-200 hover:border-cyan-500/60 transition"  >>               >                              >>                 <span className="text-base leading-none">                                    >>                   {SITE_LANGUAGES.find((item) => item.code === language)?.flag}              >>                 </span>                      >>                 <ChevronDown                 >>                   className={`h-3.5 w-3.5 transition-transform ${                            >>                     languageOpen ? "rotate-180" : ""                                         >>                   }`}                        >>                 />                           >>               </button>                      >>                                              >>               {languageOpen && (             >>                 <div                         >>                   role="menu"                >>                   className="absolute right-0 top-11 z-[70] w-56 rounded-lg border border-slate-700 bg-[#111827] p-1.5 shadow-2xl"           >>                 >                            >>                   {SITE_LANGUAGES.map((item) => {                                            >>                     const active = item.code === language;                                   >>                                              >>                     return (                 >>                       <button                >>                         key={item.code}      >>                         type="button"        >>                         role="menuitem"      >>                         onClick={() => {     >>                           setLanguage(item.code);                                            >>                           setLanguageOpen(false);                                            >>                         }}                   >>                         className={`w-full rounded-md px-3 py-2 flex items-center gap-3 text-left text-sm transition ${                      >>                           active             >>                             ? "bg-blue-600 text-white"                                       >>                             : "text-slate-300 hover:bg-slate-800 hover:text-white"           >>                         }`}                  >>                       >                      >>                         <span className="text-base leading-none">                            >>                           {item.flag}        >>                         </span>              >>                         <span>{item.name}</span>                                             >>                       </button>              >>                     );                       >>                   })}                        >>                 </div>                       >>               )}                             >>             </div>                           >>           </div>                             >> '@                                           PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # Locate the right action area using the existing desktop auth/action wrapper.                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $RightActionAnchor = '          <div className="hidden md:flex items-center'                                 PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> if ($NavbarUpdated.Contains($RightActionAnchor) -and $NavbarUpdated -notmatch 'SITE_LANGUAGES\.find') {      >>     $NavbarUpdated = $NavbarUpdated.Replace( >>         $RightActionAnchor,                  >>         $Controls + "`r`n" + $RightActionAnchor                                              >>     )                                        >> } elseif ($NavbarUpdated -notmatch 'SITE_LANGUAGES\.find') {                                 >>     throw "Could not locate the existing desktop navbar action area. No Navbar.tsx changes were written."                                    >> }                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ------------------------------------------------------------                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # 5. WRAP APPLICATION IN THE PROVIDER                        PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ------------------------------------------------------------                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $LayoutPath = Join-Path $ProjectRoot "src\app\layout.tsx"    PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> if (!(Test-Path $LayoutPath)) {                              >>     throw "layout.tsx was not found."        >> }                                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $LayoutOriginal = Get-Content -Path $LayoutPath -Raw         PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $LayoutUpdated = $LayoutOriginal                             PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> if ($LayoutUpdated -notmatch 'SitePreferencesProvider') {    >>                                              >>     $LayoutUpdated = $LayoutUpdated.Replace( >>         'import ',                           >>         'import ',                           >>         1                                    >>     )                                        >>                                              >>     # Insert provider import after the last existing import.                                 >>     $ImportMatches = [regex]::Matches($LayoutUpdated, '(?m)^import .+$')                     >>                                              >>     if ($ImportMatches.Count -eq 0) {        >>         throw "Could not identify imports in layout.tsx."                                    >>     }                                        >>                                              >>     $LastImport = $ImportMatches[$ImportMatches.Count - 1]                                   >>     $InsertAt = $LastImport.Index + $LastImport.Length                                       >>                                              >>     $LayoutUpdated =                         >>         $LayoutUpdated.Substring(0, $InsertAt) +                                             >>         "`r`nimport { SitePreferencesProvider } from ""@/components/SitePreferences""" +     >>         $LayoutUpdated.Substring($InsertAt)  >>                                              >>     # Wrap body children with provider.      >>     $BodyPattern = '<body([^>]*)>([\s\S]*?)</body>'                                          >>                                              >>     $BodyMatch = [regex]::Match($LayoutUpdated, $BodyPattern)                                >>                                              >>     if (!$BodyMatch.Success) {               >>         throw "Could not locate body in layout.tsx."                                         >>     }                                        >>                                              >>     $BodyAttributes = $BodyMatch.Groups[1].Value                                             >>     $BodyContents = $BodyMatch.Groups[2].Value                                               >>                                              >>     $NewBody =                               >>         "<body$BodyAttributes>" + "`r`n" +   >>         "        <SitePreferencesProvider>" + "`r`n" +                                       >>         $BodyContents.Trim() + "`r`n" +      >>         "        </SitePreferencesProvider>" + "`r`n" +                                      >>         "      </body>"                      >>                                              >>     $LayoutUpdated = $LayoutUpdated.Remove(  >>         $BodyMatch.Index,                    >>         $BodyMatch.Length                    >>     ).Insert(                                >>         $BodyMatch.Index,                    >>         $NewBody                             >>     )                                        >> }                                            Cannot find an overload for "Replace" and the argument                                          count: "3".                                     At line:3 char:5                                +     $LayoutUpdated = $LayoutUpdated.Replace(  +     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~      + CategoryInfo          : NotSpecified: (:) [], ParentCo                                       ntainsErrorRecordException                       + FullyQualifiedErrorId : MethodCountCouldNotFindBest                                                                                       PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ------------------------------------------------------------                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # 6. WRITE ONLY TARGETED FILES                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ------------------------------------------------------------                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Set-Content -Path $NavbarPath -Value $NavbarUpdated -Encoding UTF8                                           PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Set-Content -Path $LayoutPath -Value $LayoutUpdated -Encoding UTF8                                           PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ------------------------------------------------------------                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # 7. VERIFY DASHBOARD WAS NOT TOUCHED                        PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ------------------------------------------------------------                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $DashboardPath = Join-Path $ProjectRoot "src\app\dashboard\page.tsx"                                         PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""                                                PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "===== VERIFYING TARGETS =====" -ForegroundColor Cyan                                             ===== VERIFYING TARGETS =====                   PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "Navbar.csx target:" -ForegroundColor Yellow      Navbar.csx target:                              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> if ($NavbarUpdated -match 'SITE_LANGUAGES\.find') {          >>     Write-Host "  Theme + language controls present" -ForegroundColor Green                  >> } else {                                     >>     throw "Navbar verification failed."      >> }                                              Theme + language controls present             PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "SitePreferences.tsx:" -ForegroundColor Yellow    SitePreferences.tsx:                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> if (Test-Path $PreferencesPath) {                            >>     Write-Host "  Created" -ForegroundColor Green                                            >> } else {                                     >>     throw "SitePreferences.tsx was not created."                                             >> }                                              Created                                       PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "Dashboard page:" -ForegroundColor Yellow         Dashboard page:                                 PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "  NOT MODIFIED by this script" -ForegroundColor Green                                              NOT MODIFIED by this script                   PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ------------------------------------------------------------                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # 8. BUILD   PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> # ------------------------------------------------------------                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""                                                PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "===== RUNNING PRODUCTION BUILD =====" -ForegroundColor Cyan                                      ===== RUNNING PRODUCTION BUILD =====            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""                                                PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> npm run buildnpm notice run build                            npm notice run next build                       ▲ Next.js 16.3.5 (Turbopack)                    - Environments: .env.local                      ✓ Running next.config.ts took 214ms                                                               Creating an optimized production build ...    ✓ Compiled successfully in 32.9s                src/components/Navbar.tsx(119,18): error TS2304: Cannot find name 'Sun'.                        src/components/Navbar.tsx(121,18): error TS2304: Cannot find name 'Moon'.                       src/components/Navbar.tsx(128,32): error TS2552: Cannot find name 'setLanguageOpen'. Did you mean 'setLanguage'?                                src/components/Navbar.tsx(128,49): error TS7006: Parameter 'open' implicitly has an 'any' type. src/components/Navbar.tsx(130,32): error TS2552: Cannot find name 'languageOpen'. Did you mean 'language'?                                      src/components/Navbar.tsx(136,18): error TS2304: Cannot find name 'ChevronDown'.                src/components/Navbar.tsx(138,21): error TS2552: Cannot find name 'languageOpen'. Did you mean 'language'?                                      src/components/Navbar.tsx(143,16): error TS2552: Cannot find name 'languageOpen'. Did you mean 'language'?                                      src/components/Navbar.tsx(158,27): error TS2552: Cannot find name 'setLanguageOpen'. Did you mean 'setLanguage'?                                Failed to type check.                                                                           PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> if ($LASTEXITCODE -ne 0) {                                   >>     throw "npm run build failed. Restore from the backup before attempting unrelated changes."                                               >> }                                            npm run build failed. Restore from the backup   before attempting unrelated changes.            At line:2 char:5                                +     throw "npm run build failed. Restore      from the backup before attem ...                +     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~~~~~~~~~~~                            + CategoryInfo          : OperationStopped     : (npm run build f...elated changes.:Strin     g) [], RuntimeException                           + FullyQualifiedErrorId : npm run build fa     iled. Restore from the backup before attem     pting unrelated changes.                                                                      PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""                                                                                                PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "==================================================" -ForegroundColor Green                       ==================================================                                              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "NAVA SOCKS NAVBAR UPGRADE COMPLETED" -ForegroundColor Green                                      NAVA SOCKS NAVBAR UPGRADE COMPLETED             PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "==================================================" -ForegroundColor Green                       ==================================================                                              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""                                                                                                PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "Backup:" -ForegroundColor Cyan                   Backup:                                         PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host $BackupRoot                                       C:\Users\Sire-F\OneDrive\Desktop\navasocks-navbar-backups\NAVBAR_THEME_20260918_174211          PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""                                                                                                PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "Changed:" -ForegroundColor Cyan                  Changed:                                        PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "  src\components\Navbar.tsx"                       src\components\Navbar.tsx                     PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "  src\components\SitePreferences.tsx"              src\components\SitePreferences.tsx            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "  src\app\layout.tsx"                              src\app\layout.tsx                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""                                                                                                PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "Dashboard page was not modified." -ForegroundColor Green                                         Dashboard page was not modified.                PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "Build completed successfully." -ForegroundColor Green                                            Build completed successfully.                   PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""                                                                                                PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "STOP HERE — test locally before any further changes." -ForegroundColor Yellow      
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $ErrorActionPreference = "Stop"
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $File = "C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\components\Navbar.tsx"
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> if (!(Test-Path $File)) {
+>>     throw "Navbar.tsx not found."
+>> }
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $Lines = Get-Content $File
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""
+
+
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "=== NAVBAR CONTROL LOCATION ===" -ForegroundColor Cyan
+=== NAVBAR CONTROL LOCATION ===
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $Matches = Select-String -Path $File -Pattern "setDark\(!dark\)|languageOpen|selectedLanguage|SITE_LANGUAGES"
+
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> foreach ($Match in $Matches) {
+>>     $Start = [Math]::Max(0, $Match.LineNumber - 12)
+>>     $End   = [Math]::Min($Lines.Count - 1, $Match.LineNumber + 18)
+>>
+>>     Write-Host ""
+>>     Write-Host "----- Lines $($Start + 1) to $($End + 1) -----" -ForegroundColor Yellow
+>>
+>>     for ($i = $Start; $i -le $End; $i++) {
+>>         "{0,4}: {1}" -f ($i + 1), $Lines[$i]
+>>     }
+>> }
+
+----- Lines 12 to 42 -----
+  12:   Sliders,
+  13:   DollarSign,
+  14:   Activity,
+  15:   Menu,
+  16:   X,
+  17:   ExternalLink,
+  18:   Sun,
+  19:   Moon,
+  20:   ChevronDown,
+  21: } from "lucide-react";
+  22: import {
+  23:   SITE_LANGUAGES,
+  24:   useSitePreferences,
+  25: } from "@/components/SitePreferences";
+  26:
+  27: interface UserProfile {
+  28:   id: number;
+  29:   email: string;
+  30:   name: string;
+  31:   role: string;
+  32:   balance: number;
+  33:   twoFactorEnabled: boolean;
+  34: }
+  35:
+  36: export default function Navbar() {
+  37:   const { dark, setDark, language, setLanguage } = useSitePreferences();
+  38:   const [languageOpen, setLanguageOpen] = useState(false);
+  39:
+  40:   const selectedLanguage =
+  41:     SITE_LANGUAGES.find((item) => item.code === language) ?? SITE_LANGUAGES[0];
+  42:   const [user, setUser] = useState<UserProfile | null>(null);
+
+----- Lines 27 to 57 -----
+  27: interface UserProfile {
+  28:   id: number;
+  29:   email: string;
+  30:   name: string;
+  31:   role: string;
+  32:   balance: number;
+  33:   twoFactorEnabled: boolean;
+  34: }
+  35:
+  36: export default function Navbar() {
+  37:   const { dark, setDark, language, setLanguage } = useSitePreferences();
+  38:   const [languageOpen, setLanguageOpen] = useState(false);
+  39:
+  40:   const selectedLanguage =
+  41:     SITE_LANGUAGES.find((item) => item.code === language) ?? SITE_LANGUAGES[0];
+  42:   const [user, setUser] = useState<UserProfile | null>(null);
+  43:   const [loading, setLoading] = useState(true);
+  44:   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  45:   const router = useRouter();
+  46:   const pathname = usePathname();
+  47:
+  48:
+  49:
+  50:   const fetchUser = async () => {
+  51:     try {
+  52:       const res = await fetch("/api/auth/me");
+  53:       const data = await res.json();
+  54:       if (data?.user) {
+  55:         setUser(data.user);
+  56:       } else {
+  57:         setUser(null);
+
+----- Lines 29 to 59 -----
+  29:   email: string;
+  30:   name: string;
+  31:   role: string;
+  32:   balance: number;
+  33:   twoFactorEnabled: boolean;
+  34: }
+  35:
+  36: export default function Navbar() {
+  37:   const { dark, setDark, language, setLanguage } = useSitePreferences();
+  38:   const [languageOpen, setLanguageOpen] = useState(false);
+  39:
+  40:   const selectedLanguage =
+  41:     SITE_LANGUAGES.find((item) => item.code === language) ?? SITE_LANGUAGES[0];
+  42:   const [user, setUser] = useState<UserProfile | null>(null);
+  43:   const [loading, setLoading] = useState(true);
+  44:   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  45:   const router = useRouter();
+  46:   const pathname = usePathname();
+  47:
+  48:
+  49:
+  50:   const fetchUser = async () => {
+  51:     try {
+  52:       const res = await fetch("/api/auth/me");
+  53:       const data = await res.json();
+  54:       if (data?.user) {
+  55:         setUser(data.user);
+  56:       } else {
+  57:         setUser(null);
+  58:       }
+  59:     } catch {
+
+----- Lines 30 to 60 -----
+  30:   name: string;
+  31:   role: string;
+  32:   balance: number;
+  33:   twoFactorEnabled: boolean;
+  34: }
+  35:
+  36: export default function Navbar() {
+  37:   const { dark, setDark, language, setLanguage } = useSitePreferences();
+  38:   const [languageOpen, setLanguageOpen] = useState(false);
+  39:
+  40:   const selectedLanguage =
+  41:     SITE_LANGUAGES.find((item) => item.code === language) ?? SITE_LANGUAGES[0];
+  42:   const [user, setUser] = useState<UserProfile | null>(null);
+  43:   const [loading, setLoading] = useState(true);
+  44:   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  45:   const router = useRouter();
+  46:   const pathname = usePathname();
+  47:
+  48:
+  49:
+  50:   const fetchUser = async () => {
+  51:     try {
+  52:       const res = await fetch("/api/auth/me");
+  53:       const data = await res.json();
+  54:       if (data?.user) {
+  55:         setUser(data.user);
+  56:       } else {
+  57:         setUser(null);
+  58:       }
+  59:     } catch {
+  60:       setUser(null);
+
+----- Lines 76 to 106 -----
+  76:   };
+  77:
+  78:   return (
+  79:     <header className="sticky top-0 z-50 bg-[#0b101b]/90 backdrop-blur-md border-b border-cyan-900/30 text-white">
+  80:       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  81:         <div className="flex items-center justify-between h-16">
+  82:           {/* Logo */}
+  83:           <div className="flex items-center gap-3">
+  84:         <div className="ml-auto relative flex items-center gap-2">
+  85:           <button
+  86:             type="button"
+  87:             onClick={() => setDark(!dark)}
+  88:             aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
+  89:             title={dark ? "Light mode" : "Dark mode"}
+  90:             className="ml-auto flex h-9 w-9 items-center justify-center rounded-md border border-white/15 bg-transparent text-white/80 transition hover:border-white/30 hover:text-white"
+  91:           >
+  92:             {dark ? (
+  93:               <Sun className="ml-auto h-[16px] w-[16px]" strokeWidth={1.5} />
+  94:             ) : (
+  95:               <Moon className="ml-auto h-[16px] w-[16px]" strokeWidth={1.5} />
+  96:             )}
+  97:           </button>
+  98:
+  99:           <button
+ 100:             type="button"
+ 101:             onClick={() => setLanguageOpen((open: boolean) => !open)}
+ 102:             aria-label="Select language"
+ 103:             aria-expanded={languageOpen}
+ 104:             className="ml-auto flex h-9 items-center gap-2 rounded-md border border-white/15 bg-transparent px-2.5 text-sm text-white/85 transition hover:border-white/30 hover:text-white"
+ 105:           >
+ 106:             <span className="ml-auto text-base leading-none">{selectedLanguage.flag}</span>
+
+----- Lines 90 to 120 -----
+  90:             className="ml-auto flex h-9 w-9 items-center justify-center rounded-md border border-white/15 bg-transparent text-white/80 transition hover:border-white/30 hover:text-white"
+  91:           >
+  92:             {dark ? (
+  93:               <Sun className="ml-auto h-[16px] w-[16px]" strokeWidth={1.5} />
+  94:             ) : (
+  95:               <Moon className="ml-auto h-[16px] w-[16px]" strokeWidth={1.5} />
+  96:             )}
+  97:           </button>
+  98:
+  99:           <button
+ 100:             type="button"
+ 101:             onClick={() => setLanguageOpen((open: boolean) => !open)}
+ 102:             aria-label="Select language"
+ 103:             aria-expanded={languageOpen}
+ 104:             className="ml-auto flex h-9 items-center gap-2 rounded-md border border-white/15 bg-transparent px-2.5 text-sm text-white/85 transition hover:border-white/30 hover:text-white"
+ 105:           >
+ 106:             <span className="ml-auto text-base leading-none">{selectedLanguage.flag}</span>
+ 107:             <span className="ml-auto hidden sm:inline">{selectedLanguage.name}</span>
+ 108:             <ChevronDown
+ 109:               className={`h-3.5 w-3.5 transition-transform ${
+ 110:                 languageOpen ? "rotate-180" : ""
+ 111:               }`}
+ 112:               strokeWidth={1.5}
+ 113:             />
+ 114:           </button>
+ 115:
+ 116:           {languageOpen && (
+ 117:             <div className="ml-auto absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-md border border-white/10 bg-[#111318] p-1 shadow-2xl">
+ 118:               {SITE_LANGUAGES.map((item) => {
+ 119:                 const active = item.code === language;
+ 120:
+
+----- Lines 92 to 122 -----
+  92:             {dark ? (
+  93:               <Sun className="ml-auto h-[16px] w-[16px]" strokeWidth={1.5} />
+  94:             ) : (
+  95:               <Moon className="ml-auto h-[16px] w-[16px]" strokeWidth={1.5} />
+  96:             )}
+  97:           </button>
+  98:
+  99:           <button
+ 100:             type="button"
+ 101:             onClick={() => setLanguageOpen((open: boolean) => !open)}
+ 102:             aria-label="Select language"
+ 103:             aria-expanded={languageOpen}
+ 104:             className="ml-auto flex h-9 items-center gap-2 rounded-md border border-white/15 bg-transparent px-2.5 text-sm text-white/85 transition hover:border-white/30 hover:text-white"
+ 105:           >
+ 106:             <span className="ml-auto text-base leading-none">{selectedLanguage.flag}</span>
+ 107:             <span className="ml-auto hidden sm:inline">{selectedLanguage.name}</span>
+ 108:             <ChevronDown
+ 109:               className={`h-3.5 w-3.5 transition-transform ${
+ 110:                 languageOpen ? "rotate-180" : ""
+ 111:               }`}
+ 112:               strokeWidth={1.5}
+ 113:             />
+ 114:           </button>
+ 115:
+ 116:           {languageOpen && (
+ 117:             <div className="ml-auto absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-md border border-white/10 bg-[#111318] p-1 shadow-2xl">
+ 118:               {SITE_LANGUAGES.map((item) => {
+ 119:                 const active = item.code === language;
+ 120:
+ 121:                 return (
+ 122:                   <button
+
+----- Lines 95 to 125 -----
+  95:               <Moon className="ml-auto h-[16px] w-[16px]" strokeWidth={1.5} />
+  96:             )}
+  97:           </button>
+  98:
+  99:           <button
+ 100:             type="button"
+ 101:             onClick={() => setLanguageOpen((open: boolean) => !open)}
+ 102:             aria-label="Select language"
+ 103:             aria-expanded={languageOpen}
+ 104:             className="ml-auto flex h-9 items-center gap-2 rounded-md border border-white/15 bg-transparent px-2.5 text-sm text-white/85 transition hover:border-white/30 hover:text-white"
+ 105:           >
+ 106:             <span className="ml-auto text-base leading-none">{selectedLanguage.flag}</span>
+ 107:             <span className="ml-auto hidden sm:inline">{selectedLanguage.name}</span>
+ 108:             <ChevronDown
+ 109:               className={`h-3.5 w-3.5 transition-transform ${
+ 110:                 languageOpen ? "rotate-180" : ""
+ 111:               }`}
+ 112:               strokeWidth={1.5}
+ 113:             />
+ 114:           </button>
+ 115:
+ 116:           {languageOpen && (
+ 117:             <div className="ml-auto absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-md border border-white/10 bg-[#111318] p-1 shadow-2xl">
+ 118:               {SITE_LANGUAGES.map((item) => {
+ 119:                 const active = item.code === language;
+ 120:
+ 121:                 return (
+ 122:                   <button
+ 123:                     key={item.code}
+ 124:                     type="button"
+ 125:                     onClick={() => {
+
+----- Lines 96 to 126 -----
+  96:             )}
+  97:           </button>
+  98:
+  99:           <button
+ 100:             type="button"
+ 101:             onClick={() => setLanguageOpen((open: boolean) => !open)}
+ 102:             aria-label="Select language"
+ 103:             aria-expanded={languageOpen}
+ 104:             className="ml-auto flex h-9 items-center gap-2 rounded-md border border-white/15 bg-transparent px-2.5 text-sm text-white/85 transition hover:border-white/30 hover:text-white"
+ 105:           >
+ 106:             <span className="ml-auto text-base leading-none">{selectedLanguage.flag}</span>
+ 107:             <span className="ml-auto hidden sm:inline">{selectedLanguage.name}</span>
+ 108:             <ChevronDown
+ 109:               className={`h-3.5 w-3.5 transition-transform ${
+ 110:                 languageOpen ? "rotate-180" : ""
+ 111:               }`}
+ 112:               strokeWidth={1.5}
+ 113:             />
+ 114:           </button>
+ 115:
+ 116:           {languageOpen && (
+ 117:             <div className="ml-auto absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-md border border-white/10 bg-[#111318] p-1 shadow-2xl">
+ 118:               {SITE_LANGUAGES.map((item) => {
+ 119:                 const active = item.code === language;
+ 120:
+ 121:                 return (
+ 122:                   <button
+ 123:                     key={item.code}
+ 124:                     type="button"
+ 125:                     onClick={() => {
+ 126:                       setLanguage(item.code);
+
+----- Lines 99 to 129 -----
+  99:           <button
+ 100:             type="button"
+ 101:             onClick={() => setLanguageOpen((open: boolean) => !open)}
+ 102:             aria-label="Select language"
+ 103:             aria-expanded={languageOpen}
+ 104:             className="ml-auto flex h-9 items-center gap-2 rounded-md border border-white/15 bg-transparent px-2.5 text-sm text-white/85 transition hover:border-white/30 hover:text-white"
+ 105:           >
+ 106:             <span className="ml-auto text-base leading-none">{selectedLanguage.flag}</span>
+ 107:             <span className="ml-auto hidden sm:inline">{selectedLanguage.name}</span>
+ 108:             <ChevronDown
+ 109:               className={`h-3.5 w-3.5 transition-transform ${
+ 110:                 languageOpen ? "rotate-180" : ""
+ 111:               }`}
+ 112:               strokeWidth={1.5}
+ 113:             />
+ 114:           </button>
+ 115:
+ 116:           {languageOpen && (
+ 117:             <div className="ml-auto absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-md border border-white/10 bg-[#111318] p-1 shadow-2xl">
+ 118:               {SITE_LANGUAGES.map((item) => {
+ 119:                 const active = item.code === language;
+ 120:
+ 121:                 return (
+ 122:                   <button
+ 123:                     key={item.code}
+ 124:                     type="button"
+ 125:                     onClick={() => {
+ 126:                       setLanguage(item.code);
+ 127:                       setLanguageOpen(false);
+ 128:                     }}
+ 129:                     className={`flex w-full items-center gap-3 rounded px-3 py-2 text-left text-sm transition ${
+
+----- Lines 105 to 135 -----
+ 105:           >
+ 106:             <span className="ml-auto text-base leading-none">{selectedLanguage.flag}</span>
+ 107:             <span className="ml-auto hidden sm:inline">{selectedLanguage.name}</span>
+ 108:             <ChevronDown
+ 109:               className={`h-3.5 w-3.5 transition-transform ${
+ 110:                 languageOpen ? "rotate-180" : ""
+ 111:               }`}
+ 112:               strokeWidth={1.5}
+ 113:             />
+ 114:           </button>
+ 115:
+ 116:           {languageOpen && (
+ 117:             <div className="ml-auto absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-md border border-white/10 bg-[#111318] p-1 shadow-2xl">
+ 118:               {SITE_LANGUAGES.map((item) => {
+ 119:                 const active = item.code === language;
+ 120:
+ 121:                 return (
+ 122:                   <button
+ 123:                     key={item.code}
+ 124:                     type="button"
+ 125:                     onClick={() => {
+ 126:                       setLanguage(item.code);
+ 127:                       setLanguageOpen(false);
+ 128:                     }}
+ 129:                     className={`flex w-full items-center gap-3 rounded px-3 py-2 text-left text-sm transition ${
+ 130:                       active
+ 131:                         ? "bg-blue-600 text-white"
+ 132:                         : "text-white/80 hover:bg-white/10 hover:text-white"
+ 133:                     }`}
+ 134:                   >
+ 135:                     <span className="ml-auto text-base leading-none">{item.flag}</span>
+
+----- Lines 107 to 137 -----
+ 107:             <span className="ml-auto hidden sm:inline">{selectedLanguage.name}</span>
+ 108:             <ChevronDown
+ 109:               className={`h-3.5 w-3.5 transition-transform ${
+ 110:                 languageOpen ? "rotate-180" : ""
+ 111:               }`}
+ 112:               strokeWidth={1.5}
+ 113:             />
+ 114:           </button>
+ 115:
+ 116:           {languageOpen && (
+ 117:             <div className="ml-auto absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-md border border-white/10 bg-[#111318] p-1 shadow-2xl">
+ 118:               {SITE_LANGUAGES.map((item) => {
+ 119:                 const active = item.code === language;
+ 120:
+ 121:                 return (
+ 122:                   <button
+ 123:                     key={item.code}
+ 124:                     type="button"
+ 125:                     onClick={() => {
+ 126:                       setLanguage(item.code);
+ 127:                       setLanguageOpen(false);
+ 128:                     }}
+ 129:                     className={`flex w-full items-center gap-3 rounded px-3 py-2 text-left text-sm transition ${
+ 130:                       active
+ 131:                         ? "bg-blue-600 text-white"
+ 132:                         : "text-white/80 hover:bg-white/10 hover:text-white"
+ 133:                     }`}
+ 134:                   >
+ 135:                     <span className="ml-auto text-base leading-none">{item.flag}</span>
+ 136:                     <span>{item.name}</span>
+ 137:                   </button>
+
+----- Lines 116 to 146 -----
+ 116:           {languageOpen && (
+ 117:             <div className="ml-auto absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-md border border-white/10 bg-[#111318] p-1 shadow-2xl">
+ 118:               {SITE_LANGUAGES.map((item) => {
+ 119:                 const active = item.code === language;
+ 120:
+ 121:                 return (
+ 122:                   <button
+ 123:                     key={item.code}
+ 124:                     type="button"
+ 125:                     onClick={() => {
+ 126:                       setLanguage(item.code);
+ 127:                       setLanguageOpen(false);
+ 128:                     }}
+ 129:                     className={`flex w-full items-center gap-3 rounded px-3 py-2 text-left text-sm transition ${
+ 130:                       active
+ 131:                         ? "bg-blue-600 text-white"
+ 132:                         : "text-white/80 hover:bg-white/10 hover:text-white"
+ 133:                     }`}
+ 134:                   >
+ 135:                     <span className="ml-auto text-base leading-none">{item.flag}</span>
+ 136:                     <span>{item.name}</span>
+ 137:                   </button>
+ 138:                 );
+ 139:               })}
+ 140:             </div>
+ 141:           )}
+ 142:         </div>
+ 143:             <Link href="/" className="flex items-center gap-2.5 group">
+ 144:               <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 via-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform">
+ 145:                 <Zap className="w-5 h-5 text-white fill-current" />
+ 146:               </div>
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""
+
+
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "=== END INSPECTION ===" -ForegroundColor Cyan
+=== END INSPECTION ===
+PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>

@@ -1,1 +1,715 @@
-PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $ErrorActionPreference = "Stop"                              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $Root = "C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks"                     PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""                                                                                                PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "===== SEARCHING ACTUAL LOCAL SOURCE =====" -ForegroundColor Cyan                                 ===== SEARCHING ACTUAL LOCAL SOURCE =====       PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""                                                                                                PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Get-ChildItem "$Root\src" -Recurse -File -Include *.tsx,*.ts,*.jsx,*.js |                                    >>     Select-String -Pattern "Accepted Gateways|Automated crypto payments|USDT|BTC|LTC" -CaseSensitive:$false |                                >>     ForEach-Object {                         >>         Write-Host ""                        >>         Write-Host "$($_.Path):$($_.LineNumber)" -ForegroundColor Yellow                     >>         Write-Host $_.Line -ForegroundColor White                                            >>     }                                                                                        C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:9                           type SupportedCurrency = "BTC" | "LTC" | "USDT";                                                C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:21                          const BTC_ADDRESS = process.env.CRYPTO_BTC_ADDRESS || "";                                                                                       C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:22                          const LTC_ADDRESS = process.env.CRYPTO_LTC_ADDRESS || "";                                                                                       C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:23                          const USDT_ADDRESS = process.env.CRYPTO_USDT_TRC20_ADDRESS || "";                                                                               C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:30                          const USDT_TRC20_CONTRACT =                                                                     C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:31                            process.env.CRYPTO_USDT_TRC20_CONTRACT ||                                                     C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:34                          const BTC_MIN_CONFIRMATIONS = Number(                                                           C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:35                            process.env.CRYPTO_BTC_MIN_CONFIRMATIONS || "2"                                                                                               C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:38                          const LTC_MIN_CONFIRMATIONS = Number(                                                           C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:39                            process.env.CRYPTO_LTC_MIN_CONFIRMATIONS || "6"                                                                                               C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:47                            if (currency === "BTC") return BTC_ADDRESS;                                                   C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:48                            if (currency === "LTC") return LTC_ADDRESS;                                                   C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:49                            return USDT_ADDRESS;                                                                          C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:53                            if (currency === "BTC") return "Bitcoin";                                                     C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:54                            if (currency === "LTC") return "Litecoin";                                                    C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:59                            if (currency === "BTC") return BTC_MIN_CONFIRMATIONS;                                                                                         C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:60                            if (currency === "LTC") return LTC_MIN_CONFIRMATIONS;                                                                                         C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:65                            return value === "BTC" || value === "LTC" || value === "USDT";                                                                                C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:227                           const btcPrice = Number(response.data?.bitcoin?.usd);                                                                                         C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:228                           const ltcPrice = Number(response.data?.litecoin?.usd);                                                                                        C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:230                           if (!Number.isFinite(btcPrice) || btcPrice <= 0) {                                                                                            C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:231                             throw new Error("Invalid BTC price returned by price provider");                                                                            C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:234                           if (!Number.isFinite(ltcPrice) || ltcPrice <= 0) {                                                                                            C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:235                             throw new Error("Invalid LTC price returned by price provider");                                                                            C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:239                             BTC: btcPrice,                                                                              C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:240                             LTC: ltcPrice,                                                                              C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:241                             USDT: 1,                                                                                    C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:256                               depositAddress: BTC_ADDRESS,                                                              C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:277                                   BTC_ADDRESS.toLowerCase()                                                             C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:292                               depositAddress: BTC_ADDRESS,                                                              C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:294                               reason: "Transaction does not pay the configured BTC deposit address",                                                                    C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:322                             depositAddress: BTC_ADDRESS,                                                                C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:338                               depositAddress: LTC_ADDRESS,                                                              C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:351                                   LTC_ADDRESS.toLowerCase()                                                             C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:366                               depositAddress: LTC_ADDRESS,                                                              C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:368                               reason: "Transaction does not pay the configured LTC deposit address",                                                                    C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:396                             depositAddress: LTC_ADDRESS,                                                                C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:401                         async function verifyUsdtTrc20(txid: string): Promise<VerificationResult> {                                                                     C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:411                             `${TRON_BASE_URL}/v1/accounts/${encodeURIComponent(USDT_ADDRESS)}` +                                                                        C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:415                             `&contract_address=${encodeURIComponent(USDT_TRC20_CONTRACT)}` +                                                                            C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:443                               depositAddress: USDT_ADDRESS,                                                             C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:445                               reason: "USDT TRC-20 transaction was not found for the configured address",                                                               C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:450                           const configuredAddress = USDT_ADDRESS.toLowerCase();                                                                                         C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:458                               depositAddress: USDT_ADDRESS,                                                             C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:468                           if (tokenContract && tokenContract !== USDT_TRC20_CONTRACT.toLowerCase()) {                                                                   C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:474                               depositAddress: USDT_ADDRESS,                                                             C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:476                               reason: "TRC-20 token contract does not match configured USDT contract",                                                                  C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:515                               depositAddress: USDT_ADDRESS,                                                             C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:558                             depositAddress: USDT_ADDRESS,                                                               C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:567                           if (currency === "BTC") {                                                                     C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:571                           if (currency === "LTC") {                                                                     C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:575                           return verifyUsdtTrc20(txid);                                                                 C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:599                                 String(body?.currency || "USDT").toUpperCase();                                                                                         C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:608                                       "Unsupported cryptocurrency. Use BTC, LTC, or USDT TRC-20.",                                                                      C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:654                                 currency === "USDT"                                                                     C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:681                                 currency === "USDT"                                                                     C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\api\payments\crypto\route.ts:758                                     error: "Unsupported cryptocurrency. Use BTC, LTC, or USDT TRC-20.",                                                                 C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\dashboard\history\page.tsx:132                                             <div className="flex items-center gap-1.5"><span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 px-1.5 py-0.5 rounded">On</span><input type="checkbox" defaultChecked className="accent-cyan-500 h-3.5 w-3.5 cursor-pointer" /></div>                                                                                       C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\dashboard\history\page.tsx:136                                             <div className="flex items-center gap-1.5"><span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 px-1.5 py-0.5 rounded">On</span><input type="checkbox" defaultChecked className="accent-cyan-500 h-3.5 w-3.5 cursor-pointer" /></div>                                                                                       C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\dashboard\page.tsx:218                                     method: "USDT" | "BTC" | "LTC";                                                               C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\dashboard\page.tsx:220                                     if (method === "USDT") {                                                                      C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\dashboard\page.tsx:224                                           aria-label="Tether USDT"                                                                C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\dashboard\page.tsx:225                                           title="Tether USDT"                                                                     C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\dashboard\page.tsx:232                                     if (method === "BTC") {                                                                       C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\dashboard\page.tsx:236                                           aria-label="Bitcoin BTC"                                                                C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\dashboard\page.tsx:237                                           title="Bitcoin BTC"                                                                     C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\dashboard\page.tsx:247                                         aria-label="Litecoin LTC"                                                                 C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\dashboard\page.tsx:248                                         title="Litecoin LTC"                                                                      C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\dashboard\page.tsx:1663                                                  Crypto (USDT / BTC / LTC) credits your NAVA SOCKS balance, then you buy individual IPs from the market.                                                                         C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\page.tsx:270                                                               <Bitcoin className="w-4 h-4" /> USDT / BTC / LTC                                                                              C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\app\page.tsx:544                                                               <p>- Crypto payments: USDT / BTC / LTC</p>                                                                                    C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\components\ArchitectureModal.tsx:160                                         <span className="text-cyan-400 font-bold">4. transactions</span>: (id, user_id, amount, currency, payment_method [crypto_usdt|crypto_btc|crypto_ltc], payment_address, tx_hash, status)                                                                                         C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\components\Footer.tsx:80                                                 <h4 className="text-xs font-mono uppercase tracking-wider text-slate-200 mb-3">Accepted Gateways</h4>                                                                               C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\components\Footer.tsx:82                                                   Automated crypto payments with USDT, BTC, and LTC.                                                                                C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\components\Footer.tsx:85                                                   <span className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700">USDT</span>                                                                                            C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\components\Footer.tsx:86                                                   <span className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700">BTC</span>                                                                                             C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\components\Footer.tsx:87                                                   <span className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700">LTC</span>                                                                                             C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\components\PaymentModal.tsx:26                                 asset: "USDT" | "BTC" | "LTC";                                                                C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\components\PaymentModal.tsx:29                                   BTC: {                                                                                      C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\components\PaymentModal.tsx:33                                   LTC: {                                                                                      C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\components\PaymentModal.tsx:38                                   USDT: {                                                                                     C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\components\PaymentModal.tsx:39                                     src: "/assets/payments/tether-usdt-logo.svg",                                                                                             C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\components\PaymentModal.tsx:40                                     alt: "Tether USDt",                                                                       C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\components\PaymentModal.tsx:47                                 if (asset === "BTC") {                                                                        C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\components\PaymentModal.tsx:79                                 const [currency, setCurrency] = useState<"USDT" | "BTC" | "LTC">("USDT");                                                                     C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\components\PaymentModal.tsx:443                                                      {(["USDT", "BTC", "LTC"] as const).map((asset) => {                                                                     C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\components\PaymentModal.tsx:445                                                          USDT: {                                                             C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\components\PaymentModal.tsx:447                                                            subtitle: "USDT",                                                 C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\components\PaymentModal.tsx:449                                                          BTC: {                                                              C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\components\PaymentModal.tsx:451                                                            subtitle: "BTC",                                                  C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\components\PaymentModal.tsx:453                                                          LTC: {                                                              C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\components\PaymentModal.tsx:455                                                            subtitle: "LTC",                                                  C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\db\seed.ts:72    { ipMasked: "82.32.**", ipFull: "82.32.77.10", port: 4145, domain: "*.btcentralplus.com", country: "United Kingdom", countryCode: "GB", region: "europe", state: "ENG", city: "London", isp: "BT", zip: "EC2A", speedLabel: "7.20M", speedKbps: 7200, ping: 21, proxyType: "ISP", addedDays: 7, price: "0.90" },                                                                            C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\db\seed.ts:259                                                         currency: "USDT",                                                                     C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-intents.ts:20                             export type CryptoCurrency = "BTC" | "LTC" | "USDT";                                                                                            C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-intents.ts:22                             export type CryptoNetwork = "BTC" | "LTC" | "TRC20";                                                                                            C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-intents.ts:121                              hrp: "bc" | "ltc",                                                                            C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-intents.ts:200                              wallet: "BTC" | "LTC" | "TRON";                                                               C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-intents.ts:204                                currency === "BTC" &&                                                                       C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-intents.ts:205                                network === "BTC"                                                                           C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-intents.ts:208                                  wallet: "BTC",                                                                            C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-intents.ts:210                                    config.wallets?.BTC?.publicExtendedKey,                                                 C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-intents.ts:215                                currency === "LTC" &&                                                                       C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-intents.ts:216                                network === "LTC"                                                                           C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-intents.ts:219                                  wallet: "LTC",                                                                            C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-intents.ts:221                                    config.wallets?.LTC?.publicExtendedKey,                                                 C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-intents.ts:226                                currency === "USDT" &&                                                                      C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-intents.ts:254                                currency === "BTC" &&                                                                       C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-intents.ts:255                                network === "BTC"                                                                           C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-intents.ts:264                                currency === "LTC" &&                                                                       C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-intents.ts:265                                network === "LTC"                                                                           C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-intents.ts:268                                  "ltc",                                                                                    C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-intents.ts:274                                currency === "USDT" &&                                                                      C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-watcher.ts:7                                | "BTC"                                                                                       C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-watcher.ts:8                                | "LTC"                                                                                       C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-watcher.ts:9                                | "USDT";                                                                                     C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-watcher.ts:12                               | "BTC"                                                                                       C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-watcher.ts:13                               | "LTC"                                                                                       C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-watcher.ts:44                             const USDT_CONTRACT =                                                                           C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-watcher.ts:45                               process.env.CRYPTO_USDT_TRC20_CONTRACT ||                                                     C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-watcher.ts:489                            async function scanUsdtAddress(                                                                 C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-watcher.ts:498                                    USDT_CONTRACT,                                                                          C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-watcher.ts:548                                  USDT_CONTRACT.toLowerCase()                                                               C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-watcher.ts:866                              let btcTip: number | null = null;                                                             C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-watcher.ts:867                              let ltcTip: number | null = null;                                                             C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-watcher.ts:876                                  address.currency === "BTC" &&                                                             C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-watcher.ts:877                                  address.network === "BTC"                                                                 C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-watcher.ts:880                                  if (btcTip === null) {                                                                    C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-watcher.ts:881                                    btcTip =                                                                                C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-watcher.ts:888                                      btcTip,                                                                               C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-watcher.ts:894                                  address.currency === "LTC" &&                                                             C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-watcher.ts:895                                  address.network === "LTC"                                                                 C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-watcher.ts:898                                  if (ltcTip === null) {                                                                    C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-watcher.ts:899                                    ltcTip =                                                                                C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-watcher.ts:906                                      ltcTip,                                                                               C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-watcher.ts:912                                  address.currency === "USDT" &&                                                            C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks\src\lib\crypto\payment-watcher.ts:922                                    await scanUsdtAddress(                  PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""                                                                                                PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "===== END - NO FILES MODIFIED =====" -ForegroundColor Green                                      
+NSOCKS
+PROXY
+HISTORY
+PAYMENTS
+SUPPORT
+NEWS
+TERMS
+PROMO
+CRYPTO AML CHECK
+IP RISK CHECK
+$20.94 Xander000 
+Account Settings
+Your account security level: 0/3 not secured
+To secure your account, activate all security features with  icon
+
+2-Step Verification 
+Link telegram 
+Proxy port protection 
+API key & Docs
+Change Password
+API Documentation
+Current state:  Enabled
+
+API url: https://nsocks.network
+
+Search proxy
+POST: /api/search
+
+REQUEST BODY:
+
+
+        
+{
+    "METHOD": "search",
+    "API_KEY": "4d86e...0b271",
+    "IP": "[155|112.204|41.125.12|...]",
+    "COUNTRY": "[US|DE|...]",
+    "STATE": "[KY|AK|...]",
+    "CITY": "[Poole|Ber|...]",
+    "ZIP": "[424|...]",
+    "ISP": "[Hosting|...]",
+    "DOMAIN": "[verizon.com|...]",
+    "TYPE": "[MOB|ISP|DCH|COM|...]",
+    "ADDED": [1|3|7|30|...],
+    "AREA": [25|50|100],
+    "EXCLUDE_USED": [0|1],
+    "EXCLUDE_BLACKS": [0|1],
+    "RESIDENTIAL": [1|2],
+    "ROTATING": [1|2],
+    "HIGHSPEED": [0|1],
+    "UDP": [0|1],
+    "DISCOUNTFILTER": [0|1],
+    "SORT": "[ping-desc|speed-desc|added-desc|...]",
+    "COUNT": "50",
+    "PAGE": [1|2|3|...],
+}
+        
+    
+RESPONSE:
+
+    
+{
+  "STATUS": "OK",
+  "METHOD": "search",
+  "MESSAGE": "FOUND",
+  "DATA": {
+    "PROXIES": [
+      {
+        "id": "18869896",
+        "ct": "US",
+        "region": "KY",
+        "city": "Louisville",
+        "zip": "40229",
+        "org": "Spectrum",
+        "isp": "Spectrum",
+        "domain": "*.*.spectrum.com",
+        "time_zone": "America/Kentucky/Louisville",
+        "continent": "North America",
+        "latitude": "38.08580000",
+        "longitude": "-85.65100000",
+        "sbl_black": "0",
+        "css_black": "0",
+        "xbl_black": "0",
+        "pbl_black": "1",
+        "added": "2026-02-22 04:37:37",
+        "ping": "104",
+        "speed": "1565505",
+        "user_type": "ISP",
+        "dns_ip": "2902283100",
+        "dns_ct": "US",
+        "scl_score": "9.16",
+        "ipq_score": "20.67",
+        "geoprovider": "maxmind",
+        "socks_ipchanged": "0",
+        "sock_real_ip": "74.140.*.*",
+        "sock_dns_ip": "172.253.83.92",
+        "load_24h": "low",
+        "traffic_limit": "4096",
+        "traffic_price": "0.24",
+        "socks_isudp": "Yes",
+        "rating": "5",
+        "price": "0.64",
+        "added_days_ago": 10,
+        "country": "USA"
+      }
+    ],
+    "META": {
+      "proxies_shown": 1,
+      "proxies_total": 512,
+      "current_page": 1,
+      "total_pages": 512
+    }
+  }
+}
+
+EXAMPLE:
+
+curl 'https://nsocks.network/api/search' -H 'Content-Type: application/json' -d '{"METHOD": "search", "API_KEY": "4d86e...0b271", "COUNTRY":"US", "COUNT": "50", "STATE" : "KY"}'
+
+INFO:
+
+Required fields: COUNTRY, all other fields optional;
+AREA works only with specified ZIP and Country: US.
+RESIDENTIAL: 1 - residential proxies; 2 - hosting/datacenter proxies;
+ROTATING: 1 - static proxies; 2 - rotating proxies (may be unstable);
+UDP: 0 - proxies with no udp support; 1 - proxies with udp support;
+
+Buy proxy
+POST: /api/buy
+
+REQUEST BODY:
+
+
+        
+{
+  "METHOD": "buy",
+  "API_KEY": "4d86e...0b271",
+  "ID": 2329132,
+  "USERNAME": "johns",
+  "PASSWORD": "37a9vb6",
+  "ALLOWED_IPS": "1.2.3.4;230.190.120.31"
+}
+        
+    
+RESPONSE:
+
+    
+{
+  "STATUS": "OK",
+  "METHOD": "buy",
+  "MESSAGE": "BOUGHT",
+  "DATA": {
+    "PROXY": {
+      "ID": 2329132,
+      "PORT": "123.0.220.210:33494",
+      "SOCKS_AUTH": "johns:37a9vb6",
+      "IP": "192.250.181.216",
+      "DNS": "8.0.6.131"
+    }
+  }
+}
+
+EXAMPLE:
+
+curl 'https://nsocks.network/api/buy' -H 'Content-Type: application/json' -d '{"METHOD": "buy", "API_KEY": "4d86e...0b271", "ID":2692880, "USERNAME":"johns", "PASSWORD":"37a9vb6"}'
+
+INFO:
+
+Required fields: ID, USERNAME (5-7 chars) AND PASSWORD (5-7 chars), OR ALLOWED_IPS;
+It is USERNAME and PASSWORD for proxy! Not for your NSOCKS account! You can set random username and password for each proxy
+You can avoid setting USERNAME and PASSWORD, if you has set them in profile settigs (Socks5 login:pass tab), OR you can also specify ALLOWED_IPS list with "ip1;ip2;ip3" format (no masks allowed like /24, only end IPs).
+
+Get proxy info by id
+POST: /api/proxy
+
+REQUEST BODY:
+
+
+        
+{
+  "METHOD": "proxy",
+  "API_KEY": "4d86e...0b271",
+  "ID": 71203
+}
+        
+    
+RESPONSE:
+
+    
+{
+  "STATUS": "OK",
+  "METHOD": "proxy",
+  "MESSAGE": "FOUND",
+  "DATA": {
+    "PROXIES": [
+      {
+        "id": "71203",
+        "online": "1",
+        "ct": "NL",
+        "region": "NB",
+        "city": "Someren",
+        "zip": "5712",
+        "org": "Solcon Internet",
+        "isp": "Solcon Internet",
+        "domain": "*.*.solcon.nl",
+        "time_zone": "Europe/Amsterdam",
+        "continent": "Europe",
+        "latitude": "51.37060000",
+        "longitude": "5.70920000",
+        "sbl_black": "0",
+        "css_black": "0",
+        "xbl_black": "0",
+        "pbl_black": "0",
+        "added": "2022-06-25 12:06:27",
+        "ping": "28",
+        "speed": "1608531",
+        "user_type": "ISP",
+        "dns_ip": "3559730680",
+        "dns_ct": "NL",
+        "sock_real_ip": "83.247.*.*",
+        "sock_dns_ip": "212.45.45.248",
+        "load_24h": "no",
+        "traffic_limit": "4096",
+        "traffic_price": "0.24",
+        "socks_isudp": "Yes",
+        "rating": "5",
+        "price": "0.50",
+        "added_days_ago": 486,
+        "country": "Netherlands",
+      }
+    ]
+  }
+}
+
+EXAMPLE:
+
+curl 'https://nsocks.network/api/proxy' -H 'Content-Type: application/json' -d '{"METHOD": "proxy", "API_KEY": "4d86e...0b271", "ID":71203}'
+
+INFO:
+
+Required fields: ID
+
+Check proxy IP score with Scamalytics or IpQualityScore services.
+POST: /api/checkriskscore
+
+REQUEST BODY:
+
+
+        
+check by proxy id:
+
+{
+  "METHOD": "checkriskscore",
+  "API_KEY": "4d86e...0b271",
+  "ID": "18869896", 
+  "SERVICE":"scl"
+}
+
+or check by ip (any IP can be checked):
+
+{
+  "METHOD": "checkriskscore",
+  "API_KEY": "4d86e...0b271",
+  "IP": "170.25.13.177", 
+  "SERVICE":"ipq"
+}
+        
+    
+RESPONSE:
+
+    
+{
+  "STATUS": "SUCCESS",
+  "MESSAGE": "FOUND",
+  "DATA": {
+    "score": 5,
+    "risk": "low"
+  },
+  "BALANCE": "176.96",
+  "IP": "173.235.7.195",
+  "SERVICE": "scl"
+}
+
+or
+
+{
+  "STATUS": "SUCCESS",
+  "MESSAGE": "FOUND",
+  "DATA": {
+    "connection_type": "Residential",
+    "vpn": false,
+    "tor": false,
+    "active_vpn": false,
+    "active_tor": false,
+    "recent_abuse": true,
+    "abuse_velocity": "low",
+    "bot_status": false,
+    "mobile": false,
+    "fraud_score": 70
+  },
+  "BALANCE": "176.36",
+  "IP": "170.25.13.177",
+  "SERVICE": "ipq"
+}
+
+EXAMPLE:
+
+curl 'https://nsocks.network/api/checkriskscore' -H 'Content-Type: application/json' -d '{"METHOD": "checkriskscore", "API_KEY": "4d86e...0b271", "ID":18869896, "SERVICE":"scl"}'
+curl 'https://nsocks.network/api/checkriskscore' -H 'Content-Type: application/json' -d '{"METHOD": "checkriskscore", "API_KEY": "4d86e...0b271", "IP":"170.25.13.177", "SERVICE":"ipq"}'
+
+INFO:
+
+Required fields: SERVICE, ID or IP
+SERVICE: "scl" - for Scamalytics (cost $0.1), "iqp" - for IpQualityScore (cost $0.25) ID to check proxy by ID
+IP to check proxy by IPv4, any IP can be checked
+
+Check proxy IP against common blacklists.
+POST: /api/checkblacks
+
+REQUEST BODY:
+
+
+        
+{
+  "METHOD": "checkblacks",
+  "API_KEY": "4d86e...0b271",
+  "ID": "18869896"
+}
+        
+    
+RESPONSE:
+
+    
+{
+  "STATUS": "SUCCESS",
+  "MESSAGE": "FOUND",
+  "DATA": {
+    "access.redhawk.org": "Clean",
+    "all.s5h.net": "Clean",
+    "b.barracudacentral.org": "Clean",
+    "bl.mailspike.net": "Clean",
+    "bl.spamcop.net": "Yes",
+    "bl.tiopan.com": "Clean",
+    "blackholes.mail-abuse.org": "Clean",
+    "blackholes.wirehub.net": "Clean",
+    "blacklist.sci.kun.nl": "Clean",
+    "block.dnsbl.sorbs.net": "Clean",
+    "blocked.hilli.dk": "Clean",
+    "bogons.cymru.com": "Clean",
+    "cart00ney.surriel.com": "Clean",
+    "cbl.abuseat.org": "Clean",
+    "css.spamhaus.org": "Clean",
+    "dev.null.dk": "Clean",
+    "dialup.blacklist.jippg.org": "Clean",
+    "dnsbl.dronebl.org": "Clean",
+    "dnsbl.sorbs.net": "Clean",
+    "drone.abuse.ch": "Clean",
+    "http.dnsbl.sorbs.net": "Clean",
+    "noptr.spamrats.com": "Clean",
+    "relays.mail-abuse.org": "Clean",
+    "smtp.dnsbl.sorbs.net": "Clean",
+    "socks.dnsbl.sorbs.net": "Clean",
+    "spam.dnsbl.sorbs.net": "Clean",
+    "web.dnsbl.sorbs.net": "Clean",
+    "xbl.abuseat.org": "Clean",
+    "xbl.spamhaus.org": "Clean",
+    "zombie.dnsbl.sorbs.net": "Clean",
+    "zen.spamhaus.org": "Yes"
+  }
+}
+
+EXAMPLE:
+
+curl 'https://nsocks.network/api/checkblacks' -H 'Content-Type: application/json' -d '{"METHOD": "checkblacks", "API_KEY": "4d86e...0b271", "ID":"18869896"}'
+
+INFO:
+
+Required fields: ID
+"bl.spamcop.net": "Yes" - value means proxy blacklisted at this specific blacklist, "Clean" - proxy is clean;
+
+Get account balance
+POST: /api/balance
+
+REQUEST BODY:
+
+
+        
+{
+  "METHOD": "balance",
+  "API_KEY": "4d86e...0b271"
+}
+        
+    
+RESPONSE:
+
+    
+{
+  "STATUS": "OK",
+  "METHOD": "balance",
+  "MESSAGE": "FOUND",
+  "DATA": {
+    "BALANCE": "159.55"
+  }
+}
+
+EXAMPLE:
+
+curl 'https://nsocks.network/api/balance' -H 'Content-Type: application/json' -d '{"METHOD": "balance", "API_KEY": "4d86e...0b271"}'
+
+Get bought proxies history
+POST: /api/history
+
+REQUEST BODY:
+
+
+        
+{
+    "METHOD": "history",
+    "API_KEY": "4d86e...0b271",
+    "IP": "[155|112.204|41.125.12|...]",
+    "PORT": "[123.0.220.210|33494|41.125.12|...]",
+    "COUNTRY": "[US|DE|...]",
+    "STATE": "[KY|AK|...]",
+    "CITY": "[Poole|Ber|...]",
+    "ZIP": "[424|...]",
+    "ISP": "[Hosting|...]",
+    "TYPE": "[MOB|ISP|DCH|COM|...]",
+    "ONLINE": [0|1],
+    "PAID": [0|1],
+    "COMMENT": "[for amazon|google acc3|instagram|...]",
+    "PAGE": [1|2|3|...],
+    "COUNT": "50"
+}
+        
+    
+RESPONSE:
+
+    
+{
+  "STATUS": "OK",
+  "METHOD": "history",
+  "MESSAGE": "FOUND",
+  "DATA": {
+    "PROXIES": [
+      {
+        "speed": "6.40M",
+        "id": "18913871",
+        "history_id": "15186689",
+        "real_ip": "174.220.141.155",
+        "ct": "US",
+        "region": "MT",
+        "isp": "Spectrum",
+        "org": "Spectrum",
+        "city": "Billings",
+        "domain": "syn-035-151-218-035.res.spectrum.com",
+        "zip": "59102",
+        "time_zone": "America/Denver",
+        "ping": "328",
+        "user_type": "ISP",
+        "buy_price": "0.80",
+        "is_refund": "0",
+        "dns": "98.8.29.131",
+        "dns_ct": "US",
+        "online": 1,
+        "continent": "North America",
+        "proxy": "210.83.143.121:18038",
+        "added_timestamp": "2026-01-05 13:59:15",
+        "socks_auth": "",
+        "is_updated": "0",
+        "comment": "",
+        "socks_type": "Server",
+        "socks_type_id": "Rotating",
+        "scl_score": "9.98",
+        "ipq_score": "17.59",
+        "socks_isudp": "No",
+        "geoprovider": "maxmind",
+        "traffic_limit": "3380",
+        "socks_ipchanged": "20",
+        "rating": "2",
+        "mins_left": "52",
+        "renew_traffic": "0",
+        "renew_port": "0",
+        "traffic_price": "0.24",
+        "black": 0,
+        "added": 8,
+        "country": "USA",
+        "paid": 1
+      },
+      {
+        ...
+      },
+    ],
+    "META": {
+      "proxies_shown": 4,
+      "proxies_total": "4",
+      "current_page": 1,
+      "total_pages": 1
+    }
+  }
+}
+
+EXAMPLE:
+
+curl 'https://nsocks.network/api/history' -H 'Content-Type: application/json' -d '{"METHOD": "history", "API_KEY": "4d86e...0b271", "COUNTRY":"NL", "ONLINE":"1", "PAID":"1", "COUNT":"20"}'
+
+INFO:
+
+All fields are optional
+PORT field used for search for proxy ip:port
+
+Refund proxy by History id
+POST: /api/refund
+
+REQUEST BODY:
+
+
+        
+{
+    "METHOD": "refund", 
+    "API_KEY": "4d86e...0b271",
+    "HISTORY_ID":5676534
+}
+        
+    
+RESPONSE:
+
+    
+{
+    "STATUS":"OK",
+    "MESSAGE":"Proxy with HISTORY_ID 5676534 (174.220.141.155) refunded successfully, $0.80 added to your account balance",
+    "BALANCE":"160.21"
+}
+
+
+EXAMPLE:
+
+curl 'https://nsocks.network/api/refund' -H 'Content-Type: application/json' -d '{"METHOD": "refund", "API_KEY": "4d86e...0b271", "HISTORY_ID":5676534}'
+
+INFO:
+
+HISTORY_ID - history_id field of history record from /api/history method (not proxy id!).
+Refunds are available for proxies that went offline within 2 hours after purchase.
+
+Renew traffic at bought proxy, add 1GB.
+POST: /api/renewtraffic
+
+REQUEST BODY:
+
+
+        
+{
+    "METHOD": "renewtraffic", 
+    "API_KEY": "4d86e...0b271",
+    "HISTORY_ID":5676534
+}
+        
+    
+RESPONSE:
+
+    
+{
+    "STATUS":"OK",
+    "MESSAGE":"Added 1024Mb to port 34567",
+    "BALANCE":"159.31",
+    "TRAFFIC":"1024"
+}
+
+
+EXAMPLE:
+
+curl 'https://nsocks.network/api/renewtraffic' -H 'Content-Type: application/json' -d '{"METHOD": "renewtraffic", "API_KEY": "4d86e...0b271", "HISTORY_ID":5676534}'
+
+INFO:
+
+HISTORY_ID - history_id field of history record from /api/history method (not proxy id!)
+
+Enable/Disable auto-renew for proxy
+POST: /api/autorenew
+
+REQUEST BODY:
+
+
+        
+{
+    "METHOD": "autorenew", 
+    "API_KEY": "4d86e...0b271",
+    "HISTORY_ID":5676534, 
+    "ENABLE":[0|1]
+}
+        
+    
+RESPONSE:
+
+    
+{
+    "STATUS":"OK",
+    "METHOD":"autorenew",
+    "MESSAGE":"FOUND",
+    "DATA":{
+        "HISTORY_ID":"5676534",
+        "AUTORENEW":1
+    }
+}
+
+
+EXAMPLE:
+
+curl 'https://nsocks.network/api/autorenew' -H 'Content-Type: application/json' -d '{"METHOD": "autorenew", "API_KEY": "4d86e...0b271", "HISTORY_ID":5676534, "ENABLE":1}'
+
+INFO:
+
+HISTORY_ID - history_id field of history record from /api/history method (not proxy id!)
+"ENABLE":1 to enable auto-renew, "ENABLE":0 to disable
+
+Get proxies count by Country
+POST: /api/countries
+
+REQUEST BODY:
+
+
+        
+{
+    "METHOD": "country",
+    "API_KEY": "4d86e...0b271",
+    "COUNTRY": "[US|DE|...]",
+}
+        
+    
+RESPONSE:
+
+    
+{
+  "STATUS": "OK",
+  "METHOD": "countries",
+  "MESSAGE": "FOUND",
+  "DATA": {
+    "PROXIES": [
+      {
+        "ct": "AE",
+        "online": "24"
+      },
+      {
+        "ct": "AF",
+        "online": "38"
+      },
+      ...
+      {
+        "ct": "US",
+        "online": "23963"
+      }
+    ]
+  }
+}
+
+EXAMPLE:
+
+all countries:
+curl 'https://nsocks.network/api/countries' -H 'Content-Type: application/json' -d '{"METHOD": "countries", "API_KEY": "4d86e...0b271"}'
+
+exact country:
+curl 'https://nsocks.network/api/countries' -H 'Content-Type: application/json' -d '{"METHOD": "countries", "API_KEY": "4d86e...0b271", "COUNTRY":"US"}'
+
+INFO:
+
+COUNTRY field are optional
+
+Get USA states proxy count
+POST: /api/states
+
+REQUEST BODY:
+
+
+        
+{
+    "METHOD": "states",
+    "API_KEY": "4d86e...0b271"
+}
+        
+    
+RESPONSE:
+
+    
+{
+  "STATUS": "OK",
+  "METHOD": "states",
+  "MESSAGE": "FOUND",
+  "DATA": {
+    "PROXIES": [
+      {
+        "state": "AK",
+        "cnt": "15"
+      },
+      {
+        "state": "AL",
+        "cnt": "197"
+      },
+      ...
+      {
+        "state": "WY",
+        "cnt": "45"
+      }
+    ]
+  }
+}
+
+EXAMPLE:
+
+all countries:
+curl 'https://nsocks.network/api/states' -H 'Content-Type: application/json' -d '{"METHOD": "states", "API_KEY": "4d86e...0b271"}'
+
+INFO:
+
+Only USA states
+
+Our API / TOR version /  nsocksnet_status news and notifications channel - join now!

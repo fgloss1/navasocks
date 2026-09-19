@@ -1,1 +1,454 @@
-PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> $ErrorActionPreference = "Stop"                                       PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>                    PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Set-Location "C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks"                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>                    PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""                                                         PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "===== NAVASOCKS REMOTE VS LOCAL AUDIT =====" -ForegroundColor Cyan                                           ===== NAVASOCKS REMOTE VS LOCAL AUDIT =====        PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>                    PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""                                                         PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "--- Fetching latest GitHub refs (NO FILE CHANGES) ---" -ForegroundColor Yellow                               --- Fetching latest GitHub refs (NO FILE CHANGES) ---                                                 PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> git fetch origin   remote: Enumerating objects: 79, done.             remote: Counting objects: 100% (79/79), done.      remote: Compressing objects: 100% (78/78), done.   Unpacking objects:  56% (44/78), 53.28 KiB | 105.00Unpacking objects:  57% (45/78), 53.28 KiB | 105.00Unpacking objects:  58% (46/78), 53.28 KiB | 105.00Unpacking objects:  60% (47/78), 53.28 KiB | 105.00Unpacking objects:  61% (48/78), 53.28 KiB | 105.00Unpacking objects:  62% (49/78), 53.28 KiB | 105.00Unpacking objects:  64% (50/78), 53.28 KiB | 105.00Unpacking objects:  65% (51/78), 53.28 KiB | 105.00Unpacking objects:  66% (52/78), 53.28 KiB | 105.00Unpacking objects:  67% (53/78), 53.28 KiB | 105.00Unpacking objects:  69% (54/78), 53.28 KiB | 105.00Unpacking objects:  70% (55/78), 53.28 KiB | 105.00Unpacking objects:  71% (56/78), 53.28 KiB | 105.00Unpacking objects:  73% (57/78), 53.28 KiB | 105.00Unpacking objects:  74% (58/78), 53.28 KiB | 105.00Unpacking objects:  75% (59/78), 53.28 KiB | 105.00Unpacking objects:  76% (60/78), 53.28 KiB | 105.00Unpacking objects:  78% (61/78), 53.28 KiB | 105.00Unpacking objects:  79% (62/78), 53.28 KiB | 105.00Unpacking objects:  80% (63/78), 53.28 KiB | 105.00remote: Total 78 (delta 49), reused 0 (delta 0), pack-reused 0 (from 0)                               Unpacking objects:  82% (64/78), 53.28 KiB | 105.00Unpacking objects:  83% (65/78), 53.28 KiB | 105.00Unpacking objects:  84% (66/78), 53.28 KiB | 105.00Unpacking objects:  85% (67/78), 53.28 KiB | 105.00Unpacking objects:  87% (68/78), 53.28 KiB | 105.00Unpacking objects:  88% (69/78), 53.28 KiB | 105.00Unpacking objects:  89% (70/78), 53.28 KiB | 105.00Unpacking objects:  91% (71/78), 53.28 KiB | 105.00Unpacking objects:  92% (72/78), 53.28 KiB | 105.00Unpacking objects:  93% (73/78), 53.28 KiB | 105.00Unpacking objects:  94% (74/78), 53.28 KiB | 105.00Unpacking objects:  96% (75/78), 53.28 KiB | 105.00Unpacking objects:  97% (76/78), 53.28 KiB | 105.00Unpacking objects:  98% (77/78), 53.28 KiB | 105.00Unpacking objects: 100% (78/78), 53.28 KiB | 105.00Unpacking objects: 100% (78/78), 98.33 KiB | 98.00 KiB/s, done.                                       From https://github.com/fgloss1/navasocks             2ab8653..962af2f  main       -> origin/main     PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>                    PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""                                                         PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "--- Local HEAD ---" -ForegroundColor Yellow               --- Local HEAD ---                                 PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> git log -1 --oneline --decorate                                       2ab8653 (HEAD -> main) Improve direct IP reveal interaction                                           PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>                    PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""                                                         PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "--- GitHub main ---" -ForegroundColor Yellow              --- GitHub main ---                                PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> git log -1 origin/main --oneline --decorate                           962af2f (origin/main, origin/HEAD) Update hashoutput.txt                                              PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>                    PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""                                                         PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "--- Commits local has that GitHub does not ---" -ForegroundColor Yellow                                      --- Commits local has that GitHub does not ---     PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> git log --oneline origin/main..main                                   PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>                    PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""                                                         PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "--- Commits GitHub has that local does not ---" -ForegroundColor Yellow                                      --- Commits GitHub has that local does not ---     PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> git log --oneline main..origin/main                                   962af2f (origin/main, origin/HEAD) Update hashoutput.txt                                              2f02f76 Update hashoutput.txt                      2d535af Update hashoutput.txt                      90f262e Update hashoutput.txt                      939a503 Update hashoutput.txt                      0353796 Update hashoutput.txt                      e8ac9df Update hashoutput.txt                      c77227d Update hashoutput.txt                      1f0aa12 Update hashoutput.txt                      c7a4a65 Update hashoutput.txt                      89de787 Update hashoutput.txt                      0bbe729 Update hashoutput.txt                      7eebdc7 Update hashoutput.txt                      4b4cf4c Update hashoutput.txt                      6ac6f89 Update hashoutput.txt                      99e8111 Update hashoutput.txt                      ef049bd Update hashoutput.txt                      b9da09d Update hashoutput.txt                      aa51862 Update hashoutput.txt                      78cc93d Update hashoutput.txt                      6924288 Update hashoutput.txt                      28f4809 Update hashoutput.txt                      624cf8b Update hashoutput.txt                      36d2196 Update hashoutput.txt                      8b788d9 Update hashoutput.txt                      69581d0 Add files via upload                       PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>                    PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""                                                         PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "--- Local working tree ---" -ForegroundColor Yellow       --- Local working tree ---                         PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> git status --short  M package-lock.json                                M package.json                                     M src/app/api/listings/buy/route.ts                M src/app/dashboard/history/page.tsx               M src/app/dashboard/page.tsx                       M src/components/AppHeader.tsx                     M src/db/init.ts                                   M src/db/schema.ts                                ?? src/app/api/support/                            PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>                    PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""                                                         PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "--- Files changed relative to GitHub main ---" -ForegroundColor Yellow                                       --- Files changed relative to GitHub main ---      PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> git diff --name-only origin/main                                      warning: in the working copy of 'src/app/dashboard/history/page.tsx', LF will be replaced by CRLF the next time Git touches it                           hashoutput.txt                                     package-lock.json                                  package.json                                       src/app/api/listings/buy/route.ts                  src/app/dashboard/history/page.tsx                 src/app/dashboard/page.tsx                         src/components/AppHeader.tsx                       src/db/init.ts                                     src/db/schema.ts                                   PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>                    PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host ""                                                         PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> Write-Host "--- Change summary relative to GitHub main ---" -ForegroundColor Yellow                                      --- Change summary relative to GitHub main ---     PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks> git diff --stat origin/main                                           warning: in the working copy of 'src/app/dashboard/history/page.tsx', LF will be replaced by CRLF the next time Git touches it                            hashoutput.txt                     |    1 -        package-lock.json                  |   10 +-       package.json                       |   10 +-       src/app/api/listings/buy/route.ts  |    5 +-       src/app/dashboard/history/page.tsx |   11 +-       src/app/dashboard/page.tsx         | 3346 +++++++++++++++++++++---------------                        src/components/AppHeader.tsx       |  110 +-       src/db/init.ts                     |   28 +-       src/db/schema.ts                   |   17 +        9 files changed, 2150 insertions(+), 1388 deletions(-)                                               PS C:\Users\Sire-F\OneDrive\Desktop\Navasocks-Workspace\navasocks-local\navasocks>   
+﻿===== LISTING TYPE =====
+
+> interface Listing {
+    id: number;
+    ipMasked: string;
+    ipFull: string;
+    port: number;
+    domain: string;
+    country: string;
+    countryCode: string;
+    region: string;
+    state: string;
+    city: string;
+    isp: string;
+    zip: string;
+    speedLabel: string;
+    speedKbps: number;
+    ping: number;
+    proxyType: string;
+    addedDays: number;
+    price: string;
+    status: string;
+  }
+  
+> interface ListingDetails {
+    listingId: number;
+    location: {
+      country: string | null;
+      countryCode: string | null;
+      region: string | null;
+      state: string | null;
+      city: string | null;
+      zip: string | null;
+      zone: string | null;
+    };
+    network: {
+      org: string | null;
+      isp: string | null;
+      domain: string | null;
+      reverseDns: string | null;
+      hostname: string | null;
+      ipType: string | null;
+    };
+    risk: {
+      blacklisted: boolean | null;
+      scamalytics: number | null;
+      ipqs: number | null;
+    };
+    quality?: {
+      proxyQuality: string | null;
+    };
+    traffic?: {
+      includedGb: string | null;
+      usedGb: string | null;
+      protocol: string | null;
+    };
+  }
+  
+  interface Owned {
+    id: number;
+
+===== SELECTED LISTING =====
+      added: "any",
+    });
+    const [sort, setSort] = useState("added");
+    const [cart, setCart] = useState<Listing[]>([]);
+>   const [selectedListing, setSelectedListing] = 
+useState<Listing | null>(null);
+    const [refundProxy, setRefundProxy] = useState<Owned | 
+null>(null);
+    const [refundReason, setRefundReason] = 
+useState("proxy_not_browsing");
+    const [refundDescription, setRefundDescription] = 
+useState("");
+    const [refundSubmitting, setRefundSubmitting] = 
+useState(false);
+    const [refundClock, setRefundClock] = useState(Date.now());
+    const [detailTab, setDetailTab] = useState<"info" | "geo" | 
+"blacklists">("info");
+    const [buying, setBuying] = useState(false);
+    const [notice, setNotice] = useState("");
+    }, [region, stateFilter, filters.ip, filters.domain, 
+filters.city, filters.isp, filters.zip, filters.type, sort]);
+  
+    useEffect(() => {
+      let cancelled = false;
+>     if (!selectedListing) {
+        setListingDetails(null);
+        setDetailsLoading(false);
+        return;
+      }
+      setListingDetails({
+>       listingId: selectedListing.id,
+        location: {
+>         country: selectedListing.country || null,
+>         countryCode: selectedListing.countryCode || null,
+>         region: selectedListing.region || null,
+>         state: selectedListing.state || null,
+>         city: selectedListing.city || null,
+>         zip: selectedListing.zip || null,
+          zone: null,
+        },
+        network: {
+          org: null,
+>         isp: selectedListing.isp || null,
+>         domain: selectedListing.domain || null,
+          reverseDns: null,
+          hostname: null,
+          ipType: null,
+        },
+        risk: { blacklisted: null, scamalytics: null, ipqs: null 
+},
+      });
+      setRevealedIp("");
+      setRevealingIp(false);
+      setDetailsLoading(true);
+  
+>     void 
+fetch(`/api/listings/details?id=\${selectedListing.id}`, { 
+cache: "no-store" })
+        .then(async (res) => {
+          if (!res.ok) throw new Error(`Details request failed: 
+\${res.status}`);
+          return res.json();
+        })
+        .then((data: ListingDetails) => {
+          if (!cancelled) setListingDetails(data);
+        })
+        .catch((error) => console.error("Listing details 
+error:", error))
+        .finally(() => { if (!cancelled) 
+setDetailsLoading(false); });
+  
+      return () => { cancelled = true; };
+>   }, [selectedListing?.id]);
+  
+    const addToCart = (row: Listing) => {
+      if (cart.find((c) => c.id === row.id)) return;
+      setCart((prev) => [...prev, row]);
+    };
+  
+    const removeFromCart = (id: number) => setCart((prev) => 
+prev.filter((c) => c.id !== id));
+    const cartTotal = cart.reduce((s, c) => s + 
+parseFloat(c.price), 0);
+  
+    const revealIp = async (listingId?: number) => {
+>     const targetId = listingId ?? selectedListing?.id;
+      if (!targetId || revealingIp) return;
+      if (revealedIps[targetId]) return;
+  
+      setRevealingIp(true);
+      setNotice("");
+      try {
+        const res = await fetch("/api/listings/reveal", {
+          method: "POST",
+        if (!res.ok) throw new Error(data?.error || "Unable to 
+reveal IP.");
+  
+        const fullIp = String(data?.ip || "");
+        setRevealedIps((prev) => ({ ...prev, [targetId]: fullIp 
+}));
+>       if (selectedListing?.id === targetId) 
+setRevealedIp(fullIp);
+        setNotice("IP revealed. \$0.05 charged.");
+      } catch (error) {
+        setNotice(error instanceof Error ? error.message : 
+"Unable to reveal IP.");
+      } finally {
+        setRevealingIp(false);
+      }
+    };
+  
+            setUser((u) => (u ? { ...u, balance: data.balance } 
+: u));
+          }
+          setCart((prev) => prev.filter((c) => 
+!target.includes(c.id)));
+          setNotice(`Provisioned \${data.purchased?.length || 
+target.length} NAVA SOCKS endpoint(s)`);
+>         setSelectedListing(null);
+          setListingDetails(null);
+          setDetailTab("info");
+          load();
+        }
+      } catch {
+        setNotice("Purchase failed");
+      } finally {
+        setBuying(false);
+                          )}
+                          {visibleListings.map((row) => {
+                            const hot = parseFloat(row.price) < 
+0.6 || row.city === "New York";
+                            return (
+>                             <tr key={row.id} onClick={() => 
+setSelectedListing(row)} className="border-t border-slate-800/80 
+hover:bg-cyan-950/20 cursor-pointer">
+                                <td className="px-2 py-2 
+text-left">
+                                  <span className="inline-flex 
+items-center gap-1.5">
+                                    <Flag code={row.countryCode} 
+/>
+                                    <span className="relative 
+inline-flex group">
+                                      <button type="button" 
+onClick={(e) => { e.stopPropagation(); revealIp(row.id); }} 
+disabled={revealingIp || !!revealedIps[row.id]} 
+className="font-mono text-cyan-200 hover:text-cyan-100 underline 
+underline-offset-2 disabled:no-underline 
+disabled:cursor-default">
+                                        {revealedIps[row.id] || 
+row.ipMasked || "—"}
+                                      </button>
+                                      {!revealedIps[row.id] && 
+!revealingIp && (
+                  </div>
+                </div>
+                <aside className="xl:col-span-3 min-w-0 w-full 
+space-y-4 xl:sticky xl:top-24 h-fit">
+                  <div className="bg-[#0e1628] border 
+border-cyan-900/40 rounded-2xl overflow-hidden">
+>                   {selectedListing && (
+                      <>
+                        <div className="px-4 py-3 border-b 
+border-slate-800">
+>                         <div className="flex items-center 
+gap-2"><Activity className="w-4 h-4 text-cyan-400" /><h3 
+className="text-sm font-bold">IP DETAILS</h3>{(() => { const 
+ownedItem = owned.find((item) => item.ip === 
+selectedListing.ipFull); return ownedItem ? (<div 
+className="mt-3 flex items-center justify-between rounded-lg 
+border border-emerald-900/50 bg-emerald-950/20 px-3 
+py-2"><div><p className="text-[10px] text-emerald-300 font-black 
+tracking-wide">PURCHASED PROXY</p><p className="text-[10px] 
+text-slate-400 font-mono mt-0.5">{ownedItem.locked ? "ACCESS: 
+LOCKED" : "ACCESS: OPEN"}</p></div><button type="button" 
+onClick={() => toggleLock(ownedItem)} className="text-[10px] 
+font-mono text-cyan-300 hover:text-cyan-100">{ownedItem.locked ? 
+"UNLOCK" : "LOCK"}</button></div>) : null; })()}</div>
+                          <div className="mt-3 flex flex-wrap 
+gap-2">
+                            {(["info", "geo", "blacklists"] as 
+const).map((tabKey) => (
+                              <button key={tabKey} onClick={() 
+=> setDetailTab(tabKey)} className={`px-3 py-2 rounded-lg border 
+text-xs font-black tracking-wide transition ${detailTab === 
+tabKey ? tabKey === "info" ? "border-cyan-400 bg-cyan-400/15 
+text-cyan-200" : tabKey === "geo" ? "border-violet-400 
+bg-violet-400/15 text-violet-200" : "border-amber-400 
+bg-amber-400/15 text-amber-200" : tabKey === "info" ? 
+"border-cyan-900/60 text-cyan-400 hover:bg-cyan-500/10" : tabKey 
+=== "geo" ? "border-violet-900/60 text-violet-400 
+hover:bg-violet-500/10" : "border-amber-900/60 text-amber-400 
+hover:bg-amber-500/10"}`}>{tabKey.toUpperCase()}</button>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="p-4 space-y-3 text-xs">
+                          {detailTab === "info" && (
+                            <>
+>                             <div className="rounded-xl border 
+border-slate-800 bg-slate-950/50 p-3"><div className="flex 
+items-start gap-3"><Flag code={selectedListing.countryCode} 
+/><div className="min-w-0"><p className='text-sm font-bold 
+text-slate-100'>{selectedListing.country || '-'}</p><p 
+className='text-slate-400'>{selectedListing.state || '-'}, 
+{selectedListing.city || '-'}, {selectedListing.zip || 
+'-'}</p></div></div></div>
+                              <div className="rounded-xl border 
+border-slate-800 bg-slate-950/40 overflow-hidden">
+                                <div className="px-3 py-2 
+border-b border-slate-800"><p className="text-[11px] font-black 
+tracking-wider text-cyan-400 uppercase">Proxy</p></div>
+                                <div className="divide-y 
+divide-slate-800/80">
+>                                 <div className="flex 
+justify-between gap-4 px-3 py-2.5"><span 
+className="text-slate-500">Domain</span><span 
+className="text-right text-slate-200 
+break-all">{selectedListing.domain || "-"}</span></div>
+>                                 <div className="flex 
+justify-between gap-4 px-3 py-2.5"><span 
+className="text-slate-500">ORG</span><span className="text-right 
+text-slate-200">{listingDetails?.network.org || 
+selectedListing.isp || "-"}</span></div>
+>                                 <div className="flex 
+justify-between gap-4 px-3 py-2.5"><span 
+className="text-slate-500">ISP</span><span className="text-right 
+text-slate-200">{selectedListing.isp || "-"}</span></div>
+                                  <div className="flex 
+justify-between gap-4 px-3 py-2.5"><span 
+className="text-slate-500">Zone</span><span 
+className="text-right 
+text-slate-200">{listingDetails?.location.zone || 
+"Checking..."}</span></div>
+                                  <div className="flex 
+justify-between gap-4 px-3 py-2.5"><span 
+className="text-slate-500">Proxy quality</span><span 
+className="text-right font-semibold 
+text-emerald-300">{listingDetails?.quality?.proxyQuality || 
+"Calculating..."}</span></div>
+>                                 <div className="flex 
+justify-between gap-4 px-3 py-2.5"><span 
+className="text-slate-500">Added</span><span 
+className="text-right 
+text-slate-200">{selectedListing.addedDays} days</span></div>
+>                                 <div className="flex 
+justify-between gap-4 px-3 py-2.5"><span 
+className="text-slate-500">IP Type</span><span 
+className="text-right 
+text-slate-200">{listingDetails?.network.ipType || 
+selectedListing.proxyType || "-"}</span></div>
+>                                 <div className="flex 
+justify-between gap-4 px-3 py-2.5"><span 
+className="text-slate-500">Type</span><span 
+className="text-right text-slate-200">{selectedListing.proxyType 
+|| "-"}</span></div>
+>                                 <div className="flex 
+justify-between gap-4 px-3 py-2.5"><span 
+className="text-slate-500">Ping</span><span 
+className="text-right font-mono 
+text-slate-200">{selectedListing.ping} ms</span></div>
+                                  <div className="flex 
+justify-between gap-4 px-3 py-2.5"><span 
+className="text-slate-500">Blacklisted</span><span 
+className="text-right text-slate-200">{detailsLoading ? 
+"Loading..." : listingDetails?.risk.blacklisted ? "Yes" : 
+"No"}</span></div>
+                                </div>
+                              </div>
+                              <div className="rounded-xl border 
+border-slate-800 bg-slate-950/40 overflow-hidden">
+                                <div className="px-3 py-2 
+border-b border-slate-800"><p className="text-[11px] font-black 
+tracking-wider text-cyan-400 uppercase">Network</p></div>
+                                <div className="divide-y 
+divide-slate-800/80">
+>                                 <div className="flex 
+items-center justify-between gap-4 px-3 py-2.5"><span 
+className="text-slate-500">IP</span><button type="button" 
+onClick={() => revealIp()} disabled={revealingIp || !!revealedIp 
+|| !!revealedIps[selectedListing.id]} className="font-mono 
+text-cyan-200 underline">{revealedIp || 
+revealedIps[selectedListing.id] || selectedListing.ipMasked || 
+"—"}</button></div>
+>                                 <div className="flex 
+justify-between gap-4 px-3 py-2.5"><span 
+className="text-slate-500">Speed</span><span 
+className="text-right 
+text-slate-200">{selectedListing.speedLabel || "-"}</span></div>
+                                  <div className="flex 
+justify-between gap-4 px-3 py-2.5"><span 
+className="text-slate-500">DNS</span><span className="text-right 
+text-slate-200 truncate 
+max-w-[120px]">{listingDetails?.network.reverseDns || "No PTR 
+record"}</span></div>
+                                </div>
+                              </div>
+                              <div className="px-4 py-3 border-t 
+border-slate-800 flex gap-2">
+>                               <button type="button" 
+onClick={() => addToCart(selectedListing)} className={`flex-1 
+py-2 rounded-xl border text-xs font-black ${cart.some((c) => 
+c.id === selectedListing.id) ? "bg-cyan-500 text-slate-950" : 
+"text-cyan-300 border-cyan-800"}`}>CART</button>
+>                               <button type="button" 
+disabled={buying} onClick={() => checkout([selectedListing.id])} 
+className="flex-1 py-2 rounded-xl bg-gradient-to-r 
+from-emerald-400 to-cyan-500 text-slate-950 font-bold 
+text-xs">BUY \${selectedListing.price}</button>
+                              </div>
+                            </>
+                          )}
+>                         {detailTab === "geo" && <div 
+className="space-y-2 font-mono text-slate-300"><div>City: 
+{selectedListing.city}</div><div>ZIP: 
+{selectedListing.zip}</div></div>}
+                          {detailTab === "blacklists" && <div 
+className="p-2 text-slate-400">Connected to existing risk matrix 
+modules.</div>}
+                        </div>
+                      </>
+                    )}
+                  </div>
+  
+                  {cart.length > 0 && (
+                    <div className="bg-[#0e1628] border 
+border-cyan-900/40 rounded-2xl p-3 space-y-2">
+
+===== DETAILS REQUEST =====
+        risk: { blacklisted: null, scamalytics: null, ipqs: null 
+},
+      });
+      setRevealedIp("");
+      setRevealingIp(false);
+      setDetailsLoading(true);
+  
+>     void 
+fetch(`/api/listings/details?id=\${selectedListing.id}`, { 
+cache: "no-store" })
+        .then(async (res) => {
+          if (!res.ok) throw new Error(`Details request failed: 
+\${res.status}`);
+          return res.json();
+        })
+        .then((data: ListingDetails) => {
+          if (!cancelled) setListingDetails(data);
+        })
+        .catch((error) => console.error("Listing details 
+error:", error))
+
+===== ROW CLICK =====
+    });
+    const [sort, setSort] = useState("added");
+    const [cart, setCart] = useState<Listing[]>([]);
+>   const [selectedListing, setSelectedListing] = 
+useState<Listing | null>(null);
+    const [refundProxy, setRefundProxy] = useState<Owned | 
+null>(null);
+    const [refundReason, setRefundReason] = 
+useState("proxy_not_browsing");
+    const [refundDescription, setRefundDescription] = 
+useState("");
+    const [refundSubmitting, setRefundSubmitting] = 
+useState(false);
+    const [refundClock, setRefundClock] = useState(Date.now());
+    const [detailTab, setDetailTab] = useState<"info" | "geo" | 
+"blacklists">("info");
+                          {visibleListings.map((row) => {
+                            const hot = parseFloat(row.price) < 
+0.6 || row.city === "New York";
+                            return (
+>                             <tr key={row.id} onClick={() => 
+setSelectedListing(row)} className="border-t border-slate-800/80 
+hover:bg-cyan-950/20 cursor-pointer">
+                                <td className="px-2 py-2 
+text-left">
+                                  <span className="inline-flex 
+items-center gap-1.5">
+                                    <Flag code={row.countryCode} 
+/>
+                                    <span className="relative 
+inline-flex group">
+                                      <button type="button" 
+onClick={(e) => { e.stopPropagation(); revealIp(row.id); }} 
+disabled={revealingIp || !!revealedIps[row.id]} 
+className="font-mono text-cyan-200 hover:text-cyan-100 underline 
+underline-offset-2 disabled:no-underline 
+disabled:cursor-default">
+                                        {revealedIps[row.id] || 
+row.ipMasked || "—"}
+
+

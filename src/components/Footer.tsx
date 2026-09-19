@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { Zap, Shield, Globe, Terminal, Cpu } from "lucide-react";
 
 export default function Footer() {
@@ -92,7 +92,7 @@ export default function Footer() {
         </div>
 
         <div className="pt-8 border-t border-slate-900/80 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-          <p>Â© {new Date().getFullYear()} NAVA SOCKS. Global residential, ISP and datacenter proxy infrastructure.</p>
+          <p>- {new Date().getFullYear()} NAVA SOCKS. Global residential, ISP and datacenter proxy infrastructure.</p>
           <div className="flex gap-4">
             <Link href="/auth/login" className="hover:text-slate-400">
               User Portal

@@ -27,6 +27,7 @@ export async function GET() {
         ip: ownedProxies.ip,
         port: ownedProxies.port,
         countryCode: ownedProxies.countryCode,
+        state: proxyListings.state,
         city: ownedProxies.city,
         isp: ownedProxies.isp,
 

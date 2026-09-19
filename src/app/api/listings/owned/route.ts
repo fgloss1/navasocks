@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { ownedProxies, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -36,4 +36,11 @@ export async function POST(req: Request) {
     console.error("POST owned error:", error);
     return NextResponse.json({ error: "Failed to update proxy" }, { status: 500 });
   }
+}
+
+export async function PUT() {
+  return NextResponse.json({
+    success: true,
+    persisted: false,
+  });
 }

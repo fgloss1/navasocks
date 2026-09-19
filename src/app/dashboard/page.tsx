@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useMemo, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
@@ -23,6 +23,7 @@ import {
   Globe,
   Server,
   Copy,
+  CheckCircle,
   CheckCircle2,
   Wallet,
   Activity,
@@ -94,6 +95,9 @@ interface Owned {
   city: string;
   isp: string;
   locked: boolean;
+  statusText?: string | null;
+  state?: string | null;
+  autoRenew?: boolean;
   accessUsername?: string | null;
   accessHost?: string | null;
   accessPort?: number | null;
@@ -111,12 +115,52 @@ interface UserProfile {
   balance: number;
 }
 
+
+
+/// 🇺🇸 ROBUST STATE FLAG MATRIX: Maps cities directly to state assets with an automatic native component fallback
+function RenderStateFlag({ stateCode, city }: { stateCode?: string | null; city?: string | null }) {
+  const cleanCity = (city || "").trim().toLowerCase();
+
+  // Strict mapping from your available dashboard cities to State FlagCDN sub-entity endpoints
+  const cityToStateFlag: Record<string, string> = {
+    "miami": "us-fl",      // Florida
+    "austin": "us-tx",     // Texas
+    "denver": "us-co",     // Colorado
+    "chicago": "us-il",    // Illinois
+    "newark": "us-nj",     // New Jersey
+    "bristow": "us-va",    // Virginia
+    "santee": "us-ca",     // California (Santee, CA)
+    "union": "us-nj"       // New Jersey (Union, NJ)
+  };
+
+  const targetAsset = cityToStateFlag[cleanCity];
+
+  // 🛡️ FALLBACK SAFETY: If the city isn't in the mapping, instantly render your native workspace vector country component
+  if (!targetAsset) {
+    return <Flag code="US" />;
+  }
+
+  return (
+    <img
+      src={`https://flagcdn.com/${targetAsset}.png`}
+      alt="State Flag"
+      className="w-4 h-3 object-cover rounded-sm border border-slate-800/40 shadow-sm inline-block shrink-0 align-middle select-none"
+      onError={(e) => {
+        // Safe runtime element fallback in case the external CDN suffers a network timeout drop
+        const target = e.target as HTMLImageElement;
+        target.style.display = "none";
+      }}
+    />
+  );
+}
+
 const TABS = [
   { id: "proxy", label: "Proxy Market" },
   { id: "inventory", label: "My Proxies" },
   { id: "history", label: "History" },
   { id: "payments", label: "Payments" },
-  { id: "tools", label: "IP Tools" },
+  { id: "tools", label: "IP Tools" },
+
   { id: "support", label: "Support" },
 ];
 
@@ -203,7 +247,8 @@ function DashboardInner() {
   const [copied, setCopied] = useState("");
   const [payOpen, setPayOpen] = useState(false);
   const [toolInput, setToolInput] = useState("");
-  const [toolResult, setToolResult] = useState("");
+  const [toolResult, setToolResult] = useState("");
+
   const [supportCategory, setSupportCategory] = useState("General");
   const [supportSubject, setSupportSubject] = useState("");
   const [supportMessage, setSupportMessage] = useState("");
@@ -560,8 +605,24 @@ function DashboardInner() {
       setSupportSubmitting(false);
     }
   };
+       // ⚙️ Auto-fill proxy refund parameters when navigating from the History page
+  useEffect(() => {
+    const isRefund = searchParams.get("reason") === "refund";
+    const badIp = searchParams.get("ip");
+    const badPort = searchParams.get("port");
+
+    if (isRefund && badIp) {
+      setSupportCategory("Proxy");
+      setSupportSubject("Refund Request: Bad Proxy IP " + badIp);
+      setSupportMessage(
+        "Hello Support Team,\n\nI am requesting a refund for this proxy instance because it appears to be dead/offline:\n\nProxy IP: " + badIp + "\nPort Allocation: " + (badPort || "N/A") + "\n\nPlease review this transaction's logs. Thank you."
+      );
+    }
+  }, [searchParams]);
+
   const loadSupportTickets = async () => {
     setSupportHistoryLoading(true);
+    setSupportNotice("");
 
     try {
       const response = await fetch("/api/support/create", {
@@ -572,17 +633,11 @@ function DashboardInner() {
       const data = await response.json();
 
       if (!response.ok) {
-        setSupportNotice(
-          data?.error || "Unable to load support tickets."
-        );
+        setSupportNotice(data?.error || "Unable to load support tickets.");
         return;
       }
 
-      setSupportTickets(
-        Array.isArray(data?.tickets)
-          ? data.tickets
-          : []
-      );
+      setSupportTickets(Array.isArray(data?.tickets) ? data.tickets : []);
     } catch (error) {
       console.error("Load support tickets error:", error);
       setSupportNotice("Unable to load support tickets.");
@@ -590,6 +645,7 @@ function DashboardInner() {
       setSupportHistoryLoading(false);
     }
   };
+
   const resetFilters = () => {
     setFilters({ ip: "", domain: "", state: "", city: "", isp: "", zip: "", type: "any", added: "any" });
     setStateFilter("");
@@ -624,7 +680,7 @@ function DashboardInner() {
         </div>
 
         <div className="relative w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-          <div className={`flex flex-col lg:flex-row lg:items-end justify-between gap-4 ${tab === "support" ? "hidden" : ""}`}>
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
             <div>
               <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-cyan-400 mb-1">NAVA SOCKS Control Plane</p>
               <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
@@ -640,7 +696,7 @@ function DashboardInner() {
             </div>
           </div>
 
-          <div className={`grid grid-cols-2 lg:grid-cols-4 gap-3 ${tab === "support" ? "hidden" : ""}`}>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {[
               { label: "Account balance", value: `$${(user?.balance || 0).toFixed(2)}`, icon: Wallet, tone: "text-emerald-400" },
               { label: "Owned proxies", value: String(owned.length), icon: Server, tone: "text-cyan-300" },
@@ -860,7 +916,6 @@ function DashboardInner() {
                             >
                               <td className="px-2 py-2 whitespace-nowrap text-left">
                                 <span className="inline-flex items-center gap-1.5">
-                                  <Flag code={row.countryCode} />
                                   <span className="relative inline-flex group">
                                     <button
                                       type="button"
@@ -871,11 +926,11 @@ function DashboardInner() {
                                       disabled={revealingIp || !!revealedIps[row.id]}
                                       className="font-mono text-cyan-200 hover:text-cyan-100 underline underline-offset-2 disabled:no-underline disabled:cursor-default"
                                     >
-                                      {revealedIps[row.id] || row.ipMasked || "ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â"}
+                                      <Flag code={row.countryCode} />{" "}{revealedIps[row.id] || row.ipMasked || "—"}
                                     </button>
                                     {!revealedIps[row.id] && !revealingIp && (
                                       <span className="pointer-events-none absolute left-1/2 bottom-full z-50 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-md border border-slate-700 bg-slate-900 px-2.5 py-1.5 text-xs font-medium text-cyan-200 shadow-lg group-hover:block">
-                                        Reveal IP Ãƒâ€šÃ‚Â· $0.05
+                                        Reveal IP - $0.05
                                       </span>
                                     )}
                                   </span>
@@ -1054,10 +1109,10 @@ function DashboardInner() {
                                  <Flag code={selectedListing.countryCode} />
                                  <div className="min-w-0">
                                    <p className="text-sm font-bold text-slate-100">
-                                     {selectedListing.country || "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"}
+                                     {selectedListing.country || "-"}
                                    </p>
                                    <p className="text-slate-400">
-                                     {selectedListing.state || "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"}, {selectedListing.city || "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"}, {selectedListing.zip || "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"}
+                                     {selectedListing.state || "-"}, {selectedListing.city || "-"}, {selectedListing.zip || "-"}
                                    </p>
                                  </div>
                                </div>
@@ -1074,19 +1129,19 @@ function DashboardInner() {
                                  <div className="flex justify-between gap-4 px-3 py-2.5">
                                    <span className="text-slate-500">Domain</span>
                                    <span className="text-right text-slate-200 break-all">
-                                     {selectedListing.domain || "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"}
+                                     {selectedListing.domain || "-"}
                                    </span>
                                  </div>
 
                                  <div className="flex justify-between gap-4 px-3 py-2.5">
                                    <span className="text-slate-500">ORG</span>
-                                    <span className="text-right text-slate-200">{listingDetails?.network.org || selectedListing.isp || "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"}</span>
+                                    <span className="text-right text-slate-200">{listingDetails?.network.org || selectedListing.isp || "-"}</span>
                                  </div>
 
                                  <div className="flex justify-between gap-4 px-3 py-2.5">
                                    <span className="text-slate-500">ISP</span>
                                    <span className="text-right text-slate-200">
-                                     {selectedListing.isp || "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"}
+                                     {selectedListing.isp || "-"}
                                    </span>
                                  </div>
 
@@ -1109,13 +1164,13 @@ function DashboardInner() {
 
                                  <div className="flex justify-between gap-4 px-3 py-2.5">
                                    <span className="text-slate-500">IP Type</span>
-                                    <span className="text-right text-slate-200">{listingDetails?.network.ipType || selectedListing.proxyType || "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"}</span>
+                                    <span className="text-right text-slate-200">{listingDetails?.network.ipType || selectedListing.proxyType || "-"}</span>
                                  </div>
 
                                  <div className="flex justify-between gap-4 px-3 py-2.5">
                                    <span className="text-slate-500">Type</span>
                                    <span className="text-right text-slate-200">
-                                     {selectedListing.proxyType || "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"}
+                                     {selectedListing.proxyType || "-"}
                                    </span>
                                  </div>
 
@@ -1160,13 +1215,13 @@ function DashboardInner() {
                                            disabled={revealingIp || !!revealedIp || !!revealedIps[selectedListing.id]}
                                            className="font-mono text-cyan-200 hover:text-cyan-100 underline underline-offset-2 disabled:no-underline disabled:cursor-default"
                                          >
-                                           {revealedIp || revealedIps[selectedListing.id] || selectedListing.ipMasked || "ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â"}
+                                           {revealedIp || revealedIps[selectedListing.id] || selectedListing.ipMasked || "-"}
                                          </button>
                                          {!revealedIp && !revealedIps[selectedListing.id] && !revealingIp && (
                                            <span
                                              className="pointer-events-none absolute left-1/2 bottom-full z-50 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-md border border-slate-700 bg-slate-900 px-2.5 py-1.5 text-xs font-medium text-cyan-200 shadow-lg group-hover:block"
                                            >
-                                             Reveal IP Ãƒâ€šÃ‚Â· $0.05
+                                             Reveal IP - $0.05
                                            </span>
                                          )}
                                        </div>
@@ -1185,7 +1240,7 @@ function DashboardInner() {
                                  <div className="flex justify-between gap-4 px-3 py-2.5">
                                    <span className="text-slate-500">Speed</span>
                                    <span className="text-right text-slate-200">
-                                     {selectedListing.speedLabel || "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"}
+                                     {selectedListing.speedLabel || "-"}
                                    </span>
                                  </div>
 
@@ -1314,28 +1369,28 @@ function DashboardInner() {
                              <div className="flex justify-between gap-3">
                                <span className="text-slate-500">Region</span>
                                <span className="text-slate-200">
-                                 {selectedListing.region || "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"}
+                                 {selectedListing.region || "-"}
                                </span>
                              </div>
 
                              <div className="flex justify-between gap-3">
                                <span className="text-slate-500">State</span>
                                <span className="text-slate-200">
-                                 {selectedListing.state || "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"}
+                                 {selectedListing.state || "-"}
                                </span>
                              </div>
 
                              <div className="flex justify-between gap-3">
                                <span className="text-slate-500">City</span>
                                <span className="text-slate-200">
-                                 {selectedListing.city || "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"}
+                                 {selectedListing.city || "-"}
                                </span>
                              </div>
 
                              <div className="flex justify-between gap-3">
                                <span className="text-slate-500">ZIP</span>
                                <span className="font-mono text-slate-200">
-                                 {selectedListing.zip || "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â"}
+                                 {selectedListing.zip || "-"}
                                </span>
                              </div>
                            </>
@@ -1405,62 +1460,106 @@ function DashboardInner() {
                  </div><div className="bg-[#0e1628] border border-cyan-900/40 rounded-2xl overflow-hidden">
                   <div className="px-4 py-3 border-b border-slate-800 flex items-center gap-2">
                     <Zap className="w-4 h-4 text-cyan-400" />
-                    <h3 className="text-sm font-bold">My proxies</h3>
-                  </div>
-                  <div className="p-3 max-h-[340px] overflow-y-auto space-y-1">
-                    {owned.length === 0 && <p className="text-xs text-slate-500 px-1 py-2">No purchased endpoints yet.</p>}
-                    {owned.map((item) => (
-                      <div key={item.id} className="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-slate-950/80">
-                        <button onClick={() => copyOwned(item)} className="text-left min-w-0">
-                          <p className="font-mono text-[11px] text-cyan-200 truncate">
-                            {(item.publicAccessHost || item.accessHost || item.ip)}:{(item.publicAccessPort || item.accessPort || item.port)}
-                          </p>
-                          <p className="text-[10px] text-slate-500 inline-flex items-center gap-1">
-                            <Flag code={item.countryCode} /> {item.city}
-                          </p>
-                        </button>
-                        <div className="flex items-center gap-2">
-                          {REFUNDS_ENABLED && (
-                            <button
-                              type="button"
-                              onClick={() => setRefundProxy(item)}
-                              disabled={getRefundRemainingMs(item) <= 0}
-                              className="text-[10px] font-black uppercase tracking-wide text-amber-300 hover:text-amber-200"
-                            >
-                              {getRefundRemainingMs(item) > 0
-                                ? `ASK REFUND Ã‚Â· ${Math.ceil(getRefundRemainingMs(item) / 60000)}m`
-                                : "REFUND EXPIRED"}
-                            </button>
-                          )}
-                        <button onClick={() => toggleLock(item)} className="text-slate-500 hover:text-cyan-300">
-                          {item.locked ? "" : ""}
-                        </button>
-                      </div>
-                        </div>
-                    ))}
-                  </div>
-                  {copied && (
-                    <p className="px-4 pb-3 text-[11px] text-emerald-400 font-mono inline-flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" /> Copied {copied}
+                                                  <h3 className="text-sm font-bold">My proxies</h3>
+          </div>
+          
+          {/* ✔ FIXED: Dynamic layout card scroll wrapper */}
+          <div className="p-3 max-h-[340px] overflow-y-auto space-y-1 relative">
+            {owned.length === 0 && <p className="text-xs text-slate-500 px-1 py-2">No purchased endpoints yet.</p>}
+            {owned.map((item) => {
+              const isDeadOrExpired = String(item.statusText || "").toLowerCase().includes("expired") || (typeof getRefundRemainingMs === 'function' && getRefundRemainingMs(item) <= -86400000);
+              
+              // ✔ FIXED STRIP ENGINE: Safely trims off any trailing ", US" or ", us" text from your city payload natively
+              const cleanCityText = item.city ? item.city.replace(/,\s*us\$/i, '').trim() : "Unknown City";
+              
+              // Grab the true state code if it exists as a fallback layer
+              const displayStateCode = (item.state && item.state.trim().length === 2 && item.state.toUpperCase() !== "US") ? item.state.trim().toUpperCase() : "US";
+
+              return (
+                <div key={item.id} className="flex items-center justify-between px-2 py-2 rounded-lg hover:bg-slate-950/80 border border-transparent hover:border-slate-800/40 transition gap-2">
+                  <button onClick={() => copyOwned(item)} className="text-left min-w-0 flex-1">
+                    <p className="font-mono text-[11px] text-cyan-200 truncate">
+                      {(item.publicAccessHost || item.accessHost || item.ip)}:{(item.publicAccessPort || item.accessPort || item.port)}
                     </p>
-                  )}
-                  <p className="px-4 pb-4 text-[11px] text-slate-500 leading-relaxed">
-                    Auth is login/password by default. Unlock an IP to allow whitelist-only access.
-                  </p>
+                    <p className="text-[10px] text-slate-400 inline-flex items-center gap-1.5 mt-0.5">
+                      <Flag code="US" />
+                      {/* ✔ CLEAN CARD OUT: Renders the extracted city string along with the correct state attribute code */}
+                      <span className="truncate">{cleanCityText}, <span className="font-mono font-bold text-slate-300">{displayStateCode}</span></span>
+                    </p>
+                  </button>
+                  
+                  <div className="flex items-center gap-2.5 shrink-0">
+                    <div className={`flex flex-col items-center bg-slate-950/60 border border-slate-800/60 px-1.5 py-0.5 rounded select-none text-[8px] tracking-wider font-bold uppercase transition ${isDeadOrExpired ? "opacity-30 text-slate-600" : "text-slate-500"}`}>
+                      <span>Auto</span>
+                      <input 
+                        type="checkbox"
+                        disabled={isDeadOrExpired}
+                        checked={!isDeadOrExpired && !!item.autoRenew}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          const next = !item.autoRenew;
+                          const key = `navasocks_autorenew_${item.id}`;
+                          if (next) localStorage.setItem(key, "true"); else localStorage.removeItem(key);
+                          if (typeof setOwned === 'function') {
+                            setOwned((prev: any[]) => prev.map((x) => x.id === item.id ? { ...x, autoRenew: next } : x));
+                          }
+                        }}
+                        className="h-3 w-3 accent-cyan-500 rounded bg-slate-900 border-slate-800 cursor-pointer mt-0.5 transition active:scale-75 disabled:cursor-not-allowed"
+                      />
+                    </div>
+
+                    {REFUNDS_ENABLED && (
+                      <button
+                        type="button"
+                        onClick={() => setRefundProxy(item)}
+                        disabled={getRefundRemainingMs(item) <= 0}
+                        className="text-[10px] font-black uppercase tracking-wide text-amber-300 hover:text-amber-200"
+                      >
+                        {getRefundRemainingMs(item) > 0
+                          ? `ASK REFUND · ${Math.ceil(getRefundRemainingMs(item) / 60000)}m`
+                          : "REFUND EXPIRED"}
+                      </button>
+                    )}
+                    <button onClick={() => toggleLock(item)} className="text-slate-500 hover:text-cyan-300">
+                      {item.locked ? "" : ""}
+                    </button>
+                  </div>
                 </div>
-              </aside>
+              );
+            })}
+          </div>
+
+          {/* ✔ FIXED FOOTER BLOCK: All components are cleanly closed inside bounding card layout walls to eliminate overlaps */}
+          <div className="px-4 pt-3 pb-4 border-t border-slate-800/60 bg-slate-950/20 rounded-b-2xl">
+            {copied && (
+              <p className="pb-2 text-[11px] text-emerald-400 font-mono inline-flex items-center gap-1">
+                <CheckCircle className="w-3 h-3" /> Copied {copied}
+              </p>
+            )}
+            <p className="text-[11px] text-slate-500 leading-relaxed font-sans normal-case">
+              Auth is login/password by default. Unlock an IP to allow whitelist-only access.
+            </p>
+          </div>
+        </div>
+      </aside>
+
             </div>
           )}
 
           {tab === "inventory" && (
             <div className="bg-[#0e1628] border border-cyan-900/40 rounded-2xl p-5">
-              <h2 className="text-sm font-bold mb-4">Allocated NAVA SOCKS endpoints</h2>
+                            <h2 className="text-sm font-bold mb-4">Allocated NAVA SOCKS endpoints</h2>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {owned.map((item) => (
+              {owned.map((item) => {
+                const cleanCityText = item.city ? item.city.replace(/,\s*us$/i, '').trim() : "Unknown City";
+                const displayStateCode = (item.state && item.state.trim().length === 2 && item.state.toUpperCase() !== "US") ? item.state.trim().toUpperCase() : "US";
+                
+                return (
                   <div key={item.id} className="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="inline-flex items-center gap-2 text-xs">
-                        <Flag code={item.countryCode} /> {item.city}
+                      <span className="inline-flex items-center gap-2 text-xs text-slate-200">
+                        <Flag code="US" /> 
+                        <span>{cleanCityText}, <span className="font-mono font-bold text-slate-400">{displayStateCode}</span></span>
                       </span>
                       <button onClick={() => toggleLock(item)} className="text-slate-400 hover:text-cyan-300">
                         {item.locked ? "" : ""}
@@ -1472,13 +1571,15 @@ function DashboardInner() {
                     <p className="text-[11px] text-slate-500">{item.isp}</p>
                     <button
                       onClick={() => copyOwned(item)}
-                      className="text-[11px] text-cyan-400 inline-flex items-center gap-1"
+                      className="text-[11px] text-cyan-400 inline-flex items-center gap-1 hover:text-cyan-300 transition"
                     >
                       <Copy className="w-3 h-3" /> Copy NAVA endpoint
                     </button>
                   </div>
-                ))}
-              </div>
+                );
+              })}
+            </div>
+
             </div>
           )}
 
@@ -1533,18 +1634,26 @@ function DashboardInner() {
                     {tab === "support" && (
             <div className="space-y-5">
 
-              <div>
-                <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-cyan-400 mb-1">
-                  NAVA SOCKS Control Plane
-                </p>
+              <div className="bg-[#0e1628] border border-cyan-900/40 rounded-2xl p-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-800/50 flex items-center justify-center">
+                    <MessageCircle className="w-5 h-5 text-cyan-400" />
+                  </div>
 
-                <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
-                  <span className="text-cyan-400">Support</span>
-                </h1>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-cyan-400 font-mono">
+                      Support Center
+                    </p>
 
-                <p className="text-sm text-slate-400 mt-1">
-                  Customer support tickets and ongoing conversations.
-                </p>
+                    <h2 className="text-lg font-bold mt-1">
+                      How can we help?
+                    </h2>
+
+                    <p className="text-xs text-slate-500 mt-1">
+                      Get help with your account, proxies, billing, or technical issues.
+                    </p>
+                  </div>
+                </div>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
@@ -1720,7 +1829,7 @@ function DashboardInner() {
                                   <p className="text-[10px] text-slate-500 mt-1">
                                     {ticket.category}
                                     {ticket.createdAt
-                                      ? ` Â· ${new Date(ticket.createdAt).toLocaleString()}`
+                                      ? ` - ${new Date(ticket.createdAt).toLocaleString()}`
                                       : ""}
                                   </p>
                                 </div>
@@ -1957,7 +2066,7 @@ function DashboardInner() {
                   onClick={() =>
                     setToolResult(
                       toolInput
-                        ? `${toolInput} ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· risk 12/100 ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· ISP/residential ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· not listed on spamhaus`
+                        ? `${toolInput} - risk 12/100 - ISP/residential - not listed on spamhaus`
                         : "Enter an IP or address first"
                     )
                   }
@@ -1972,8 +2081,8 @@ function DashboardInner() {
                   <Activity className="w-4 h-4 text-cyan-400" />
                   <h2 className="text-sm font-bold">Gateway endpoints</h2>
                 </div>
-                <p className="font-mono text-xs text-cyan-200">pr.navasocks.net:7000 · HTTP</p>
-                <p className="font-mono text-xs text-cyan-200">pr.navasocks.net:1080 · SOCKS5</p>
+                <p className="font-mono text-xs text-cyan-200">pr.navasocks.net:7000 - HTTP</p>
+                <p className="font-mono text-xs text-cyan-200">pr.navasocks.net:1080 - SOCKS5</p>
                 <p className="text-[11px] text-slate-500">Use purchased IP:port or rotating user/pass credentials from inventory.</p>
               </div>
             </div>
@@ -2002,11 +2111,6 @@ export default function DashboardPage() {
     </Suspense>
   );
 }
-
-
-
-
-
 
 
 

@@ -269,11 +269,11 @@ func main() {
                 <span className="flex items-center gap-1.5 text-amber-300">
                   <Bitcoin className="w-4 h-4" /> USDT / BTC / LTC
                 </span>
-                <span className="text-slate-700">â€¢</span>
+                <span className="text-slate-700">-</span>
                 <span className="flex items-center gap-1.5 text-blue-300">
                   <CreditCard className="w-4 h-4" /> Crypto Only
                 </span>
-                <span className="text-slate-700">â€¢</span>
+                <span className="text-slate-700">-</span>
                 <span className="flex items-center gap-1.5 text-emerald-400">
                   <Shield className="w-3.5 h-3.5" /> Instant Delivery
                 </span>
@@ -466,7 +466,7 @@ func main() {
                 <div>
                   <h3 className="text-2xl font-bold text-white">{planInfo.name}</h3>
                   <p className="text-xs text-slate-400 mt-1">
-                    Pool: <span className="text-cyan-300 font-mono font-bold">{planInfo.pool}</span> â€¢ Concurrency: <span className="text-emerald-400 font-mono">{planInfo.concurrency}</span>
+                    Pool: <span className="text-cyan-300 font-mono font-bold">{planInfo.pool}</span> - Concurrency: <span className="text-emerald-400 font-mono">{planInfo.concurrency}</span>
                   </p>
                 </div>
 
@@ -540,8 +540,8 @@ func main() {
                 </button>
 
                 <div className="text-[11px] text-slate-500 space-y-1">
-                  <p>âœ“ Instant Automated Provisioning</p>
-                  <p>âœ“ Crypto payments: USDT / BTC / LTC</p>
+                  <p>- Instant Automated Provisioning</p>
+                  <p>- Crypto payments: USDT / BTC / LTC</p>
                 </div>
               </div>
             </div>

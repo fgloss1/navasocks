@@ -92,7 +92,7 @@ const handleLogout = async () => {
           </div>
 
           {/* Nav links */}
-          <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-300">
+          <nav className="hidden lg:flex items-center gap-6 text-sm font-medium text-slate-300">
             <Link href="/#pricing" className="hover:text-cyan-400 transition-colors">
               Pricing & Plans
             </Link>
@@ -105,7 +105,7 @@ const handleLogout = async () => {
           </nav>
 
           {/* Right Action buttons */}
-          <div className="hidden sm:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-3">
             {user ? (
               <div className="flex items-center gap-2">
                 <Link
@@ -162,7 +162,7 @@ const handleLogout = async () => {
           </div>
 
           {/* Mobile hamburger */}
-          <div className="flex sm:hidden">
+          <div className="flex md:hidden">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
@@ -175,7 +175,7 @@ const handleLogout = async () => {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="sm:hidden bg-[#0c121f] border-b border-slate-800 px-4 pt-2 pb-6 space-y-3">
+        <div className="md:hidden bg-[#0c121f] border-b border-slate-800 px-4 pt-2 pb-6 space-y-3">
           <Link
             href="/#pricing"
             onClick={() => setMobileMenuOpen(false)}

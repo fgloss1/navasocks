@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --page-bg: #080d19;
+}
+
+html,
+body {
+  min-height: 100%;
+  background-color: var(--page-bg);
+}
+
+body {
+  min-height: 100vh;
+}
+/*
+  Dark theme first-paint protection.
+  The selector intentionally treats the missing data-theme attribute as dark.
+  This prevents white flashes before the theme bootstrap runs.
+*/
+
+:root {
+  --page-bg: #07101d;
+  --first-paint-surface: #0d1424;
+  --first-paint-input: #020617;
+}
+
+html:not([data-theme="light"]),
+html:not([data-theme="light"]) body {
+  background-color: #07101d !important;
+  color: #ffffff;
+}
+
+html:not([data-theme="light"]) [data-site-navbar="true"] {
+  background-color: #080d19 !important;
+  border-color: #0f172a !important;
+  color: #ffffff !important;
+}
+
+/* Navbar buttons, language picker, and dropdown */
+html:not([data-theme="light"]) [data-site-navbar="true"] .bg-white,
+html:not([data-theme="light"]) [data-site-navbar="true"] .bg-slate-50,
+html:not([data-theme="light"]) [data-site-navbar="true"] .bg-slate-100 {
+  background-color: #0d1424 !important;
+}
+
+/* Navbar light text classes before the dark class is applied */
+html:not([data-theme="light"]) [data-site-navbar="true"] .text-slate-900,
+html:not([data-theme="light"]) [data-site-navbar="true"] .text-slate-800,
+html:not([data-theme="light"]) [data-site-navbar="true"] .text-slate-700,
+html:not([data-theme="light"]) [data-site-navbar="true"] .text-slate-600 {
+  color: #e2e8f0 !important;
+}
+
+/* Signup and other form controls */
+html:not([data-theme="light"]) input,
+html:not([data-theme="light"]) textarea,
+html:not([data-theme="light"]) select {
+  background-color: #020617 !important;
+  color: #ffffff !important;
+  border-color: #1e293b !important;
+}
+
+html:not([data-theme="light"]) input::placeholder,
+html:not([data-theme="light"]) textarea::placeholder {
+  color: #94a3b8 !important;
+}

@@ -1,0 +1,2030 @@
+"use client";
+
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
+
+export const SITE_LANGUAGES = [
+  { code: "en", name: "English", flag: "\ud83c\uddfa\ud83c\uddf8" }, // ðŸ‡ºðŸ‡¸
+  { code: "de", name: "Deutsch", flag: "\ud83c\udde9\ud83c\uddea" }, // ðŸ‡©ðŸ‡ª
+  { code: "es", name: "Espa\u00f1ol", flag: "\ud83c\uddea\ud83c\uddf8" }, // ðŸ‡ªðŸ‡¸
+  { code: "fr", name: "Fran\u00e7ais", flag: "\ud83c\uddeb\ud83c\uddf7" }, // ðŸ‡«ðŸ‡·
+  { code: "ja", name: "\u65e5\u672c\u8a9e", flag: "\ud83c\uddef\ud83c\uddf5" }, // æ—¥æœ¬èªž
+  { code: "ko", name: "\ud55c\uad6d\uc5b4", flag: "\ud83c\uddf0\ud83c\uddf7" }, // í•œêµ­ì–´
+  { code: "it", name: "Italiano", flag: "\ud83c\uddee\ud83c\uddf9" }, // ðŸ‡®ðŸ‡¹
+  { code: "pl", name: "Polski", flag: "\ud83c\uddf5\ud83c\uddf1" }, // ðŸ‡µðŸ‡±
+  { code: "pt", name: "Portugu\u00eas", flag: "\ud83c\uddf5\ud83c\uddf9" }, // ðŸ‡µðŸ‡¹
+  { code: "ru", name: "\u0420\u0443\u0441\u0441\u043a\u0438\u0439", flag: "\ud83c\uddf7\ud83c\uddfa" }, // Ð ÑƒÑÑÐºÐ¸Ð¹
+  { code: "zh", name: "\u7b80\u4f53\u4e2d\u6587", flag: "\ud83c\udde8\ud83c\uddf3" }, // ç®€ä½“ä¸­æ–‡
+  { code: "es-ar", name: "Espa\u00f1ol AR", flag: "\ud83c\udde6\ud83c\uddf7" }, // ðŸ‡¦ðŸ‡·
+  { code: "tr", name: "T\u00fcrk\u00e7e", flag: "\ud83c\uddf9\ud83c\uddf7" }, // ðŸ‡¹ðŸ‡·
+] as const;
+
+type SiteLanguage = (typeof SITE_LANGUAGES)[number]["code"];
+
+export type TranslationKey =
+  | "enterpriseGrid"
+  | "onlineIps"
+  | "pricing"
+  | "networkSpecs"
+  | "globalNodes"
+  | "dashboard"
+  | "topUp"
+  | "signOut"
+  | "login"
+  | "signup"
+  | "createAccount"
+  | "selectLanguage"
+  | "switchToDarkMode"
+  | "switchToLightMode"
+  | "darkMode"
+  | "lightMode"
+  | "anonymity"
+  | "automatedGateways"
+  | "availabilityByLocation"
+  | "averageResponseLatency"
+  | "calculatedRate"
+  | "carrierISP"
+  | "compatibleOutOfBox"
+  | "concurrencyLabel"
+  | "connectionString"
+  | "copied"
+  | "copyCode"
+  | "countriesTerritories"
+  | "cryptoOnly"
+  | "cryptoPayments"
+  | "datacenterComingSoon"
+  | "eliteTier1"
+  | "establishingHandshake"
+  | "executeProxyPing"
+  | "exitIPv4"
+  | "handshakeOk"
+  | "heroDescriptionLead"
+  | "heroDescriptionRest"
+  | "heroNetwork"
+  | "heroTitle1"
+  | "heroTitle2"
+  | "includedEveryPlan"
+  | "instantDelivery"
+  | "instantProvisioning"
+  | "integration"
+  | "latencySuffix"
+  | "liveGatewaySandbox"
+  | "loginDashboard"
+  | "mobileComingSoon"
+  | "networkUptimeSLA"
+  | "noHiddenFees"
+  | "orderNowPrefix"
+  | "plugPlay"
+  | "poolLabel"
+  | "residentialDynamic"
+  | "residentialLocations"
+  | "residentialNetwork"
+  | "residentialPeerIPs"
+  | "scaleBandwidth"
+  | "selectedBandwidth"
+  | "stickyComingSoon"
+  | "targetGeolocation"
+  | "targetLocation"
+  | "totalOrderCost"
+  | "transparentPayg"
+  | "volumeDiscount"
+  // Core Interface Keys Added
+  | "proxyMarket"
+  | "myProxies"
+  | "history"
+  | "payments"
+  | "ipTools"
+  | "support"
+  | "controlPlaneLabel"
+  | "proxyMarketAndInventory"
+  | "dashboardSubDescription"
+  | "gridOnlineLabel"
+  | "peersLabel"
+  | "accountBalance"
+  | "ownedProxies"
+  | "cartLabel"
+  | "cartEmpty"
+  | "visiblePool"
+  | "buyAll"
+  | "filterAnyType"
+  | "filterNewest"
+  | "filterLowestPing"
+  | "filterFastest"
+  | "filterPrice"
+  | "filterReset"
+  | "tableHeaderIp"
+  | "tableHeaderDomain"
+  | "tableHeaderState"
+  | "tableHeaderCity"
+  | "tableHeaderIsp"
+  | "tableHeaderZip"
+  | "tableHeaderSpeed"
+  | "tableHeaderPing"
+  | "tableHeaderType"
+  | "tableHeaderAdded"
+  | "tableHeaderPrice"
+  | "revealIpTooltip"
+  | "loadingNavaSocks"
+  | "noEndpointsMatch"
+  | "pagePrev"
+  | "pageNext"
+  | "ipDetailsHeader"
+  | "panelTabInfo"
+  | "panelTabGeo"
+  | "panelTabBlacklists"
+  | "paymentWalletLabel"
+  | "paymentAddPayment"
+  | "paymentAddFundsDescription"
+  | "paymentCurrentBalance"
+  | "paymentAddPaymentButton"
+  | "paymentWalletActivity"
+  | "paymentTopupsHistory"
+  | "paymentTopupsDescription"
+  | "paymentTopupsHistoryButton"
+  | "paymentWalletSpending"
+  | "paymentExpensesHistory"
+  | "paymentExpensesDescription"
+  | "paymentExpensesHistoryButton"
+  | "actionBuyIp";
+
+export const SITE_TRANSLATIONS: Record<
+  SiteLanguage,
+  Record<TranslationKey, string>
+> = {
+  en: {
+    enterpriseGrid: "ENTERPRISE PROXY GRID",
+    onlineIps: "75M+ IPs Online (99.98%)",
+    pricing: "Pricing & Plans",
+    networkSpecs: "Network Specs",
+    globalNodes: "Global Nodes",
+    dashboard: "Dashboard",
+    topUp: "TOP UP",
+    signOut: "Sign Out",
+    login: "Log In",
+    signup: "Sign Up",
+    createAccount: "Create Account",
+    selectLanguage: "Select language",
+    switchToDarkMode: "Switch to dark mode",
+    switchToLightMode: "Switch to light mode",
+    darkMode: "Dark mode",
+    lightMode: "Light mode",
+    anonymity: "Anonymity:",
+    automatedGateways: "Automated Gateways:",
+    availabilityByLocation: "Residential availability varies by location",
+    averageResponseLatency: "Average Response Latency",
+    calculatedRate: "Calculated Rate",
+    carrierISP: "Carrier/ISP:",
+    compatibleOutOfBox: "Compatible out-of-the-box with Puppeteer, Playwright, Selenium, Scrapy, and all custom bot scripts.",
+    concurrencyLabel: "Concurrency:",
+    connectionString: "Connection String:",
+    copied: "Copied!",
+    copyCode: "Copy Code",
+    countriesTerritories: "Countries \u0026 Territories",
+    cryptoOnly: "Crypto Only",
+    cryptoPayments: "Crypto payments: USDT / BTC / LTC",
+    datacenterComingSoon: "Datacenter - Coming Soon",
+    eliteTier1: "Elite / Tier 1",
+    establishingHandshake: "Establishing SSL Handshake...",
+    executeProxyPing: "Execute Live Proxy Ping",
+    exitIPv4: "Exit IPv4:",
+    handshakeOk: "Handshake 200 OK",
+    heroDescriptionLead: "Harness Residential IP access",
+    heroDescriptionRest: ", reliable residential connectivity, and location-targeted residential IPs. Residential SOCKS5 access with location targeting and flexible sessions.",
+    heroNetwork: "Residential SOCKS5 Proxy Network",
+    heroTitle1: "Unblockable Proxies.",
+    heroTitle2: "Sub-Second Speed.",
+    includedEveryPlan: "Included With Every Plan:",
+    instantDelivery: "Instant Delivery",
+    instantProvisioning: "Instant Automated Provisioning",
+    integration: "Residential SOCKS5 Integration",
+    latencySuffix: "Latency",
+    liveGatewaySandbox: "Live Gateway Sandbox",
+    loginDashboard: "Login to Proxy Dashboard",
+    mobileComingSoon: "Mobile 4G/5G - Coming Soon",
+    networkUptimeSLA: "Network Uptime SLA",
+    noHiddenFees: "No hidden fees. Zero monthly commitments. Bandwidth never expires. Automatic volume discounts as your demand expands.",
+    orderNowPrefix: "Order Now:",
+    plugPlay: "Plug \u0026 Play With 3 Lines of Code",
+    poolLabel: "Pool:",
+    residentialDynamic: "Residential Dynamic",
+    residentialLocations: "Residential SOCKS5 Locations",
+    residentialNetwork: "Residential SOCKS5 Network",
+    residentialPeerIPs: "Residential Peer IPs",
+    scaleBandwidth: "Scale Your Bandwidth, Keep Your Balance",
+    selectedBandwidth: "Selected Bandwidth:",
+    stickyComingSoon: "Residential Sticky ISP - Coming Soon",
+    targetGeolocation: "Target Geolocation:",
+    targetLocation: "Target Location:",
+    totalOrderCost: "Total Order Cost:",
+    transparentPayg: "Transparent Pay-As-You-Go Pricing",
+    volumeDiscount: "Volume Discount Applied!",
+
+    // Dashboard UI Navigation Terms
+    proxyMarket: "Proxy Market",
+    myProxies: "My Proxies",
+    history: "History",
+    payments: "Payments",
+    paymentWalletLabel: "Wallet",
+    paymentAddPayment: "Add Payment",
+    paymentAddFundsDescription: "Add funds to your NAVA SOCKS balance using the supported crypto payment methods.",
+    paymentCurrentBalance: "Current balance",
+    paymentAddPaymentButton: "ADD PAYMENT",
+    paymentWalletActivity: "Wallet Activity",
+    paymentTopupsHistory: "Topups History",
+    paymentTopupsDescription: "View your wallet top-ups, including BTC, LTC and USDT deposits.",
+    paymentTopupsHistoryButton: "TOPUPS HISTORY",
+    paymentWalletSpending: "Wallet Spending",
+    paymentExpensesHistory: "Expenses History",
+    paymentExpensesDescription: "View money spent from your balance, including proxy purchases and IP reveal charges.",
+    paymentExpensesHistoryButton: "EXPENSES HISTORY",
+    ipTools: "IP Tools",
+    support: "Support",
+
+    // Dashboard Layout Frames & Cards
+    controlPlaneLabel: "NAVA SOCKS Control Plane",
+    proxyMarketAndInventory: "Proxy Market & Inventory",
+    dashboardSubDescription: "Buy ISP / mobile endpoints by country, state and city. Flags, live ping and cart checkout.",
+    gridOnlineLabel: "Grid online",
+    peersLabel: "peers",
+    accountBalance: "Account balance",
+    ownedProxies: "Owned proxies",
+    cartLabel: "Cart",
+    cartEmpty: "Empty",
+    visiblePool: "Visible pool",
+    buyAll: "BUY ALL",
+
+    // Market Table Filters & Options
+    filterAnyType: "Any type",
+    filterNewest: "Newest",
+    filterLowestPing: "Lowest ping",
+    filterFastest: "Fastest",
+    filterPrice: "Price",
+    filterReset: "Reset",
+
+    // Market Table System Headers
+    tableHeaderIp: "IP",
+    tableHeaderDomain: "DOMAIN",
+    tableHeaderState: "STATE",
+    tableHeaderCity: "CITY",
+    tableHeaderIsp: "ISP",
+    tableHeaderZip: "ZIP",
+    tableHeaderSpeed: "SPEED",
+    tableHeaderPing: "PING",
+    tableHeaderType: "TYPE",
+    tableHeaderAdded: "ADDED",
+    tableHeaderPrice: "PRICE",
+    revealIpTooltip: "Reveal IP - $0.05",
+    loadingNavaSocks: "Loading NAVA SOCKS...",
+    noEndpointsMatch: "No endpoints match these filters.",
+    pagePrev: "Prev",
+    pageNext: "Next",
+
+    // IP Details Panel Buttons
+    ipDetailsHeader: "IP DETAILS",
+    panelTabInfo: "INFO",
+    panelTabGeo: "GEO",
+    panelTabBlacklists: "BLACKLISTS",
+    actionBuyIp: "BUY IP"
+  },
+  de: {
+    enterpriseGrid: "UNTERNEHMENS-PROXY-NETZWERK",
+    onlineIps: "75M+ IPs online (99,98%)",
+    pricing: "Preise & Tarife",
+    networkSpecs: "Netzwerk-Spezifikationen",
+    globalNodes: "Globale Knoten",
+    dashboard: "Dashboard",
+    topUp: "AUFLADEN",
+    signOut: "Abmelden",
+    login: "Anmelden",
+    signup: "Registrieren",
+    createAccount: "Konto erstellen",
+    selectLanguage: "Sprache ausw\u00e4hlen",
+    switchToDarkMode: "Dunkelmodus aktivieren",
+    switchToLightMode: "Hellmodus aktivieren",
+    darkMode: "Dunkelmodus",
+    lightMode: "Hellmodus",
+    anonymity: "Anonymit\u00e4t:",
+    automatedGateways: "Automatisierte Gateways:",
+    availabilityByLocation: "Die Verf\u00fcgbarkeit h\u00e4ngt vom Standort ab",
+    averageResponseLatency: "Durchschnittliche Antwortlatenz",
+    calculatedRate: "Berechneter Tarif",
+    carrierISP: "Anbieter/ISP:",
+    compatibleOutOfBox: "Sofort kompatibel mit Puppeteer, Playwright, Selenium, Scrapy und allen benutzerdefinierten Bot-Skripten.",
+    concurrencyLabel: "Parallelit\u00e4t:",
+    connectionString: "Verbindungszeichenfolge:",
+    copied: "Kopiert!",
+    copyCode: "Code kopieren",
+    countriesTerritories: "L\u00e4nder \u0026 Gebiete",
+    cryptoOnly: "Nur Krypto",
+    cryptoPayments: "Krypto-Zahlungen: USDT / BTC / LTC",
+    datacenterComingSoon: "Datacenter - Bald verf\u00fcgbar",
+    eliteTier1: "Elite / Stufe 1",
+    establishingHandshake: "SSL-Handshake wird hergestellt...",
+    executeProxyPing: "Live-Proxy-Ping ausf\u00fchren",
+    exitIPv4: "Exit-IPv4:",
+    handshakeOk: "Handshake 200 OK",
+    heroDescriptionLead: "Nutze den Zugriff auf private IPs",
+    heroDescriptionRest: ", zuverl\u00e4ssige Konnektivit\u00e4t f\u00fcr Privatnetze und standortbezogene private IPs. SOCKS5-Zugriff mit Standortauswahl und flexiblen Sitzungen.",
+    heroNetwork: "Privates SOCKS5-Proxy-Netzwerk",
+    heroTitle1: "Entsperrbare Proxys.",
+    heroTitle2: "Geschwindigkeit unter einer Sekunde.",
+    includedEveryPlan: "In jedem Tarif enthalten:",
+    instantDelivery: "Sofortige Bereitstellung",
+    instantProvisioning: "Sofortige automatische Bereitstellung",
+    integration: "Residential SOCKS5-Integration",
+    latencySuffix: "Latenz",
+    liveGatewaySandbox: "Live-Gateway-Sandbox",
+    loginDashboard: "Proxy-Dashboard \u00f6ffnen",
+    mobileComingSoon: "Mobile 4G/5G - Bald verf\u00fcgbar",
+    networkUptimeSLA: "Netzwerk-Uptime-SLA",
+    noHiddenFees: "Keine versteckten Geb\u00fchren. Keine monatliche Bindung. Bandbreite l\u00e4uft nie ab. Automatische Mengenrabatte bei steigender Nachfrage.",
+    orderNowPrefix: "Jetzt bestellen:",
+    plugPlay: "Plug \u0026 Play mit 3 Codezeilen",
+    poolLabel: "Pool:",
+    residentialDynamic: "Residential Dynamisch",
+    residentialLocations: "Residential SOCKS5-Standorte",
+    residentialNetwork: "Residential SOCKS5-Netzwerk",
+    residentialPeerIPs: "Private Peer-IPs",
+    scaleBandwidth: "Bandbreite skalieren, Guthaben behalten",
+    selectedBandwidth: "Ausgew\u00e4hlte Bandbreite:",
+    stickyComingSoon: "Residential Sticky ISP - Bald verf\u00fcgbar",
+    targetGeolocation: "Ziel-Geostandort:",
+    targetLocation: "Zielstandort:",
+    totalOrderCost: "Gesamtkosten:",
+    transparentPayg: "Transparente Pay-as-you-go-Preise",
+    volumeDiscount: "Mengenrabatt angewendet!",
+
+    // Dashboard UI Navigation Terms
+    proxyMarket: "Proxy-Marktplatz",
+    myProxies: "Meine Proxys",
+    history: "Verlauf",
+    payments: "Zahlungen",
+    paymentWalletLabel: "Wallet",
+    paymentAddPayment: "Zahlung hinzufügen",
+    paymentAddFundsDescription: "Fügen Sie Ihrem NAVA SOCKS-Guthaben mit den unterstützten Krypto-Zahlungsmethoden Geld hinzu.",
+    paymentCurrentBalance: "Aktueller Kontostand",
+    paymentAddPaymentButton: "ZAHLUNG HINZUFÜGEN",
+    paymentWalletActivity: "Wallet-Aktivität",
+    paymentTopupsHistory: "Aufladehistorie",
+    paymentTopupsDescription: "Sehen Sie Ihre Wallet-Aufladungen einschließlich BTC-, LTC- und USDT-Einzahlungen.",
+    paymentTopupsHistoryButton: "AUFLADEHISTORIE",
+    paymentWalletSpending: "Wallet-Ausgaben",
+    paymentExpensesHistory: "Ausgabenhistorie",
+    paymentExpensesDescription: "Sehen Sie das von Ihrem Guthaben ausgegebene Geld, einschließlich Proxy-Käufen und IP-Reveal-Gebühren.",
+    paymentExpensesHistoryButton: "AUSGABENHISTORIE",
+    ipTools: "IP-Tools",
+    support: "Support",
+
+    // Dashboard Layout Frames & Cards
+    controlPlaneLabel: "NAVA SOCKS Control Plane",
+    proxyMarketAndInventory: "Proxy-Marktplatz & Inventar",
+    dashboardSubDescription: "Kaufen Sie ISP- / Mobilfunk-Endpunkte nach Land, Bundesland und Stadt. Flaggen, Live-Ping und Warenkorb-Checkout.",
+    gridOnlineLabel: "Netzwerk online",
+    peersLabel: "Peers",
+    accountBalance: "Kontostand",
+    ownedProxies: "Eigene Proxys",
+    cartLabel: "Warenkorb",
+    cartEmpty: "Leer",
+    visiblePool: "Sichtbarer Pool",
+    buyAll: "ALLE KAUFEN",
+
+    // Market Table Filters & Options
+    filterAnyType: "Alle Typen",
+    filterNewest: "Neueste",
+    filterLowestPing: "Niedrigster Ping",
+    filterFastest: "Schnellste",
+    filterPrice: "Preis",
+    filterReset: "Zur\u00fccksetzen",
+
+    // Market Table System Headers
+    tableHeaderIp: "IP",
+    tableHeaderDomain: "DOMAIN",
+    tableHeaderState: "BUNDESLAND",
+    tableHeaderCity: "STADT",
+    tableHeaderIsp: "ISP",
+    tableHeaderZip: "PLZ",
+    tableHeaderSpeed: "GESCHWINDIGKEIT",
+    tableHeaderPing: "PING",
+    tableHeaderType: "TYP",
+    tableHeaderAdded: "HINZUGEF\u00dcGT",
+    tableHeaderPrice: "PREIS",
+    revealIpTooltip: "IP anzeigen - $0.05",
+    loadingNavaSocks: "NAVA SOCKS wird geladen...",
+    noEndpointsMatch: "Keine Endpunkte entsprechen diesen Filtern.",
+    pagePrev: "Zur\u00fcck",
+    pageNext: "Weiter",
+
+    // IP Details Panel Buttons
+    ipDetailsHeader: "IP-DETAILS",
+    panelTabInfo: "INFO",
+    panelTabGeo: "GEO",
+    panelTabBlacklists: "BLACKLISTS",
+    actionBuyIp: "IP KAUFEN"
+  },
+  es: {
+    enterpriseGrid: "RED PROXY EMPRESARIAL",
+    onlineIps: "75M+ IPs en l\u00ednea (99,98%)",
+    pricing: "Precios y planes",
+    networkSpecs: "Especificaciones de red",
+    globalNodes: "Nodos globales",
+    dashboard: "Panel",
+    topUp: "RECARGAR",
+    signOut: "Cerrar sesi\u00f3n",
+    login: "Iniciar sesi\u00f3n",
+    signup: "Registrarse",
+    createAccount: "Crear cuenta",
+    selectLanguage: "Seleccionar idioma",
+    switchToDarkMode: "Cambiar a modo oscuro",
+    switchToLightMode: "Cambiar a modo claro",
+    darkMode: "Modo oscuro",
+    lightMode: "Modo claro",
+    anonymity: "Anonimato:",
+    automatedGateways: "Puertas de enlace automatizadas:",
+    availabilityByLocation: "La disponibilidad residencial var\u00eda seg\u00fan la ubicaci\u00f3n",
+    averageResponseLatency: "Latencia media de respuesta",
+    calculatedRate: "Tarifa calculada",
+    carrierISP: "Operador/ISP:",
+    compatibleOutOfBox: "Compatible directamente con Puppeteer, Playwright, Selenium, Scrapy y todos los scripts de bots personalizados.",
+    concurrencyLabel: "Concurrencia:",
+    connectionString: "Cadena de conex\u00edn:",
+    copied: "\u00a1Copiado!",
+    copyCode: "Copiar c\u00f3digo",
+    countriesTerritories: "Pa\u00edses y territorios",
+    cryptoOnly: "Solo criptomonedas",
+    cryptoPayments: "Pagos con cripto: USDT / BTC / LTC",
+    datacenterComingSoon: "Datacenter - Pr\u00f3ximamente",
+    eliteTier1: "Elite / Nivel 1",
+    establishingHandshake: "Estableciendo handshake SSL...",
+    executeProxyPing: "Ejecutar ping proxy en vivo",
+    exitIPv4: "IPv4 de salida:",
+    handshakeOk: "Handshake 200 OK",
+    heroDescriptionLead: "Aprovecha el acceso a IP residenciales",
+    heroDescriptionRest: ", conectividad residencial fiable e IP residenciales orientadas por ubicaci\u00f3n. Acceso SOCKS5 residencial con selecci\u00f3n de ubicaci\u00f3n y sesiones flexibles.",
+    heroNetwork: "Red de proxies SOCKS5 residenciales",
+    heroTitle1: "Proxies dif\u00edciles de bloquear.",
+    heroTitle2: "Velocidad inferior a un segundo.",
+    includedEveryPlan: "Incluido en todos los planes:",
+    instantDelivery: "Entrega instant\u00e1nea",
+    instantProvisioning: "Provisionamiento autom\u00e1tico instant\u00e1neo",
+    integration: "Integraci\u00f3n SOCKS5 residencial",
+    latencySuffix: "Latencia",
+    liveGatewaySandbox: "Sandbox de gateway en vivo",
+    loginDashboard: "Iniciar sesi\u00f3n en el panel proxy",
+    mobileComingSoon: "M\u00f3vil 4G/5G - Pr\u00f3ximamente",
+    networkUptimeSLA: "SLA de disponibilidad de red",
+    noHiddenFees: "Sin cargos ocultos. Sin compromisos mensuales. El ancho de banda nunca caduca. Descuentos autom\u00e1ticos por volumen a medida que aumenta la demanda.",
+    orderNowPrefix: "Pedir ahora:",
+    plugPlay: "Plug \u0026 Play con 3 l\u00edneas de c\u00f3digo",
+    poolLabel: "Pool:",
+    residentialDynamic: "Residencial Din\u00e1mico",
+    residentialLocations: "Ubicaciones SOCKS5 residenciales",
+    residentialNetwork: "Red residencial SOCKS5",
+    residentialPeerIPs: "IPs residenciales peer",
+    scaleBandwidth: "Escala tu ancho de banda y conserva tu saldo",
+    selectedBandwidth: "Ancho de banda seleccionado:",
+    stickyComingSoon: "ISP residencial Sticky - Pr\u00f3ximamente",
+    targetGeolocation: "Geolocalizaci\u00f3n objetivo:",
+    targetLocation: "Ubicaci\u00f3n objetivo:",
+    totalOrderCost: "Coste total del pedido:",
+    transparentPayg: "Precios transparentes de pago por uso",
+    volumeDiscount: "\u00a1Descuento por volumen aplicado!",
+
+    // Dashboard UI Navigation Terms
+    proxyMarket: "Mercado de Proxies",
+    myProxies: "Mis Proxies",
+    history: "Historial",
+    payments: "Pagos",
+    paymentWalletLabel: "Billetera",
+    paymentAddPayment: "Añadir pago",
+    paymentAddFundsDescription: "Añade fondos a tu saldo de NAVA SOCKS mediante los métodos de pago con criptomonedas compatibles.",
+    paymentCurrentBalance: "Saldo actual",
+    paymentAddPaymentButton: "AÑADIR PAGO",
+    paymentWalletActivity: "Actividad de la billetera",
+    paymentTopupsHistory: "Historial de recargas",
+    paymentTopupsDescription: "Consulta tus recargas de billetera, incluidos los depósitos de BTC, LTC y USDT.",
+    paymentTopupsHistoryButton: "HISTORIAL DE RECARGAS",
+    paymentWalletSpending: "Gastos de la billetera",
+    paymentExpensesHistory: "Historial de gastos",
+    paymentExpensesDescription: "Consulta el dinero gastado de tu saldo, incluidas las compras de proxies y los cargos por revelar IP.",
+    paymentExpensesHistoryButton: "HISTORIAL DE GASTOS",
+    ipTools: "Herramientas IP",
+    support: "Soporte",
+
+    // Dashboard Layout Frames & Cards
+    controlPlaneLabel: "NAVA SOCKS Control Plane",
+    proxyMarketAndInventory: "Mercado de Proxies e Inventario",
+    dashboardSubDescription: "Compre endpoints residenciales y m\u00f3viles por pa\u00eds, estado y ciudad. Verificaci\u00f3n de ping en vivo y carrito.",
+    gridOnlineLabel: "Red en l\u00ednea",
+    peersLabel: "peers",
+    accountBalance: "Saldo de cuenta",
+    ownedProxies: "Proxies adquiridos",
+    cartLabel: "Carrito",
+    cartEmpty: "Vac\u00edo",
+    visiblePool: "Pool disponible",
+    buyAll: "COMPRAR TODO",
+
+    // Market Table Filters & Options
+    filterAnyType: "Cualquier tipo",
+    filterNewest: "M\u00e1s nuevos",
+    filterLowestPing: "Ping m\u00e1s bajo",
+    filterFastest: "M\u00e1s r\u00e1pidos",
+    filterPrice: "Precio",
+    filterReset: "Restablecer",
+
+    // Market Table System Headers
+    tableHeaderIp: "IP",
+    tableHeaderDomain: "DOMINIO",
+    tableHeaderState: "ESTADO",
+    tableHeaderCity: "CIUDAD",
+    tableHeaderIsp: "ISP",
+    tableHeaderZip: "C\u00d3DIGO POSTAL",
+    tableHeaderSpeed: "VELOCIDAD",
+    tableHeaderPing: "PING",
+    tableHeaderType: "TIPO",
+    tableHeaderAdded: "A\u00d1ADIDO",
+    tableHeaderPrice: "PRECIO",
+    revealIpTooltip: "Revelar IP - $0.05",
+    loadingNavaSocks: "Cargando NAVA SOCKS...",
+    noEndpointsMatch: "No hay proxies que coincidan con los filtros.",
+    pagePrev: "Anterior",
+    pageNext: "Siguiente",
+
+    // IP Details Panel Buttons
+    ipDetailsHeader: "DETALLES DE IP",
+    panelTabInfo: "INFO",
+    panelTabGeo: "GEO",
+    panelTabBlacklists: "LISTAS NEGRAS",
+    actionBuyIp: "COMPRAR IP"
+  },
+  fr: {
+    enterpriseGrid: "R\u00c9SEAU PROXY ENTREPRISE",
+    onlineIps: "75M+ IP en ligne",
+    pricing: "Tarifs \u0026 forfaits",
+    networkSpecs: "Sp\u00e9cifications r\u00e9seau",
+    globalNodes: "N\u0153uds mondiaux",
+    dashboard: "Tableau de bord",
+    topUp: "RECHARGER",
+    signOut: "Se d\u00e9connecter",
+    login: "Se connecter",
+    signup: "S\u2019inscrire",
+    createAccount: "Cr\u00e9er un compte",
+    selectLanguage: "S\u00e9lectionner la langue",
+    switchToDarkMode: "Passer en mode sombre",
+    switchToLightMode: "Passer en mode clair",
+    darkMode: "Mode sombre",
+    lightMode: "Mode clair",
+    anonymity: "Anonymat :",
+    automatedGateways: "Passerelles automatis\u00e9es :",
+    availabilityByLocation: "La disponibilit\u00e9 r\u00e9sidentielle varie selon l'emplacement",
+    averageResponseLatency: "Latence moyenne de r\u00e9ponse",
+    calculatedRate: "Tarif calcul\u00e9",
+    carrierISP: "Op\u00e9rateur/FAI :",
+    compatibleOutOfBox: "Compatible imm\u00e9diatement avec Puppeteer, Playwright, Selenium, Scrapy et tous les scripts de bots personnalis\u00e9s.",
+    concurrencyLabel: "Concurrence :",
+    connectionString: "Cha\u00eene de connexion :",
+    copied: "Copi\u00e9 !",
+    copyCode: "Copier le code",
+    countriesTerritories: "Pays et territoires",
+    cryptoOnly: "Crypto uniquement",
+    cryptoPayments: "Paiements crypto : USDT / BTC / LTC",
+    datacenterComingSoon: "Datacenter - Bient\u00f4t disponible",
+    eliteTier1: "Elite / Niveau 1",
+    establishingHandshake: "\u00c9tablissement de la n\u00e9gociation SSL...",
+    executeProxyPing: "Ex\u00e9cuter le ping proxy en direct",
+    exitIPv4: "IPv4 de sortie :",
+    handshakeOk: "Handshake 200 OK",
+    heroDescriptionLead: "Profitez de l'acc\u00e8s aux IP r\u00e9sidentielles",
+    heroDescriptionRest: ", d'une connectivit\u00e9 r\u00e9sidentielle fiable et d'IP r\u00e9sidentielles cibl\u00e9es par emplacement. Acc\u00e8s SOCKS5 r\u00e9sidentiel avec ciblage g\u00e9ographique et sessions flexibles.",
+    heroNetwork: "R\u00e9seau de proxies SOCKS5 r\u00e9sidentiels",
+    heroTitle1: "Proxies difficiles \u00e0 bloquer.",
+    heroTitle2: "Vitesse en moins d'une seconde.",
+    includedEveryPlan: "Inclus dans chaque forfait :",
+    instantDelivery: "Livraison instantan\u00e9e",
+    instantProvisioning: "Provisionnement automatis\u00e9 instantan\u00e9",
+    integration: "Int\u00e9gration SOCKS5 r\u00e9sidentielle",
+    latencySuffix: "Latence",
+    liveGatewaySandbox: "Sandbox de passerelle en direct",
+    loginDashboard: "Se connecter au tableau de bord proxy",
+    mobileComingSoon: "Mobile 4G/5G - Bient\u00f4t disponible",
+    networkUptimeSLA: "SLA de disponibilit\u00e9 r\u00e9seau",
+    noHiddenFees: "Aucun frais cach\u00e9. Aucun engagement mensuel. La bande passante ne s'expire jamais. Remises automatiques sur volume lorsque votre demande augmente.",
+    orderNowPrefix: "Commander maintenant :",
+    plugPlay: "Plug \u0026 Play avec 3 lignes de code",
+    poolLabel: "Pool :",
+    residentialDynamic: "R\u00e9sidentiel dynamique",
+    residentialLocations: "Emplacements SOCKS5 r\u00e9sidentiels",
+    residentialNetwork: "R\u00e9seau SOCKS5 r\u00e9sidentiel",
+    residentialPeerIPs: "IP r\u00e9sidentielles pair \u00e0 pair",
+    scaleBandwidth: "Augmentez votre bande passante, gardez votre solde",
+    selectedBandwidth: "Bande passante s\u00e9lectionn\u00e9e :",
+    stickyComingSoon: "ISP r\u00e9sidentiel Sticky - Bient\u00f4t disponible",
+    targetGeolocation: "G\u00e9olocalisation cible :",
+    targetLocation: "Emplacement cible :",
+    totalOrderCost: "Co\u00fbt total de la commande :",
+    transparentPayg: "Tarification transparente \u00e0 l'usage",
+    volumeDiscount: "Remise sur volume appliqu\u00e9e !",
+
+    // Dashboard UI Navigation Terms
+    proxyMarket: "March\u00e9 des Proxies",
+    myProxies: "Mes Proxies",
+    history: "Historique",
+    payments: "Paiements",
+    paymentWalletLabel: "Portefeuille",
+    paymentAddPayment: "Ajouter un paiement",
+    paymentAddFundsDescription: "Ajoutez des fonds à votre solde NAVA SOCKS avec les méthodes de paiement crypto prises en charge.",
+    paymentCurrentBalance: "Solde actuel",
+    paymentAddPaymentButton: "AJOUTER UN PAIEMENT",
+    paymentWalletActivity: "Activité du portefeuille",
+    paymentTopupsHistory: "Historique des rechargements",
+    paymentTopupsDescription: "Consultez vos rechargements de portefeuille, notamment les dépôts BTC, LTC et USDT.",
+    paymentTopupsHistoryButton: "HISTORIQUE DES RECHARGEMENTS",
+    paymentWalletSpending: "Dépenses du portefeuille",
+    paymentExpensesHistory: "Historique des dépenses",
+    paymentExpensesDescription: "Consultez les sommes dépensées depuis votre solde, notamment les achats de proxies et les frais de révélation IP.",
+    paymentExpensesHistoryButton: "HISTORIQUE DES DÉPENSES",
+    ipTools: "Outils IP",
+    support: "Support",
+
+    // Dashboard Layout Frames & Cards
+    controlPlaneLabel: "NAVA SOCKS Control Plane",
+    proxyMarketAndInventory: "March\u00e9 des Proxies \u0026 Inventaire",
+    dashboardSubDescription: "Achetez des points de terminaison FAI / mobiles par pays, r\u00e9gion et ville. Ping en direct et panier.",
+    gridOnlineLabel: "R\u00e9seau en ligne",
+    peersLabel: "pairs",
+    accountBalance: "Solde du compte",
+    ownedProxies: "Proxies poss\u00e9d\u00e9s",
+    cartLabel: "Panier",
+    cartEmpty: "Vide",
+    visiblePool: "Pool visible",
+    buyAll: "TOUT ACHETER",
+
+    // Market Table Filters & Options
+    filterAnyType: "Tous les types",
+    filterNewest: "Plus r\u00e9cents",
+    filterLowestPing: "Ping le plus bas",
+    filterFastest: "Plus rapides",
+    filterPrice: "Prix",
+    filterReset: "R\u00e9initialiser",
+
+    // Market Table System Headers
+    tableHeaderIp: "IP",
+    tableHeaderDomain: "DOMAINE",
+    tableHeaderState: "R\u00c9GION",
+    tableHeaderCity: "VILLE",
+    tableHeaderIsp: "ISP",
+    tableHeaderZip: "CODE POSTAL",
+    tableHeaderSpeed: "VITESSE",
+    tableHeaderPing: "PING",
+    tableHeaderType: "TYPE",
+    tableHeaderAdded: "AJOUT\u00c9",
+    tableHeaderPrice: "PRIX",
+    revealIpTooltip: "R\u00e9v\u00e9ler l'IP - $0.05",
+    loadingNavaSocks: "Chargement de NAVA SOCKS...",
+    noEndpointsMatch: "Aucun point de terminaison ne correspond \u00e0 ces filtres.",
+    pagePrev: "Pr\u00e9c\u00e9dent",
+    pageNext: "Suivant",
+
+    // IP Details Panel Buttons
+    ipDetailsHeader: "D\u00c9TAILS DE L'IP",
+    panelTabInfo: "INFO",
+    panelTabGeo: "GEO",
+    panelTabBlacklists: "LISTES NOIRES",
+    actionBuyIp: "ACHETER L'IP"
+  },
+  ja: {
+    enterpriseGrid: "\u30a8\u30f3\u30bf\u30fc\u30d7\u30e9\u30a4\u30ba\u30d7\u30ed\u30ad\u30b7\u30cd\u30c3\u30c8\u30ef\u30fc\u30af",
+    onlineIps: "7,500\u4e07+ IP \u30aa\u30f3\u30e9\u30a4\u30f3",
+    pricing: "\u6599\u91d1\u30fb\u30d7\u30e9\u30f3",
+    networkSpecs: "\u30cd\u30c3\u30c8\u30ef\u30fc\u30af\u4ed5\u69d8",
+    globalNodes: "\u30b0\u30ed\u30fc\u30d0\u30eb\u30ce\u30fc\u30c9",
+    dashboard: "\u30c0\u30c3\u30b7\u30e5\u30dc\u30fc\u30c9",
+    topUp: "\u30e1\u30fc\u30b8",
+    signOut: "\u30ed\u30b0\u30a2\u30a4\u30c6",
+    login: "\u30ed\u30b0\u30a4\u30f3",
+    signup: "\u30b5\u30a4\u30f3\u30a2\u30c3\u30d7",
+    createAccount: "\u30a2\u30ab\u30a6\u30f3\u30c8\u3092\u4f5c\u6210",
+    selectLanguage: "\u8a00\u8a9e\u3092\u9078\u629e",
+    switchToDarkMode: "\u30c0\u30fc\u30af\u30e2\u30fc\u30c9\u306b\u5207\u308a\u66ff\u3041",
+    switchToLightMode: "\u30e9\u30a4\u30c8\u30e2\u30fc\u30c9\u306b\u5207\u308a\u66ff\u3041",
+    darkMode: "\u30c0\u30fc\u30af\u30e2\u30fc\u30c9",
+    lightMode: "\u30e9\u30a4\u30c8\u30e2\u30fc\u30c9",
+    anonymity: "\u533f\u540d\u6027\uff1a",
+    automatedGateways: "\u81ea\u52d5\u30e2\u30fc\u30c8\u30a6\u30a7\u30a4\uff1a",
+    availabilityByLocation: "\u4f4f\u5b85\u7528\u30d7\u30ed\u30ad\u30b7\u306e\u53ef\u7528\u6027\u306f\u5730\u57df\u306b\u3088\u3063\u3066\u7570\u306a\u308a\u307e\u3059",
+    averageResponseLatency: "\u5e73\u5747\u5fdc\u7b54\u30ec\u30a4\u30c6\u30f3\u30b7",
+    calculatedRate: "\u8a08\u7b97\u3055\u308c\u305f\u6599\u91d1",
+    carrierISP: "\u30ad\u30e3\u30ea\u30a2/ISP\uff1a",
+    compatibleOutOfBox: "Puppeteer\u3001Playwright\u3001Selenium\u3001Scrapy\u3001\u30ab\u30b9\u30bf\u30e0Bot\u30b9\u30af\u30ea\u30d7\u30c8\u306b\u305d\u306e\u307e\u307e\u5bfe\u5fdc\u3002",
+    concurrencyLabel: "\u540c\u6642\u63a5\u7d9a\uff1a",
+    connectionString: "\u63a5\u7d9a\u6587\u5b57\u5217\uff1a",
+    copied: "\u30b3\u30d4\u30fc\u3057\u307e\u3057\u305f\uff01",
+    copyCode: "\u30b3\u30d4\u30fc\u3059\u308b",
+    countriesTerritories: "\u56fd\u3068\u5730\u57df",
+    cryptoOnly: "\u6697\u53f7\u8cc7\u7523\u306e\u307f",
+    cryptoPayments: "\u6697\u53f7\u8cc7\u7523\u6c7a\u6e08\uff1aUSDT / BTC / LTC",
+    datacenterComingSoon: "\u30c7\u30fc\u30bf\u30bb\u30f3\u30bf\u30fc - \u8fd1\u65e5\u516c\u958b",
+    eliteTier1: "Elite / Tier 1",
+    establishingHandshake: "SSL\u30cf\u30f3\u30c9\u30b7\u30a7\u30a4\u30af\u3092\u78ba\u7acb\u4e2d...",
+    executeProxyPing: "\u30e9\u30a4\u30d6\u30d7\u30ed\u30ad\u30b7Ping\u3092\u5b9f\u884c",
+    exitIPv4: "\u51fa\u53e3IPv4\uff1a",
+    handshakeOk: "Handshake 200 OK",
+    heroDescriptionLead: "\u4f4f\u5b85\u7528IP\u3078\u306e\u30e2\u30af\u30bb\u30b9\u3092\u6d3b\u7528",
+    heroDescriptionRest: "\u3057\u3001\u4fe1\u983c\u6027\u306e\u9ad8\u3044\u4f4f\u5b85\u56de\u7dda\u63a5\u7d9a\u3068\u5730\u57df\u6307\u5b9aIP\u3092\u5229\u7528\u306e\u3067\u304d\u307e\u3059\u3002\u5730\u57df\u6307\u5b9a\u3068\u67d4\u67d4\u306a\u30bb\u30c3\u30b7\u30e7\u30f3\u306b\u5bfe\u5fdc\u3057\u305f\u4f4f\u5b85\u7528SOCKS5\u30e2\u30af\u30bb\u30b9\u3002",
+    heroNetwork: "\u4f4f\u5b85\u7528SOCKS5\u30d7\u30ed\u30ad\u30b7\u30cd\u30c3\u30c8\u30ef\u30fc\u30af",
+    heroTitle1: "\u30d6\u30ed\u30c3\u30af\u3055\u308c\u306b\u304f\u3044\u30d7\u30ed\u30ad\u30b7\u3002",
+    heroTitle2: "1\u79d2\u672a\u6e80\u306e\u9ad8\u901f\u901a\u4fe1\u3002",
+    includedEveryPlan: "\u3059\u3079\u3066\u306e\u30d7\u30e3\u30f3\u306b\u542b\u307e\u308c\u308b\u3082\u306e\uff1a",
+    instantDelivery: "\u5373\u6642\u63d0\u4f9b",
+    instantProvisioning: "\u81ea\u52d5\u30d7\u30ed\u30d3\u30b8\u30e7\u30cb\u30f3\u30b0\u3092\u5373\u6642\u5b9f\u884c",
+    integration: "\u4f4f\u5b85\u7528SOCKS5\u30a4\u30f3\u30c6\u30b0\u30ec\u30fc\u30b7\u30e7\u30f3",
+    latencySuffix: "\u30ec\u30a4\u30c6\u30f3\u30b7",
+    liveGatewaySandbox: "\u30e9\u30a4\u30d6\u30e2\u30fc\u30c8\u30a6\u30a7\u30a4\u30b5\u30f3\u30c9\u30dc\u30c3\u30af\u30b9",
+    loginDashboard: "\u30d7\u30ed\u30ad\u30b7\u30c0\u30c3\u30b7\u30e5\u30dc\u30fc\u30c9\u306b\u30ed\u30b0\u30a4\u30f3",
+    mobileComingSoon: "\u30e2\u30d0\u30a4\u4e504G/5G - \u8fd1\u65e5\u516c\u958b",
+    networkUptimeSLA: "\u30cd\u30c3\u30c8\u30ef\u30fc\u30af\u7a3c\u50cd\u7387SLA",
+    noHiddenFees: "\u96a0\u308c\u305f\u624b\u6570\u6599\u306a\u3057\u3002\u6708\u984d\u5951\u7d04\u306a\u3057\u3002\u5e2f\u57df\u5e45\u306f\u671f\u9650\u5207\u308c\u306b\u306a\u308a\u307e\u305b\u3093\u3002\u9700\u8981\u306e\u5897\u52a0\u306b\u5fdc\u3058\u3066\u81ea\u52a8\u3067\u30dc\u30ea\u30e5\u30fc\u30e0\u5272\u5f15\u3092\u9069\u7528\u3002",
+    orderNowPrefix: "\u4eca\u3059\u3051\u6ce8\u6587\uff1a",
+    plugPlay: "3\u884c\u306e\u30b3\u30fc\u30c9\u3067Plug \u0026 Play",
+    poolLabel: "\u30d7\u30fc\u30eb\uff1a",
+    residentialDynamic: "\u4f4f\u5b85\u7528\u30c0\u30a4\u30ca\u30df\u30c3\u30af",
+    residentialLocations: "\u4f4f\u5b85\u7528SOCKS5\u30ed\u30b1\u30fc\u30b7\u30e7\u30f3",
+    residentialNetwork: "\u4f4f\u5b85\u7528SOCKS5\u30cd\u30c3\u30c8\u30ef\u30fc\u30af",
+    residentialPeerIPs: "\u4f4f\u5b85\u7528\u30d4\u30a2IP",
+    scaleBandwidth: "\u5e2f\u57df\u5e45\u3092\u62e1\u5f35\u3057\u3002\u6b8b\u9ad8\u3092\u7dad\u6301",
+    selectedBandwidth: "\u9078\u629e\u5e2f\u57df\u5e45\uff1a",
+    stickyComingSoon: "\u4f4f\u5b85\u7528Sticky ISP - \u8fd1\u65e5\u516c\u958b",
+    targetGeolocation: "\u5bfe\u8c61\u5730\u57df\uff1a",
+    targetLocation: "\u5bfe\u8c61\u5730\u57df\uff1a",
+    totalOrderCost: "\u6ce8\u6587\u5408\u8a08\u91d1\u984d\uff1a",
+    transparentPayg: "\u900f\u660e\u306a\u5f93\u91cf\u8ab2\u91d1\u4fa1\u683c",
+    volumeDiscount: "\u30dc\u30ea\u30e5\u30fc\u30e0\u5272\u5f15\u9069\u7528\u6e08\u307f\uff01",
+
+    // Dashboard UI Navigation Terms
+    proxyMarket: "\u30d7\u30ed\u30ad\u30b7\u30de\u30fc\u30b1\u30c3\u30c8",
+    myProxies: "\u30de\u30a4\u30d7\u30ed\u30ad\u30b7",
+    history: "\u5c65\u6b74",
+    payments: "\u652f\u6255\u3044",
+    paymentWalletLabel: "ウォレット",
+    paymentAddPayment: "支払いを追加",
+    paymentAddFundsDescription: "対応している暗号資産の決済方法を使用して、NAVA SOCKS残高に入金します。",
+    paymentCurrentBalance: "現在の残高",
+    paymentAddPaymentButton: "支払いを追加",
+    paymentWalletActivity: "ウォレットの利用状況",
+    paymentTopupsHistory: "入金履歴",
+    paymentTopupsDescription: "BTC、LTC、USDTの入金を含むウォレットへの入金履歴を確認できます。",
+    paymentTopupsHistoryButton: "入金履歴",
+    paymentWalletSpending: "ウォレット支出",
+    paymentExpensesHistory: "支出履歴",
+    paymentExpensesDescription: "プロキシ購入やIP表示手数料を含む、残高からの支出を確認できます。",
+    paymentExpensesHistoryButton: "支出履歴",
+    ipTools: "IP\u30c4\u30fc\u30eb",
+    support: "\u30b5\u30dc\u30fc\u30c8",
+
+    // Dashboard Layout Frames & Cards
+    controlPlaneLabel: "NAVA SOCKS Control Plane",
+    proxyMarketAndInventory: "\u30d7\u30ed\u30ad\u30b7\u30de\u30fc\u30b1\u30c3\u30c8\uff06\u30a4\u30f3\u30d9\u30f3\u30c8\u30ea\u30fc",
+    dashboardSubDescription: "\u56fd\u3001\u5dde\u3001\u90fd\u5e02\u3054\u3068\u306bISP\u3082\u3057\u304f\u306f\u30e2\u30d0\u30a4\u30eb\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\u3092\u8cfc\u5165\u3067\u3042\u307e\u3059\u3002",
+    gridOnlineLabel: "\u30cd\u30c3\u30c8\u30ef\u30fc\u30af\u30aa\u30f3\u30e9\u30a4\u30f3",
+    peersLabel: "\u30d4\u30a2",
+    accountBalance: "\u30a2\u30ab\u30a6\u30f3\u30c8\u6b8b\u9ad8",
+    ownedProxies: "\u8cfc\u5165\u6e08\u307f\u30d7\u30ed\u30ad\u30b7",
+    cartLabel: "\u30ab\u30fc\u30c8",
+    cartEmpty: "\u7a7a",
+    visiblePool: "\u8868\u793a\u53ef\u80fd\u306a\u30d7\u30fc\u30eb",
+    buyAll: "\u3059\u3079\u3066\u8cfc\u5165",
+
+    // Market Table Filters & Options
+    filterAnyType: "\u3059\u3079\u3066\u306e\u30bf\u30a4\u30d7",
+    filterNewest: "\u65b0\u7740",
+    filterLowestPing: "\u6700\u4f4e\u30d4\u30f3",
+    filterFastest: "\u6700\u901f",
+    filterPrice: "\u4fa1\u683c",
+    filterReset: "\u30ea\u30bb\u30c3\u30c8",
+
+    // Market Table System Headers
+    tableHeaderIp: "IP",
+    tableHeaderDomain: "\u30c9\u30e1\u30a4\u30f3",
+    tableHeaderState: "\u5dde",
+    tableHeaderCity: "\u90fd\u5e02",
+    tableHeaderIsp: "ISP",
+    tableHeaderZip: "\u90e5\u4faf\u756a\u53f7",
+    tableHeaderSpeed: "\u901f\u5ea6",
+    tableHeaderPing: "\u30d4\u30f3",
+    tableHeaderType: "\u30bf\u30a4\u30d7",
+    tableHeaderAdded: "\u8ffd\u52a0\u65e5",
+    tableHeaderPrice: "\u4fa1\u683c",
+    revealIpTooltip: "IP\u3092\u8868\u793a - $0.05",
+    loadingNavaSocks: "NAVA SOCKS\u3092\u8aad\u307f\u8fbc\u307f\u4e2d...",
+    noEndpointsMatch: "\u30d5\u30a3\u30eb\u30bf\u30fc\u306b\u4e00\u81f4\u3059\u308b\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\u306f\u3042\u308a\u307e\u305b\u3093\u3002",
+    pagePrev: "\u524d\u3078",
+    pageNext: "\u6b21\u3078",
+
+    // IP Details Panel Buttons
+    ipDetailsHeader: "IP\u8a73\u7d30",
+    panelTabInfo: "\u60c5\u5831",
+    panelTabGeo: "GEO",
+    panelTabBlacklists: "\u30d6\u30e9\u30c3\u30af\u30ea\u30b9\u30c8",
+    actionBuyIp: "IP\u3092\u8cfc\u5165"
+  },
+  ko: {
+    enterpriseGrid: "\uc5d4\ud130\ud504\ub77c\uc774\uc988 \ud504\ub85d\uc2dc \ub124\ud2b8\uc6cc\ud06c",
+    onlineIps: "7,500\ub9cc+ IP \uc628\ub77c\uc778",
+    pricing: "\uc694\uae08 \ubc0f \ud50c\ub79c",
+    networkSpecs: "\ub124\ud2b8\uc6cc\ud06c \uc0ac\uc591",
+    globalNodes: "\uac00\ub85c\ubc8c \ub178\ub4dc",
+    dashboard: "\ub300\uc2dc\ubcf4\ub4dc",
+    topUp: "\uc4a9\uc804",
+    signOut: "\ub85c\uadf8\uc5ba\uc6c3",
+    login: "\ub85c\uadf8\uc778",
+    signup: "\ud68c\uc6d0\uac00\uc785",
+    createAccount: "\uacacc\uc815 \ub9cc\ub4e4\uae30",
+    selectLanguage: "\uc5b8\uc5b4 \uc120\ud0dd",
+    switchToDarkMode: "\ub2e4\ud06c \ubaa8\ub4dc\ub85c \uc804\ud651",
+    switchToLightMode: "\ub77c\uc774\ud2b8 \ubaa8\ub4dc\ub85c \uc804\ud651",
+    darkMode: "\ub2e4\ud06c \ubaa8\ub4dc",
+    lightMode: "\ub77c\uc774\ud2b8 \ubaa8\ub4dc",
+    anonymity: "\uc775\uba85\uc131:",
+    automatedGateways: "\uc790\ub3d9 \uac8c\uc774\ud2b8\uc6e8\uc774:",
+    availabilityByLocation: "\uc8fc\uac70\uc6a9 \ud504\ub85d\uc2dc \uac00\uc6a9\uc131\uc740 \uc704\uce58\uc5d0 \ub530\ub77c \ub2ec\ub2bc\uc9d1\ub2c8\ub2e4",
+    averageResponseLatency: "\ud3c9\uade0 \uc751\ub2f5 \uc9c0\uc5f0",
+    calculatedRate: "\uacc4\uc0b0\ub41c \uc694\uae08",
+    carrierISP: "\ud1a5\uc2e0\uc0ac/ISP:",
+    compatibleOutOfBox: "Puppeteer, Playwright, Selenium, Scrapy \ubc0f \ubaa8\ub4e0 \uc0ac\uc6a9\uc790 \uc9c0\uc815 \ubd07 \uc2a4\ud0ac\ud504\ud2b8\uc640 \ubc14\ub85c \ud638\ud658\ub429\ub2c8\ub2e4.",
+    concurrencyLabel: "\ud53c\uacb0:",
+    connectionString: "\ubb38\uc790\uc5f4:",
+    copied: "\ubcf5\uc0ac\ub428!",
+    copyCode: "\ucf54\ub4dc \ubcf5\uc0ac",
+    countriesTerritories: "\uad6d\uac00 \ubc0f \uc9c0\uc5ed",
+    cryptoOnly: "\uc554\ud638\ud644\ud3d0 \uc804\uc6a9",
+    cryptoPayments: "\uc554\ud638\ud644\ud3d0 \uacb0\uc81c: USDT / BTC / LTC",
+    datacenterComingSoon: "\ub370\uc774\ud130\uc13c\ud130 - \ucd9c\uc2dc \uc608\uc815",
+    eliteTier1: "Elite / Tier 1",
+    establishingHandshake: "SSL \ud578\ub4dc\uc170\uc774\ud06c \uc124\uc815 \uc911...",
+    executeProxyPing: "\uc2e4\uc2dc\uac04 \ud504\ub85d\uc2dc Ping \uc2e4\ud589",
+    exitIPv4: "\ucd1c\uad6c IPv4:",
+    handshakeOk: "Handshake 200 OK",
+    heroDescriptionLead: "\uc8fc\uac70\uc6a9 IP \uc561\uc138\uc2a4\ub9bc \ud65c\uc6a9\ud574",
+    heroDescriptionRest: " \uc548\uc815\uc801\uc778 \uc8fc\uac70\uc6a9 \ud53c\uacb0\uacfc \uc704\uce58 \uae30\ubc18 IP\ub9bc \uc0ac\uc6a9\ud558\uc138\uc694. \uc704\uce58 \uc9c0\uc815\uacfc \uc720\uc9c0\ud55c \uc138\uc158\uc744 \uc9c0\uc6d0\ud558\ub294 \uc8fc\uac70\uc6a9 SOCKS5 \uc561\uc138\uc2a4.",
+    heroNetwork: "\uc8fc\uac70\uc6a9 SOCKS5 \ud504\ub85d\uc2dc \ub124\ud2b8\uc6cc\ud06c",
+    heroTitle1: "\ucc28\ub2e8\uc5d0 \uac15\ud55c \ud504\ub85d\uc2dc.",
+    heroTitle2: "1\ucd08 \ubbf8\ub9cc\uc758 \uc18d\ub3c4.",
+    includedEveryPlan: "\ubaa8\ub4e0 \ud50c\ub79c\uc5d0 \ud1b5\ud569:",
+    instantDelivery: "\uc9ec\uc2dc \uc81c\uacf5",
+    instantProvisioning: "\uc9ec\uc2dc \uc790\ub3d9 \ud504\ub85c\ube44\uc800\ub2dd",
+    integration: "\uc8fc\uac70\uc6a9 SOCKS5 \ud1b5\ud569",
+    latencySuffix: "\uc9c0\uc5f0 \uc2dc\uac04",
+    liveGatewaySandbox: "\uc2e4\uc2dc\uac04 \uac8c\uc774\ud2b8\uc6e8\uc774 \uc0cc\ub4dc\ubc15\uc2a4",
+    loginDashboard: "\ud504\ub85d\uc2dc \ub300\uc2dc\ubcf4\ub4dc \ub85c\uadd8\uc778",
+    mobileComingSoon: "\ubaa8\ubc14\uc77c 4G/5G - \ucd9c\uc2dc \uc608\uc815",
+    networkUptimeSLA: "\ub124\ud2b8\uc6cc\ud06c \uac00\ub3d9\ub960 SLA",
+    noHiddenFees: "\uc228\uaca8\uc9c4 \uc218\uc218\ub8cc \uc5c6\uc74c. \uc6d4\uac04 \uc57d\uc815 \uc5c6\uc74c. \ub300\uc5ed\ud3ed\uc740 \ub9cc\ub8cc\ub418\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4. \uc218\uc694\uac00 \uc99d\uac00\ud558\uba74 \uc790\ub3d9 \ubcfc\ub968 \ud560\uc778\uc774 \uc801\uc6a9\ub429\ub2c8\ub2e4.",
+    orderNowPrefix: "\uc9c0\uae08 \ucbc5\ubb38:",
+    plugPlay: "\ucf54\ub4dc 3\uc904\ub85c Plug \u0026 Play",
+    poolLabel: "\ud580:",
+    residentialDynamic: "\uc8fc\uac70\uc6a9 \ub2e4\uc774\ub0b4\ubbf9",
+    residentialLocations: "\uc8fc\uac70\uc6a9 SOCKS5 \uc619\uce58",
+    residentialNetwork: "\uc8fc\uac70\uc6a9 SOCKS5 \ub124\ud2b8\uc6cc\ud06c",
+    residentialPeerIPs: "\uc8fc\uac70\uc6a9 \ud53c\uc5b4 IP",
+    scaleBandwidth: "\ub300\uc5ed\ud3ed\uc740 \ud655\uc7a5\ud558\uace0 \uc790\uc561\uc740 \uc720\uc9c0\ud558\uc138\uc694",
+    selectedBandwidth: "\uc120\ud0dd\ud55c \ub300\uc5ed\ud3ed:",
+    stickyComingSoon: "\uc8fc\uac70\uc6a9 Sticky ISP - \ucd9c\uc2dc \uc608\uc815",
+    targetGeolocation: "\ub300\uc0c1 \uc9c0\uc5ed:",
+    targetLocation: "\ub300\uc0c1 \uc704\uce58:",
+    totalOrderCost: "\ucd1d \ucbc5\ubb38 \ube44\uc6a9:",
+    transparentPayg: "\ud22c\uba85\ud55c \uc162\ub7c9\uc81c \uc694\uae08",
+    volumeDiscount: "\ubcfc\ub968 \ud560\uc778 \uc801\uc6a9!",
+
+    // Dashboard UI Navigation Terms
+    proxyMarket: "\ud504\ub85d\uc2dc \ub9c8\ucf13",
+    myProxies: "\ub0b4 \ud504\ub85d\uc2dc",
+    history: "\uad6c\ub9e4 \ub0b4\uc6a9",
+    payments: "\uacb0\uc81c",
+    paymentWalletLabel: "지갑",
+    paymentAddPayment: "결제 추가",
+    paymentAddFundsDescription: "지원되는 암호화폐 결제 방법을 사용하여 NAVA SOCKS 잔액에 자금을 추가합니다.",
+    paymentCurrentBalance: "현재 잔액",
+    paymentAddPaymentButton: "결제 추가",
+    paymentWalletActivity: "지갑 활동",
+    paymentTopupsHistory: "충전 내역",
+    paymentTopupsDescription: "BTC, LTC, USDT 입금을 포함한 지갑 충전 내역을 확인합니다.",
+    paymentTopupsHistoryButton: "충전 내역",
+    paymentWalletSpending: "지갑 지출",
+    paymentExpensesHistory: "지출 내역",
+    paymentExpensesDescription: "프록시 구매 및 IP 공개 요금을 포함하여 잔액에서 지출한 금액을 확인합니다.",
+    paymentExpensesHistoryButton: "지출 내역",
+    ipTools: "IP \ud200",
+    support: "\uace0\uac1d \uc9c0\uc6d0",
+
+    // Dashboard Layout Frames & Cards
+    controlPlaneLabel: "NAVA SOCKS Control Plane",
+    proxyMarketAndInventory: "\ud504\ub85d\uc2dc \ub9c8\ucf13 \ubc0f \uc778\ubca4\ud1a0\ub9ac",
+    dashboardSubDescription: "\uad6d\uac00\ubcc4, \uc8fc\ubcc4, \ub3c4\uc2dc\ubcc4\ub85c ISP \ubc0f \ubaa8\ubc14\uc77c \uc5d4\ub4dc\ud3ec\uc778\ud2b8\ub9bc \uad6c\ub9e4\ud558\uc138\uc694.",
+    gridOnlineLabel: "\ub124\ud2b8\uc6cc\ud06c \uc628\ub77c\uc778",
+    peersLabel: "\ud53c\uc5b4",
+    accountBalance: "\uacc4\uc815 \uc794\uc561",
+    ownedProxies: "\uad6c\ub9e4\ud55c \ud504\ub85d\uc2dc",
+    cartLabel: "\uc561\uc138\uc11c\ub9ac",
+    cartEmpty: "\ube44\uc5b4\uc78c",
+    visiblePool: "\ud45c\uc2dc \uac00\ub2a5\ud55c \ud480",
+    buyAll: "\ubaa8\ub4e0 \uad6c\ub9e4",
+
+    // Market Table Filters & Options
+    filterAnyType: "\ubaa8\ub4e0 \ud0c0\uc785",
+    filterNewest: "\ucd5c\uc2e0",
+    filterLowestPing: "\ucd5c\uc800 \ud53c\uacb0",
+    filterFastest: "\ucd5c\uace0 \uc18d\ub3c4",
+    filterPrice: "\uac00\uaca9",
+    filterReset: "\uc2ac\uc14b",
+
+    // Market Table System Headers
+    tableHeaderIp: "IP",
+    tableHeaderDomain: "\ub3c4\uba5e\uc778",
+    tableHeaderState: "\uc8fc",
+    tableHeaderCity: "\ub3c4\uc2dc",
+    tableHeaderIsp: "ISP",
+    tableHeaderZip: "\uc6b0\ud3b8\ubc88\ud638",
+    tableHeaderSpeed: "\uc18d\ub3c4",
+    tableHeaderPing: "\ud53c\uacb0",
+    tableHeaderType: "\ud0c0\uc785",
+    tableHeaderAdded: "\ub4f1\ub85d\uc77c",
+    tableHeaderPrice: "\uac00\uaca9",
+    revealIpTooltip: "IP \ud45c\uc2dc - $0.05",
+    loadingNavaSocks: "NAVA SOCKS \ub85c\ub529 \uc911...",
+    noEndpointsMatch: "\ud544\ud130\uc5d0 \uc77c\uce58\ud558\ub294 \uc5d4\ud3ec\uc778\ud2b8\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.",
+    pagePrev: "\uc774\uc804",
+    pageNext: "\ub2e4\uc74c",
+
+    // IP Details Panel Buttons
+    ipDetailsHeader: "IP \uc0ac\ud56d \uc815\ubcf4",
+    panelTabInfo: "\uc815\ubcf4",
+    panelTabGeo: "GEO",
+    panelTabBlacklists: "\ube14\ub799\ub9ac\uc2a4\ud2b8",
+    actionBuyIp: "IP \uad6c\ub9e4"
+  },
+  it: {
+    enterpriseGrid: "RETE PROXY AZIENDALE",
+    onlineIps: "75M+ IP online",
+    pricing: "Prezzi e piani",
+    networkSpecs: "Specifiche rete",
+    globalNodes: "Nodi globali",
+    dashboard: "Dashboard",
+    topUp: "RICARICA",
+    signOut: "Disconnetti",
+    login: "Accedi",
+    signup: "Registrati",
+    createAccount: "Crea account",
+    selectLanguage: "Seleziona lingua",
+    switchToDarkMode: "Passa alla modalit\u00e0 scura",
+    switchToLightMode: "Passa alla modalit\u00e0 chiara",
+    darkMode: "Modalit\u00e0 scura",
+    lightMode: "Modalit\u00e0 chiara",
+    anonymity: "Anonimato:",
+    automatedGateways: "Gateway automatici:",
+    availabilityByLocation: "La disponibilit\u00e1 residenziale varia in base alla localit\u00e1",
+    averageResponseLatency: "Latenza media di risposta",
+    calculatedRate: "Tariffa calcolata",
+    carrierISP: "Operatore/ISP:",
+    compatibleOutOfBox: "Compatibile subito con Puppeteer, Playwright, Selenium, Scrapy e tutti gli script bot personalizzati.",
+    concurrencyLabel: "Concorrenza:",
+    connectionString: "Stringa di connessione:",
+    copied: "Copiato!",
+    copyCode: "Copia codice",
+    countriesTerritories: "Paesi e territori",
+    cryptoOnly: "Solo criptovalute",
+    cryptoPayments: "Pagamenti crypto: USDT / BTC / LTC",
+    datacenterComingSoon: "Datacenter - In arrivo",
+    eliteTier1: "Elite / Livello 1",
+    establishingHandshake: "Stabilimento handshake SSL...",
+    executeProxyPing: "Esegui ping proxy live",
+    exitIPv4: "IPv4 in uscita:",
+    handshakeOk: "Handshake 200 OK",
+    heroDescriptionLead: "Sfrutta l'accesso agli IP residenziali",
+    heroDescriptionRest: ", una connettivit\u00e0 residenziale affidabile e IP residenziali mirati per localit\u00e1. Accesso SOCKS5 residenziale con targeting geografico e sessioni flessibili.",
+    heroNetwork: "Rete proxy SOCKS5 residenziali",
+    heroTitle1: "Proxy difficili da bloccare.",
+    heroTitle2: "Velocit\u00e0 sotto il secondo.",
+    includedEveryPlan: "Incluso in ogni piano:",
+    instantDelivery: "Consegna istantanea",
+    instantProvisioning: "Provisioning automatico istantaneo",
+    integration: "Integrazione SOCKS5 residenziale",
+    latencySuffix: "Latenza",
+    liveGatewaySandbox: "Sandbox gateway live",
+    loginDashboard: "Accedi al dashboard proxy",
+    mobileComingSoon: "Mobile 4G/5G - In arrivo",
+    networkUptimeSLA: "SLA di uptime della rete",
+    noHiddenFees: "Nessun costo nascosto. Nessun impegno mensile. La banda non scade mai. Sconti automatici sul volume all'aumentare della domanda.",
+    orderNowPrefix: "Ordina ora:",
+    plugPlay: "Plug \u0026 Play con 3 righe di codice",
+    poolLabel: "Pool:",
+    residentialDynamic: "Residenziale dinamico",
+    residentialLocations: "Localit\u00e1 SOCKS5 residenziali",
+    residentialNetwork: "Rete SOCKS5 residenziale",
+    residentialPeerIPs: "IP peer residenziali",
+    scaleBandwidth: "Scala la banda e mantieni il saldo",
+    selectedBandwidth: "Banda selezionata:",
+    stickyComingSoon: "ISP residenziale Sticky - In arrivo",
+    targetGeolocation: "Geolocalizzazione target:",
+    targetLocation: "Posizione target:",
+    totalOrderCost: "Costo totale ordine:",
+    transparentPayg: "Prezzi trasparenti pay-as-you-go",
+    volumeDiscount: "Sconto volume applicato!",
+
+    // Dashboard UI Navigation Terms
+    proxyMarket: "Mercato Proxy",
+    myProxies: "Miei Proxy",
+    history: "Cronologia",
+    payments: "Pagamenti",
+    paymentWalletLabel: "Wallet",
+    paymentAddPayment: "Aggiungi pagamento",
+    paymentAddFundsDescription: "Aggiungi fondi al tuo saldo NAVA SOCKS usando i metodi di pagamento in criptovaluta supportati.",
+    paymentCurrentBalance: "Saldo attuale",
+    paymentAddPaymentButton: "AGGIUNGI PAGAMENTO",
+    paymentWalletActivity: "Attività del wallet",
+    paymentTopupsHistory: "Cronologia delle ricariche",
+    paymentTopupsDescription: "Visualizza le ricariche del tuo wallet, inclusi i depositi BTC, LTC e USDT.",
+    paymentTopupsHistoryButton: "CRONOLOGIA RICARICHE",
+    paymentWalletSpending: "Spese del wallet",
+    paymentExpensesHistory: "Cronologia delle spese",
+    paymentExpensesDescription: "Visualizza il denaro speso dal tuo saldo, inclusi gli acquisti di proxy e gli addebiti per la visualizzazione IP.",
+    paymentExpensesHistoryButton: "CRONOLOGIA SPESE",
+    ipTools: "Strumenti IP",
+    support: "Supporto",
+
+    // Dashboard Layout Frames & Cards
+    controlPlaneLabel: "NAVA SOCKS Control Plane",
+    proxyMarketAndInventory: "Mercato Proxy \u0026 Inventario",
+    dashboardSubDescription: "Acquista endpoint residenziali / mobile per paese, stato e citt\u00e0. Bandiere, ping live e checkout carrello.",
+    gridOnlineLabel: "Rete online",
+    peersLabel: "peers",
+    accountBalance: "Saldo conto",
+    ownedProxies: "Proxy acquistati",
+    cartLabel: "Carrello",
+    cartEmpty: "Vuoto",
+    visiblePool: "Pool visibile",
+    buyAll: "ACQUISTA TUTTO",
+
+    // Market Table Filters & Options
+    filterAnyType: "Qualsiasi tipo",
+    filterNewest: "Pi\u00f9 recenti",
+    filterLowestPing: "Ping pi\u00f9 basso",
+    filterFastest: "Pi\u00f9 veloci",
+    filterPrice: "Prezzo",
+    filterReset: "Reimposta",
+
+    // Market Table System Headers
+    tableHeaderIp: "IP",
+    tableHeaderDomain: "DOMINIO",
+    tableHeaderState: "STATO",
+    tableHeaderCity: "CITT\u00c0",
+    tableHeaderIsp: "ISP",
+    tableHeaderZip: "CAP",
+    tableHeaderSpeed: "VELOCIT\u00c0",
+    tableHeaderPing: "PING",
+    tableHeaderType: "TIPO",
+    tableHeaderAdded: "AGGIUNTO",
+    tableHeaderPrice: "PREZZO",
+    revealIpTooltip: "Rivela IP - $0.05",
+    loadingNavaSocks: "Caricamento di NAVA SOCKS...",
+    noEndpointsMatch: "Nessun endpoint corrisponde a questi filtri.",
+    pagePrev: "Prec",
+    pageNext: "Succ",
+
+    // IP Details Panel Buttons
+    ipDetailsHeader: "DETTAGLI IP",
+    panelTabInfo: "INFO",
+    panelTabGeo: "GEO",
+    panelTabBlacklists: "BLACKLISTS",
+    actionBuyIp: "ACQUISTA IP"
+  },
+  pl: {
+    enterpriseGrid: "SIEC PROXY DLA FIRM",
+    onlineIps: "75 mln+ adres\u00f3w IP online",
+    pricing: "Cennik i plany",
+    networkSpecs: "Specyfikacja sieci",
+    globalNodes: "W\u0119z\u0142y globalne",
+    dashboard: "Panel",
+    topUp: "DO\u0141ADUJ",
+    signOut: "Wyloguj",
+    login: "Zaloguj",
+    signup: "Zarejestruj si\u0119",
+    createAccount: "Utw\u00f3rz konto",
+    selectLanguage: "Wybierz j\u0119zyk",
+    switchToDarkMode: "W\u0142\u0105cz tryb ciemny",
+    switchToLightMode: "W\u0142\u0105cz tryb jasny",
+    darkMode: "Tryb ciemny",
+    lightMode: "Tryb jasny",
+    anonymity: "Anonimowo\u015b\u0107:",
+    automatedGateways: "Automatyczne bramy:",
+    availabilityByLocation: "Dost\u0119pno\u015b\u0107 rezydencjalna zale\u017cy od lokalizacji",
+    averageResponseLatency: "\u015erednie op\u00f3\u017anienie odpowiedzi",
+    calculatedRate: "Wyliczona stawka",
+    carrierISP: "Operator/ISP:",
+    compatibleOutOfBox: "Gotowe do u\u017cycia z Puppeteer, Playwright, Selenium, Scrapy i niestandardowymi skryptami bot\u00f3w.",
+    concurrencyLabel: "R\u00f3wnoleg\u0142o\u015b\u0107:",
+    connectionString: "Ci\u0105g po\u0142\u0105czenia:",
+    copied: "Skopiowano!",
+    copyCode: "Kopiuj kod",
+    countriesTerritories: "Kraje i terytoria",
+    cryptoOnly: "Tylko kryptowaluty",
+    cryptoPayments: "P\u0142atno\u015bci crypto: USDT / BTC / LTC",
+    datacenterComingSoon: "Datacenter - Wkr\u00f3tce",
+    eliteTier1: "Elite / Poziom 1",
+    establishingHandshake: "Nawi\u0105zywanie uzgadniania SSL...",
+    executeProxyPing: "Uruchom test ping proxy",
+    exitIPv4: "Wyj\u015bciowy IPv4:",
+    handshakeOk: "Handshake 200 OK",
+    heroDescriptionLead: "Wykorzystaj dost\u0119p do rezydencjalnych adres\u00f3w IP",
+    heroDescriptionRest: ", niezawodne po\u0142\u0105czenie rezydencjalne i adresy IP kierowane lokalizacj\u0105. Rezydencjalny SOCKS5 z wyborem lokalizacji i elastycznymi sesjami.",
+    heroNetwork: "Rezydencjalna sie\u0107 proxy SOCKS5",
+    heroTitle1: "Proxy trudne do zablokowania.",
+    heroTitle2: "Pr\u0119dko\u015b\u0107 poni\u017cej sekundy.",
+    includedEveryPlan: "W ka\u017cdym planie:",
+    instantDelivery: "Natychmiastowe dostarczenie",
+    instantProvisioning: "Natychmiastowe automatyczne wdro\u017cenie",
+    integration: "Integracja rezydencjalnego SOCKS5",
+    latencySuffix: "Op\u00f3\u017anienie",
+    liveGatewaySandbox: "Testowa piaskownica bramy na \u017cywo",
+    loginDashboard: "Zaloguj do panelu proxy",
+    mobileComingSoon: "Mobile 4G/5G - Wkr\u00f3tce",
+    networkUptimeSLA: "SLA dost\u0119pno\u015bci sieci",
+    noHiddenFees: "Brak ukrytych op\u0142at. Brak miesi\u0119cznych zobowi\u0105za\u0144. Przepustowo\u015b\u0107 nigdy nie wygasa. Automatyczne rabaty wolumenowe wraz ze wzrostem zapotrzebowania.",
+    orderNowPrefix: "Zam\u00f3w teraz:",
+    plugPlay: "Plug \u0026 Play w 3 liniach kodu",
+    poolLabel: "Pula:",
+    residentialDynamic: "Rezydencjalne dynamiczne",
+    residentialLocations: "Rezydencjalne lokalizacje SOCKS5",
+    residentialNetwork: "Rezydencjalna sie\u0107 SOCKS5",
+    residentialPeerIPs: "Rezydencjalne adresy IP peer",
+    scaleBandwidth: "Zwi\u0119ksz przepustowo\u015b\u0107 i zachowaj saldo",
+    selectedBandwidth: "Wybrana przepustowo\u015b\u0107:",
+    stickyComingSoon: "Rezydencjalny Sticky ISP - Wkr\u00f3tce",
+    targetGeolocation: "Docelowa geolokalizacja:",
+    targetLocation: "Lokalizacja docelowa:",
+    totalOrderCost: "\u0141\u0105czny koszt zam\u00f3wienia:",
+    transparentPayg: "Przejrzyste ceny pay-as-you-go",
+    volumeDiscount: "Zastosowano rabat wolumenowy!",
+
+    // Dashboard UI Navigation Terms
+    proxyMarket: "Rynek Proxy",
+    myProxies: "Moje Proxy",
+    history: "Historia",
+    payments: "P\u0142atno\u015bci",
+    paymentWalletLabel: "Portfel",
+    paymentAddPayment: "Dodaj płatność",
+    paymentAddFundsDescription: "Dodaj środki do salda NAVA SOCKS za pomocą obsługiwanych metod płatności kryptowalutowych.",
+    paymentCurrentBalance: "Bieżące saldo",
+    paymentAddPaymentButton: "DODAJ PŁATNOŚĆ",
+    paymentWalletActivity: "Aktywność portfela",
+    paymentTopupsHistory: "Historia doładowań",
+    paymentTopupsDescription: "Wyświetl historię doładowań portfela, w tym wpłaty BTC, LTC i USDT.",
+    paymentTopupsHistoryButton: "HISTORIA DOŁADOWAŃ",
+    paymentWalletSpending: "Wydatki z portfela",
+    paymentExpensesHistory: "Historia wydatków",
+    paymentExpensesDescription: "Wyświetl środki wydane z salda, w tym zakupy proxy i opłaty za ujawnienie adresu IP.",
+    paymentExpensesHistoryButton: "HISTORIA WYDATKÓW",
+    ipTools: "Narz\u0119dzia IP",
+    support: "Wsparcie",
+
+    // Dashboard Layout Frames & Cards
+    controlPlaneLabel: "NAVA SOCKS Control Plane",
+    proxyMarketAndInventory: "Rynek Proxy \u0026 Zapasy",
+    dashboardSubDescription: "Kupuj punkty ko\u0144cowe ISP / mobilne wed\u0142ug kraju, stanu i miasta. Flagi, ping na \u017cywo i koszyk.",
+    gridOnlineLabel: "Sie\u0107 online",
+    peersLabel: "peers",
+    accountBalance: "Saldo konta",
+    ownedProxies: "Posiadane proxy",
+    cartLabel: "Koszyk",
+    cartEmpty: "Pusty",
+    visiblePool: "Widoczna pula",
+    buyAll: "KUP WSZYSTKO",
+
+    // Market Table Filters & Options
+    filterAnyType: "Dowolny typ",
+    filterNewest: "Najnowsze",
+    filterLowestPing: "Najni\u017cszy ping",
+    filterFastest: "Najszybsze",
+    filterPrice: "Cena",
+    filterReset: "Resetuj",
+
+    // Market Table System Headers
+    tableHeaderIp: "IP",
+    tableHeaderDomain: "DOMENA",
+    tableHeaderState: "STAN",
+    tableHeaderCity: "MIASTO",
+    tableHeaderIsp: "ISP",
+    tableHeaderZip: "KOD",
+    tableHeaderSpeed: "PR\u0118DKO\u015a\u0106",
+    tableHeaderPing: "PING",
+    tableHeaderType: "TYP",
+    tableHeaderAdded: "DODANO",
+    tableHeaderPrice: "CENA",
+    revealIpTooltip: "Odkryj IP - $0.05",
+    loadingNavaSocks: "Wczytywanie NAVA SOCKS...",
+    noEndpointsMatch: "Brak punkt\u00f3w ko\u0144cowych pasuj\u0105cych do filtr\u00f3w.",
+    pagePrev: "Poprzednia",
+    pageNext: "Nast\u0119pna",
+
+    // IP Details Panel Buttons
+    ipDetailsHeader: "SZCZEG\u00d3\u0141Y IP",
+    panelTabInfo: "INFO",
+    panelTabGeo: "GEO",
+    panelTabBlacklists: "CZARNE LISTY",
+    actionBuyIp: "KUP IP"
+  },
+  pt: {
+    enterpriseGrid: "REDE PROXY EMPRESARIAL",
+    onlineIps: "75M+ IPs online",
+    pricing: "Pre\u00e7os e planos",
+    networkSpecs: "Especifica\u00e7\u00f5es da rede",
+    globalNodes: "N\u00f3s globais",
+    dashboard: "Painel",
+    topUp: "RECARREGAR",
+    signOut: "Sair",
+    login: "Entrar",
+    signup: "Cadastrar-se",
+    createAccount: "Criar conta",
+    selectLanguage: "Selecionar idioma",
+    switchToDarkMode: "Mudar para modo escuro",
+    switchToLightMode: "Mudar para modo claro",
+    darkMode: "Modo escuro",
+    lightMode: "Modo claro",
+    anonymity: "Anonimato:",
+    automatedGateways: "Gateways automatizados:",
+    availabilityByLocation: "A disponibilidade residencial varia conforme a localiza\u00e7\u00e3o",
+    averageResponseLatency: "Lat\u00eancia m\u00e9dia de resposta",
+    calculatedRate: "Tarifa calculada",
+    carrierISP: "Operadora/ISP:",
+    compatibleOutOfBox: "Compat\u00edvel imediatamente com Puppeteer, Playwright, Selenium, Scrapy e todos os scripts de bots personalizados.",
+    concurrencyLabel: "Concorr\u00eancia:",
+    connectionString: "String de conex\u00e3o:",
+    copied: "Copiado!",
+    copyCode: "Copiar c\u00f3digo",
+    countriesTerritories: "Pa\u00edses e territ\u00f3rios",
+    cryptoOnly: "Somente criptomoedas",
+    cryptoPayments: "Pagamentos cripto: USDT / BTC / LTC",
+    datacenterComingSoon: "Datacenter - Em breve",
+    eliteTier1: "Elite / N\u00edvel 1",
+    establishingHandshake: "Estabelecendo handshake SSL...",
+    executeProxyPing: "Executar ping do proxy ao vivo",
+    exitIPv4: "IPv4 de sa\u00edda:",
+    handshakeOk: "Handshake 200 OK",
+    heroDescriptionLead: "Aproveite o acesso a IPs residenciais",
+    heroDescriptionRest: ", conectividade residencial confi\u00e1vel e IPs residenciais direcionados por localiza\u00e7\u00e3o. Acesso SOCKS5 residencial com sele\u00e7\u00e3o de localiza\u00e7\u00e3o e sess\u00f5es flex\u00edveis.",
+    heroNetwork: "Rede de proxies SOCKS5 residenciais",
+    heroTitle1: "Proxies dif\u00edceis de bloquear.",
+    heroTitle2: "Velocidade inferior a um segundo.",
+    includedEveryPlan: "Inclu\u00eddo em todos os planos:",
+    instantDelivery: "Entrega instant\u00e2nea",
+    instantProvisioning: "Provisionamento autom\u00e1tico instant\u00e2neo",
+    integration: "Integra\u00e7\u00e3o SOCKS5 residencial",
+    latencySuffix: "Lat\u00eancia",
+    liveGatewaySandbox: "Sandbox de gateway ao vivo",
+    loginDashboard: "Entrar no painel de proxy",
+    mobileComingSoon: "M\u00f3vel 4G/5G - Em breve",
+    networkUptimeSLA: "SLA de disponibilidade da rede",
+    noHiddenFees: "Sem taxas ocultas. Sem compromissos mensais. A largura de banda nunca expira. Descontos autom\u00e1ticos por volume conforme a demanda aumenta.",
+    orderNowPrefix: "Pedir agora:",
+    plugPlay: "Plug \u0026 Play com 3 linhas de c\u00f3digo",
+    poolLabel: "Pool:",
+    residentialDynamic: "Residencial Din\u00e2mico",
+    residentialLocations: "Localiza\u00e7\u00f5es SOCKS5 residenciais",
+    residentialNetwork: "Rede SOCKS5 residencial",
+    residentialPeerIPs: "IPs peer residenciais",
+    scaleBandwidth: "Aumente a largura de banda e mantenha seu saldo",
+    selectedBandwidth: "Largura de banda selecionada:",
+    stickyComingSoon: "ISP residencial Sticky - Em breve",
+    targetGeolocation: "Geolocaliza\u00e7\u00e3o alvo:",
+    targetLocation: "Localiza\u00e7\u00e3o alvo:",
+    totalOrderCost: "Custo total do pedido:",
+    transparentPayg: "Pre\u00e7os transparentes por uso",
+    volumeDiscount: "Desconto por volume aplicado!",
+
+    // Dashboard UI Navigation Terms
+    proxyMarket: "Mercado Proxy",
+    myProxies: "Meus Proxies",
+    history: "Hist\u00f3rico",
+    payments: "Pagamentos",
+    paymentWalletLabel: "Carteira",
+    paymentAddPayment: "Adicionar pagamento",
+    paymentAddFundsDescription: "Adicione fundos ao seu saldo NAVA SOCKS usando os métodos de pagamento em criptomoedas compatíveis.",
+    paymentCurrentBalance: "Saldo atual",
+    paymentAddPaymentButton: "ADICIONAR PAGAMENTO",
+    paymentWalletActivity: "Atividade da carteira",
+    paymentTopupsHistory: "Histórico de recargas",
+    paymentTopupsDescription: "Veja as recargas da sua carteira, incluindo depósitos de BTC, LTC e USDT.",
+    paymentTopupsHistoryButton: "HISTÓRICO DE RECARGAS",
+    paymentWalletSpending: "Gastos da carteira",
+    paymentExpensesHistory: "Histórico de gastos",
+    paymentExpensesDescription: "Veja o dinheiro gasto do seu saldo, incluindo compras de proxy e cobranças para revelar IP.",
+    paymentExpensesHistoryButton: "HISTÓRICO DE GASTOS",
+    ipTools: "Ferramentas IP",
+    support: "Suporte",
+
+    // Dashboard Layout Frames & Cards
+    controlPlaneLabel: "NAVA SOCKS Control Plane",
+    proxyMarketAndInventory: "Mercado Proxy \u0026 Invent\u00e1rio",
+    dashboardSubDescription: "Compre endpoints residenciais / m\u00f3veis por pa\u00eds, estado e cidade. Bandeiras, ping ao vivo e carrinho.",
+    gridOnlineLabel: "Rede online",
+    peersLabel: "peers",
+    accountBalance: "Saldo da conta",
+    ownedProxies: "Proxies adquiridos",
+    cartLabel: "Carrinho",
+    cartEmpty: "Vazio",
+    visiblePool: "Pool vis\u00edvel",
+    buyAll: "COMPRAR TUDO",
+
+    // Market Table Filters & Options
+    filterAnyType: "Qualquer tipo",
+    filterNewest: "Mais recentes",
+    filterLowestPing: "Menor ping",
+    filterFastest: "Mais r\u00e1pidos",
+    filterPrice: "Pre\u00e7o",
+    filterReset: "Redefinir",
+
+    // Market Table System Headers
+    tableHeaderIp: "IP",
+    tableHeaderDomain: "DOM\u00cdNIO",
+    tableHeaderState: "ESTADO",
+    tableHeaderCity: "CIDADE",
+    tableHeaderIsp: "ISP",
+    tableHeaderZip: "CEP",
+    tableHeaderSpeed: "VELOCIDADE",
+    tableHeaderPing: "PING",
+    tableHeaderType: "TIPO",
+    tableHeaderAdded: "ADICIONADO",
+    tableHeaderPrice: "PRE\u00c7O",
+    revealIpTooltip: "Revelar IP - $0.05",
+    loadingNavaSocks: "Carregando NAVA SOCKS...",
+    noEndpointsMatch: "Nenhum endpoint corresponde a estes filtros.",
+    pagePrev: "Anterior",
+    pageNext: "Pr\u00f3ximo",
+
+    // IP Details Panel Buttons
+    ipDetailsHeader: "DETALHES DO IP",
+    panelTabInfo: "INFO",
+    panelTabGeo: "GEO",
+    panelTabBlacklists: "LISTAS NEGRAS",
+    actionBuyIp: "COMPRAR IP"
+  },
+      ru: {
+    enterpriseGrid: "ÐšÐžÐ ÐŸÐžÐ ÐÐ¢Ð˜Ð’ÐÐÐ¯ PROXY-Ð¡Ð•Ð¢Ð¬",
+    onlineIps: "75M+ IP Ð¾Ð½Ð»Ð°Ð¹Ð½ (99.98%)",
+    pricing: "Ð¦ÐµÐ½Ñ‹ Ð¸ Ð¿Ð»Ð°Ð½Ñ‹",
+    networkSpecs: "ÐŸÐ°Ñ€Ð°Ð¼ÐµÑ‚Ñ€Ñ‹ ÑÐµÑ‚Ð¸",
+    globalNodes: "Ð“Ð»Ð¾Ð±Ð°Ð»ÑŒÐ½Ñ‹Ðµ ÑƒÐ·Ð»Ñ‹",
+    dashboard: "ÐŸÐ°Ð½ÐµÐ»ÑŒ ÑƒÐ¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ñ",
+    topUp: "ÐŸÐžÐŸÐžÐ›ÐÐ˜Ð¢Ð¬",
+    signOut: "Ð’Ñ‹Ð¹Ñ‚Ð¸",
+    login: "Ð’Ð¾Ð¹Ñ‚Ð¸",
+    signup: "Ð ÐµÐ³Ð¸ÑÑ‚Ñ€Ð°Ñ†Ð¸Ñ",
+    createAccount: "Ð¡Ð¾Ð·Ð´Ð°Ñ‚ÑŒ Ð°ÐºÐºÐ°ÑƒÐ½Ñ‚",
+    selectLanguage: "Ð’Ñ‹Ð±Ñ€Ð°Ñ‚ÑŒ ÑÐ·Ñ‹Ðº",
+    switchToDarkMode: "ÐŸÐµÑ€ÐµÐºÐ»ÑŽÑ‡Ð¸Ñ‚ÑŒ Ð½Ð° Ñ‚Ñ‘Ð¼Ð½ÑƒÑŽ Ñ‚ÐµÐ¼Ñƒ",
+    switchToLightMode: "ÐŸÐµÑ€ÐµÐºÐ»ÑŽÑ‡Ð¸Ñ‚ÑŒ Ð½Ð° ÑÐ²ÐµÑ‚Ð»ÑƒÑŽ Ñ‚ÐµÐ¼Ñƒ",
+    darkMode: "Ð¢Ñ‘Ð¼Ð½Ð°Ñ Ñ‚ÐµÐ¼Ð°",
+    lightMode: "Ð¡Ð²ÐµÑ‚Ð»Ð°Ñ Ñ‚ÐµÐ¼Ð°",
+    anonymity: "ÐÐ½Ð¾Ð½Ð¸Ð¼Ð½Ð¾ÑÑ‚ÑŒ:",
+    automatedGateways: "ÐÐ²Ñ‚Ð¾Ð¼Ð°Ñ‚Ð¸Ñ‡ÐµÑÐºÐ¸Ðµ ÑˆÐ»ÑŽÐ·Ñ‹:",
+    availabilityByLocation: "Ð”Ð¾ÑÑ‚ÑƒÐ¿Ð½Ð¾ÑÑ‚ÑŒ Ð·Ð°Ð²Ð¸ÑÐ¸Ñ‚ Ð¾Ñ‚ Ð»Ð¾ÐºÐ°Ñ†Ð¸Ð¸",
+    averageResponseLatency: "Ð¡Ñ€ÐµÐ´Ð½ÑÑ Ð·Ð°Ð´ÐµÑ€Ð¶ÐºÐ° Ð¾Ñ‚Ð²ÐµÑ‚Ð°",
+    calculatedRate: "Ð Ð°ÑÑ‡Ñ‘Ñ‚Ð½Ð°Ñ ÑÑ‚Ð°Ð²ÐºÐ°",
+    carrierISP: "ÐžÐ¿ÐµÑ€Ð°Ñ‚Ð¾Ñ€/ISP:",
+    compatibleOutOfBox: "Ð“Ð¾Ñ‚Ð¾Ð²Ð¾ Ðº Ñ€Ð°Ð±Ð¾Ñ‚Ðµ Ñ Puppeteer, Playwright, Selenium, Scrapy Ð¸ Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»ÑŒÑÐºÐ¸Ð¼Ð¸ bot-ÑÐºÑ€Ð¸Ð¿Ñ‚Ð°Ð¼Ð¸.",
+    concurrencyLabel: "ÐŸÐ°Ñ€Ð°Ð»Ð»ÐµÐ»ÑŒÐ½Ð¾ÑÑ‚ÑŒ:",
+    connectionString: "Ð¡Ñ‚Ñ€Ð¾ÐºÐ° Ð¿Ð¾Ð´ÐºÐ»ÑŽÑ‡ÐµÐ½Ð¸Ñ:",
+    copied: "Ð¡ÐºÐ¾Ð¿Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¾!",
+    copyCode: "ÐšÐ¾Ð¿Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ ÐºÐ¾Ð´",
+    countriesTerritories: "Ð¡Ñ‚Ñ€Ð°Ð½Ñ‹ Ð¸ Ñ‚ÐµÑ€Ñ€Ð¸Ñ‚Ð¾Ñ€Ð¸Ð¸",
+    cryptoOnly: "Ð¢Ð¾Ð»ÑŒÐºÐ¾ ÐºÑ€Ð¸Ð¿Ñ‚Ð¾Ð²Ð°Ð»ÑŽÑ‚Ð°",
+    cryptoPayments: "ÐšÑ€Ð¸Ð¿Ñ‚Ð¾Ð¿Ð»Ð°Ñ‚ÐµÐ¶Ð¸: USDT / BTC / LTC",
+    datacenterComingSoon: "Datacenter - Ð¡ÐºÐ¾Ñ€Ð¾",
+    eliteTier1: "Elite / Ð£Ñ€Ð¾Ð²ÐµÐ½ÑŒ 1",
+    establishingHandshake: "Ð£ÑÑ‚Ð°Ð½Ð°Ð²Ð»Ð¸Ð²Ð°ÐµÑ‚ÑÑ SSL-handshake...",
+    executeProxyPing: "Ð—Ð°Ð¿ÑƒÑÑ‚Ð¸Ñ‚ÑŒ Ð¶Ð¸Ð²Ð¾Ð¹ ping Ð¿Ñ€Ð¾ÐºÑÐ¸",
+    exitIPv4: "Ð’Ñ‹Ñ…Ð¾Ð´Ð½Ð¾Ð¹ IPv4:",
+    handshakeOk: "Handshake 200 OK",
+    heroDescriptionLead: "Ð˜ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÐ¹Ñ‚Ðµ Ð´Ð¾ÑÑ‚ÑƒÐ¿ Ðº Ñ€ÐµÐ·Ð¸Ð´ÐµÐ½Ñ‚ÑÐºÐ¸Ð¼ IP",
+    heroDescriptionRest: ", Ð½Ð°Ð´Ñ‘Ð¶Ð½Ð¾Ðµ ÑÐ¾ÐµÐ´Ð¸Ð½ÐµÐ½Ð¸Ðµ Ð¸ Ñ‚Ð¾Ñ‡Ð½Ñ‹Ð¹ Ð²Ñ‹Ð±Ð¾Ñ€ Ð»Ð¾ÐºÐ°Ñ†Ð¸Ð¸. Ð ÐµÐ·Ð¸Ð´ÐµÐ½Ñ‚ÑÐºÐ¸Ð¹ SOCKS5 Ñ Ð³Ð¸Ð±ÐºÐ¸Ð¼Ð¸ ÑÐµÑÑÐ¸ÑÐ¼Ð¸.",
+    heroNetwork: "Ð ÐµÐ·Ð¸Ð´ÐµÐ½Ñ‚ÑÐºÐ°Ñ Ð¿Ñ€Ð¾ÐºÑÐ¸-ÑÐµÑ‚ÑŒ SOCKS5",
+    heroTitle1: "ÐŸÑ€Ð¾ÐºÑÐ¸ Ñ Ð²Ñ‹ÑÐ¾ÐºÐ¾Ð¹ Ð´Ð¾ÑÑ‚ÑƒÐ¿Ð½Ð¾ÑÑ‚ÑŒÑŽ.",
+    heroTitle2: "Ð¡ÐºÐ¾Ñ€Ð¾ÑÑ‚ÑŒ Ð¼ÐµÐ½ÐµÐµ ÑÐµÐºÑƒÐ½Ð´Ñ‹.",
+    includedEveryPlan: "Ð’ÐºÐ»ÑŽÑ‡ÐµÐ½Ð¾ Ð² ÐºÐ°Ð¶Ð´Ñ‹Ð¹ Ñ‚Ð°Ñ€Ð¸Ñ„:",
+    instantDelivery: "ÐœÐ³Ð½Ð¾Ð²ÐµÐ½Ð½Ð°Ñ Ð²Ñ‹Ð´Ð°Ñ‡Ð°",
+    instantProvisioning: "ÐœÐ³Ð½Ð¾Ð²ÐµÐ½Ð½Ð¾Ðµ Ð°Ð²Ñ‚Ð¾Ð¼Ð°Ñ‚Ð¸Ñ‡ÐµÑÐºÐ¾Ðµ Ð¿Ñ€ÐµÐ´Ð¾ÑÑ‚Ð°Ð²Ð»ÐµÐ½Ð¸Ðµ",
+    integration: "Ð˜Ð½Ñ‚ÐµÐ³Ñ€Ð°Ñ†Ð¸Ñ Ñ€ÐµÐ·Ð¸Ð´ÐµÐ½Ñ‚ÑÐºÐ¾Ð³Ð¾ SOCKS5",
+    latencySuffix: "Ð—Ð°Ð´ÐµÑ€Ð¶ÐºÐ°",
+    liveGatewaySandbox: "Ð–Ð¸Ð²Ð°Ñ Ð¿ÐµÑÐ¾Ñ‡Ð½Ð¸Ñ†Ð° ÑˆÐ»ÑŽÐ·Ð°",
+    loginDashboard: "Ð’Ð¾Ð¹Ñ‚Ð¸ Ð² Ð¿Ð°Ð½ÐµÐ»ÑŒ Ð¿Ñ€Ð¾ÐºÑÐ¸",
+    mobileComingSoon: "ÐœÐ¾Ð±Ð¸Ð»ÑŒÐ½Ñ‹Ð¹ 4G/5G - Ð¡ÐºÐ¾Ñ€Ð¾",
+    networkUptimeSLA: "SLA Ð´Ð¾ÑÑ‚ÑƒÐ¿Ð½Ð¾ÑÑ‚Ð¸ ÑÐµÑ‚Ð¸",
+    noHiddenFees: "Ð‘ÐµÐ· ÑÐºÑ€Ñ‹Ñ‚Ñ‹Ñ… ÐºÐ¾Ð¼Ð¸ÑÑÐ¸Ð¹. Ð‘ÐµÐ· Ð¾Ð±ÑÐ·Ð°Ñ‚ÐµÐ»ÑŒÑÑ‚Ð². Ð¢Ñ€Ð°Ñ„Ð¸Ðº Ð½Ðµ ÑÐ³Ð¾Ñ€Ð°ÐµÑ‚. ÐÐ²Ñ‚Ð¾Ð¼Ð°Ñ‚Ð¸Ñ‡ÐµÑÐºÐ¸Ðµ ÑÐºÐ¸Ð´ÐºÐ¸ Ð·Ð° Ð¾Ð±ÑŠÑ‘Ð¼.",
+    orderNowPrefix: "Ð—Ð°ÐºÐ°Ð·Ð°Ñ‚ÑŒ ÑÐµÐ¹Ñ‡Ð°Ñ:",
+    plugPlay: "Plug \u0026 Play Ð² 3 ÑÑ‚Ñ€Ð¾ÐºÐ¸ ÐºÐ¾Ð´Ð°",
+    poolLabel: "ÐŸÑƒÐ»:",
+    residentialDynamic: "Ð ÐµÐ·Ð¸Ð´ÐµÐ½Ñ‚ÑÐºÐ¸Ð¹ Ð´Ð¸Ð½Ð°Ð¼Ð¸Ñ‡ÐµÑÐºÐ¸Ð¹",
+    residentialLocations: "Ð ÐµÐ·Ð¸Ð´ÐµÐ½Ñ‚ÑÐºÐ¸Ðµ SOCKS5-Ð»Ð¾ÐºÐ°Ñ†Ð¸Ð¸",
+    residentialNetwork: "Ð ÐµÐ·Ð¸Ð´ÐµÐ½Ñ‚ÑÐºÐ°Ñ ÑÐµÑ‚ÑŒ SOCKS5",
+    residentialPeerIPs: "Ð ÐµÐ·Ð¸Ð´ÐµÐ½Ñ‚ÑÐºÐ¸Ðµ peer-IP",
+    scaleBandwidth: "ÐœÐ°ÑÑˆÑ‚Ð°Ð±Ð¸Ñ€ÑƒÐ¹Ñ‚Ðµ Ñ‚Ñ€Ð°Ñ„Ð¸Ðº Ð¸ ÑÐ¾Ñ…Ñ€Ð°Ð½ÑÐ¹Ñ‚Ðµ Ð±Ð°Ð»Ð°Ð½Ñ",
+    selectedBandwidth: "Ð’Ñ‹Ð±Ñ€Ð°Ð½Ð½Ð°Ñ Ð¿Ñ€Ð¾Ð¿ÑƒÑÐºÐ½Ð°Ñ ÑÐ¿Ð¾ÑÐ¾Ð±Ð½Ð¾ÑÑ‚ÑŒ:",
+    stickyComingSoon: "Ð ÐµÐ·Ð¸Ð´ÐµÐ½Ñ‚ÑÐºÐ¸Ð¹ Sticky ISP - Ð¡ÐºÐ¾Ñ€Ð¾",
+    targetGeolocation: "Ð¦ÐµÐ»ÐµÐ²Ð°Ñ Ð³ÐµÐ¾Ð»Ð¾ÐºÐ°Ñ†Ð¸Ñ:",
+    targetLocation: "Ð¦ÐµÐ»ÐµÐ²Ð°Ñ Ð»Ð¾ÐºÐ°Ñ†Ð¸Ñ:",
+    totalOrderCost: "ÐžÐ±Ñ‰Ð°Ñ ÑÑ‚Ð¾Ð¸Ð¼Ð¾ÑÑ‚ÑŒ Ð·Ð°ÐºÐ°Ð·Ð°:",
+    transparentPayg: "ÐŸÑ€Ð¾Ð·Ñ€Ð°Ñ‡Ð½Ñ‹Ðµ Ñ†ÐµÐ½Ñ‹ Ñ Ð¾Ð¿Ð»Ð°Ñ‚Ð¾Ð¹ Ð¿Ð¾ Ñ„Ð°ÐºÑ‚Ñƒ",
+    volumeDiscount: "ÐŸÑ€Ð¸Ð¼ÐµÐ½ÐµÐ½Ð° ÑÐºÐ¸Ð´ÐºÐ° Ð·Ð° Ð¾Ð±ÑŠÑ‘Ð¼!",
+
+    // Dashboard UI Navigation Terms
+    proxyMarket: "ÐœÐ°Ñ€ÐºÐµÑ‚ Ð¿Ñ€Ð¾ÐºÑÐ¸",
+    myProxies: "ÐœÐ¾Ð¸ Ð¿Ñ€Ð¾ÐºÑÐ¸",
+    history: "Ð˜ÑÑ‚Ð¾Ñ€Ð¸Ñ",
+    payments: "ÐŸÐ»Ð°Ñ‚ÐµÐ¶Ð¸",
+    paymentWalletLabel: "Кошелёк",
+    paymentAddPayment: "Добавить платёж",
+    paymentAddFundsDescription: "Пополните баланс NAVA SOCKS с помощью поддерживаемых способов оплаты в криптовалюте.",
+    paymentCurrentBalance: "Текущий баланс",
+    paymentAddPaymentButton: "ДОБАВИТЬ ПЛАТЁЖ",
+    paymentWalletActivity: "Активность кошелька",
+    paymentTopupsHistory: "История пополнений",
+    paymentTopupsDescription: "Просматривайте пополнения кошелька, включая депозиты BTC, LTC и USDT.",
+    paymentTopupsHistoryButton: "ИСТОРИЯ ПОПОЛНЕНИЙ",
+    paymentWalletSpending: "Расходы кошелька",
+    paymentExpensesHistory: "История расходов",
+    paymentExpensesDescription: "Просматривайте средства, потраченные с баланса, включая покупки прокси и плату за раскрытие IP.",
+    paymentExpensesHistoryButton: "ИСТОРИЯ РАСХОДОВ",
+    ipTools: "Ð˜Ð½ÑÑ‚Ñ€ÑƒÐ¼ÐµÐ½Ñ‚Ñ‹ IP",
+    support: "ÐŸÐ¾Ð´Ð´ÐµÑ€Ð¶ÐºÐ°",
+
+    // Dashboard Layout Frames & Cards
+    controlPlaneLabel: "NAVA SOCKS Control Plane",
+    proxyMarketAndInventory: "ÐœÐ°Ñ€ÐºÐµÑ‚ Ð¿Ñ€Ð¾ÐºÑÐ¸ Ð¸ Ð¸Ð½Ð²ÐµÐ½Ñ‚Ð°Ñ€ÑŒ",
+    dashboardSubDescription: "ÐŸÐ¾ÐºÑƒÐ¿Ð°Ð¹Ñ‚Ðµ Ð¿Ñ€Ð¾Ð²Ð°Ð¹Ð´ÐµÑ€ÑÐºÐ¸Ðµ Ð¸ Ð¼Ð¾Ð±Ð¸Ð»ÑŒÐ½Ñ‹Ðµ Ñ‚Ð¾Ñ‡ÐºÐ¸ Ð¿Ð¾ ÑÑ‚Ñ€Ð°Ð½Ð°Ð¼, ÑˆÑ‚Ð°Ñ‚Ð°Ð¼ Ð¸ Ð³Ð¾Ñ€Ð¾Ð´Ð°Ð¼. Ð¤Ð»Ð°Ð³Ð¸, Ð¶Ð¸Ð²Ð¾Ð¹ Ð¿Ð¸Ð½Ð³ Ð¸ ÐºÐ¾Ñ€Ð·Ð¸Ð½Ð°.",
+    gridOnlineLabel: "Ð¡ÐµÑ‚ÑŒ Ð¾Ð½Ð»Ð°Ð¹Ð½",
+    peersLabel: "Ð¿Ð¸Ñ€Ð¾Ð²",
+    accountBalance: "Ð‘Ð°Ð»Ð°Ð½Ñ Ð°ÐºÐºÐ°ÑƒÐ½Ñ‚Ð°",
+    ownedProxies: "ÐšÑƒÐ¿Ð»ÐµÐ½Ð½Ñ‹Ðµ Ð¿Ñ€Ð¾ÐºÑÐ¸",
+    cartLabel: "ÐšÐ¾Ñ€Ð·Ð¸Ð½Ð°",
+    cartEmpty: "ÐŸÑƒÑÑ‚Ð¾",
+    visiblePool: "Ð”Ð¾ÑÑ‚ÑƒÐ¿Ð½Ñ‹Ð¹ Ð¿ÑƒÐ»",
+    buyAll: "ÐšÐ£ÐŸÐ˜Ð¢Ð¬ Ð’Ð¡Ð",
+
+    // Market Table Filters & Options
+    filterAnyType: "Ð›ÑŽÐ±Ð¾Ð¹ Ñ‚Ð¸Ð¿",
+    filterNewest: "ÐÐ¾Ð²Ñ‹Ðµ",
+    filterLowestPing: "ÐÐ¸Ð·ÐºÐ¸Ð¹ Ð¿Ð¸Ð½Ð³",
+    filterFastest: "Ð‘Ñ‹ÑÑ‚Ñ€Ñ‹Ðµ",
+    filterPrice: "Ð¦ÐµÐ½Ð°",
+    filterReset: "Ð¡Ð±Ñ€Ð¾ÑÐ¸Ñ‚ÑŒ",
+
+    // Market Table System Headers
+    tableHeaderIp: "IP",
+    tableHeaderDomain: "Ð”ÐžÐœÐ•Ð",
+    tableHeaderState: "Ð¨Ð¢ÐÐ¢",
+    tableHeaderCity: "Ð“ÐžÐ ÐžÐ”",
+    tableHeaderIsp: "ISP",
+    tableHeaderZip: "Ð˜ÐÐ”Ð•ÐšÐ¡",
+    tableHeaderSpeed: "Ð¡ÐšÐžÐ ÐžÐ¡Ð¢Ð¬",
+    tableHeaderPing: "ÐŸÐ˜ÐÐ“",
+    tableHeaderType: "Ð¢Ð˜ÐŸ",
+    tableHeaderAdded: "Ð”ÐžÐ‘ÐÐ’Ð›Ð•ÐÐž",
+    tableHeaderPrice: "Ð¦Ð•ÐÐ",
+    revealIpTooltip: "ÐŸÐ¾ÐºÐ°Ð·Ð°Ñ‚ÑŒ IP - $0.05",
+    loadingNavaSocks: "Ð—Ð°Ð³Ñ€ÑƒÐ·ÐºÐ° NAVA SOCKS...",
+    noEndpointsMatch: "ÐÐµÑ‚ Ñ‚Ð¾Ñ‡ÐµÐº, ÑÐ¾Ð¾Ñ‚Ð²ÐµÑ‚ÑÑ‚Ð²ÑƒÑŽÑ‰Ð¸Ñ… Ñ„Ð¸Ð»ÑŒÑ‚Ñ€Ð°Ð¼.",
+    pagePrev: "ÐŸÑ€ÐµÐ´.",
+    pageNext: "Ð¡Ð»ÐµÐ´.",
+
+    // IP Details Panel Buttons
+    ipDetailsHeader: "Ð”Ð•Ð¢ÐÐ›Ð˜ IP",
+    panelTabInfo: "Ð˜ÐÐ¤Ðž",
+    panelTabGeo: "GEO",
+    panelTabBlacklists: "Ð§ÐÐ ÐÐ«Ð• Ð¡ÐŸÐ˜Ð¡ÐšÐ˜",
+    actionBuyIp: "ÐšÐ£ÐŸÐ˜Ð¢Ð¬ IP"
+  },
+    zh: {
+    enterpriseGrid: "\u4f01\u4e1a\u4ee3\u7406\u7f51\u7edc",
+    onlineIps: "7500\u4e07+ IP \u5728\u7ebf",
+    pricing: "\u4ef7\u683c\u4e0e\u5957\u9910",
+    networkSpecs: "\u7f51\u7edc\u89c4\u683c",
+    globalNodes: "\u5168\u7403\u8282\u70b9",
+    dashboard: "\u63a7\u5236\u9762\u677f",
+    topUp: "\u5145\u503c",
+    signOut: "\u9000\u51fa\u767b\u5f55",
+    login: "\u727b\u5f55",
+    signup: "\u6ce8\u518c",
+    createAccount: "\u521b\u5efa\u8d26\u6237",
+    selectLanguage: "\u9005\u62e9\u8bed\u8a00",
+    switchToDarkMode: "\u5207\u6362\u6df1\u8272\u6a21\u5f0f",
+    switchToLightMode: "\u5207\u6362\u6d45\u8272\u6a21\u5f0f",
+    darkMode: "\u6df1\u8272\u6a21\u5f0f",
+    lightMode: "\u6d45\u8272\u6a21\u5f0f",
+    anonymity: "\u533f\u540d\u6027\uff1a",
+    automatedGateways: "\u81ea\u52a8\u5316\u7f51\u5173\uff1a",
+    availabilityByLocation: "\u4f4f\u5b85\u53ef\u7528\u6027\u56e0\u4f4d\u7f6e\u800c\u5f02",
+    averageResponseLatency: "\u5e73\u5747\u54cd\u5e94\u5ef6\u8fdf",
+    calculatedRate: "\u8ba1\u7b97\u8d39\u7387",
+    carrierISP: "\u8fd0\u8425\u5546/ISP\uff1a",
+    compatibleOutOfBox: "\u5f00\u7bb1\u5373\u7528\uff0c\u517c\u5bb9 Puppeteer\u3001Playwright\u3001Selenium\u3001Scrapy \u4ee5\u53ca\u6240\u6709\u81ea\u5b9a\u4e49 Bot \u811a\u672c\u3002",
+    concurrencyLabel: "\u5e76\u53d1\uff1a",
+    connectionString: "\u8fde\u63a5\u5b57\u7b26\u4e32\uff1a",
+    copied: "\u5df2\u590d\u5236\uff01",
+    copyCode: "\u590d\u5236\u4ee3\u7801",
+    countriesTerritories: "\u56fd\u5bb6\u548c\u5730\u533a",
+    cryptoOnly: "\u4ec5\u652f\u6301\u52a0\u5bc6\u8d27\u5e01",
+    cryptoPayments: "\u52a0\u5bc6\u8d27\u5e01\u652f\u4ed8\uff1aUSDT / BTC / LTC",
+    datacenterComingSoon: "\u6570\u636e\u4e2d\u5fc3 - \u5373\u5c06\u63a8\u51fa",
+    eliteTier1: "Elite / Tier 1",
+    establishingHandshake: "\u6b63\u5728\u5efa\u7acb SSL \u63e1\u624b...",
+    executeProxyPing: "\u6267\u884c\u5b9e\u65f6\u4ee3\u7406 Ping",
+    exitIPv4: "\u51fa\u53e3 IPv4\uff1a",
+    handshakeOk: "Handshake 200 OK",
+    heroDescriptionLead: "\u4f7f\u7528\u4f4f\u5b85 IP \u8bbf\u95ee",
+    heroDescriptionRest: "\u3001\u53ef\u9760\u7684\u4f4f\u5b85\u7f51\u7edc\u8fde\u63a5\u4ee5\u53ca\u6309\u5730\u533a\u5b9a\u4f4d\u4f4f\u5b85 IP\u3002\u652f\u6301\u5730\u533a\u5b9a\u4f4d\u548c\u7075\u6d3b\u4f1a\u8bdd\u7684\u4f4f\u5b85 SOCKS5 \u4ee3\u7406\u3002",
+    heroNetwork: "\u4f4f\u5b85 SOCKS5 \u4ee3\u7406\u7f51\u7edc",
+    heroTitle1: "\u9ad8\u53ef\u7528\u4ee3\u7406\u3002",
+    heroTitle2: "\u4e9a\u79d2\u7ea7\u901f\u5ea6\u3002",
+    includedEveryPlan: "\u6bcf\u4e2a\u5957\u9910\u5747\u5305\u542b\uff1a",
+    instantDelivery: "\u5373\u65f6\u4ea4\u4ed8",
+    instantProvisioning: "\u5373\u65f6\u81ea\u52a8\u5f00\u901a",
+    integration: "\u4f4f\u5b85 SOCKS5 \u96c6\u6210",
+    latencySuffix: "\u5ef6\u8fdf",
+    liveGatewaySandbox: "\u5b9e\u65f6\u7f51\u5173\u6c99\u76d2",
+    loginDashboard: "\u727b\u5f55\u4ee3\u7406\u63a7\u5236\u9762\u677f",
+    mobileComingSoon: "\u79fb\u52a8 4G/5G - \u5373\u5c06\u63a8\u51fa",
+    networkUptimeSLA: "\u7f51\u7edc\u53ef\u7528\u6027 SLA",
+    noHiddenFees: "\u65e0\u9690\u85cf\u8d39\u7528\u3002\u65e0\u6708\u5ea6\u627f\u8bfa\u3002\u5e2f\u5bbd\u6c38\u4e0d\u8fc7\u671f\u3002\u0020\u968f\u7745\u9700\u6c42\u589e\u52a0\u81ea\u52a8\u63d0\u4f9b\u6279\u91cf\u6298\u6263\u3002",
+    orderNowPrefix: "\u7acb\u5373\u8ba2\u8d2d\uff1a",
+    plugPlay: "3 \u884c\u4ee3\u7401\u5373\u53ef Plug \u0026 Play",
+    poolLabel: "IP \u6c60\uff1a",
+    residentialDynamic: "\u4f4f\u5b85\u52a8\u6001",
+    residentialLocations: "\u4f4f\u5b85 SOCKS5 \u4f4d\u7f6e",
+    residentialNetwork: "\u4f4f\u5b85 SOCKS5 \u7f51\u7edc",
+    residentialPeerIPs: "\u4f4f\u5b85 Peer IP",
+    scaleBandwidth: "\u6269\u5c55\u5e2f\u5bbd\u5e76\u4fdd\u7559\u4f59\u989d",
+    selectedBandwidth: "\u5df2\u9009\u5e2f\u5bbd\uff1a",
+    stickyComingSoon: "\u4f4f\u5b85 Sticky ISP - \u5373\u5c06\u63a8\u51fa",
+    targetGeolocation: "\u76ee\u6807\u5730\u7406\u4f4d\u7f6e\uff1a",
+    targetLocation: "\u76ee\u6807\u4f4d\u7f6e\uff1a",
+    totalOrderCost: "\u8ba2\u5355\u603b\u8d39\u7528\uff1a",
+    transparentPayg: "\u900f\u660e\u7684\u6309\u91cf\u4ed8\u8d39\u4ef7\u683c",
+    volumeDiscount: "\u5df2\u5e94\u7528\u6279\u91cf\u6298\u6263\uff01",
+
+    // Dashboard UI Navigation Terms
+    proxyMarket: "\u4ee3\u7406\u5e02\u573a",
+    myProxies: "\u6211\u7684\u4ee3\u7406",
+    history: "\u8d2d\u4e70\u5386\u53f2",
+    payments: "\u652f\u4ed8",
+    paymentWalletLabel: "钱包",
+    paymentAddPayment: "添加付款",
+    paymentAddFundsDescription: "使用支持的加密货币支付方式为您的 NAVA SOCKS 余额充值。",
+    paymentCurrentBalance: "当前余额",
+    paymentAddPaymentButton: "添加付款",
+    paymentWalletActivity: "钱包活动",
+    paymentTopupsHistory: "充值记录",
+    paymentTopupsDescription: "查看您的钱包充值记录，包括 BTC、LTC 和 USDT 存款。",
+    paymentTopupsHistoryButton: "充值记录",
+    paymentWalletSpending: "钱包支出",
+    paymentExpensesHistory: "支出记录",
+    paymentExpensesDescription: "查看从余额中支出的金额，包括代理购买和 IP 显示费用。",
+    paymentExpensesHistoryButton: "支出记录",
+    ipTools: "IP \u5de5\u5177",
+    support: "\u6280\u672f\u652f\u6301",
+
+    // Dashboard Layout Frames & Cards
+    controlPlaneLabel: "NAVA SOCKS Control Plane",
+    proxyMarketAndInventory: "\u4ee3\u7406\u5e02\u573a\u4e0e\u5e93\u5b58",
+    dashboardSubDescription: "\u6309\u56fd\u5bb6\u3001\u5dde\u548c\u5eac\u5e02\u8d2d\u4e70 ISP / \u79fb\u52a8\u7aef\u70b9\u3002\u56fd\u65d7\u3001\u5b9e\u65f6 Ping \u548c\u8d2d\u7269\u8f66\u7ed3\u8d26\u3002",
+    gridOnlineLabel: "\u7f51\u7edc\u5728\u7ebf",
+    peersLabel: "\u8282\u70b9",
+    accountBalance: "\u8d26\u6237\u4f59\u989d",
+    ownedProxies: "\u5df2\u8d2d\u4e70\u4ee3\u7406",
+    cartLabel: "\u8d2d\u7269\u8f66",
+    cartEmpty: "\u7a7a",
+    visiblePool: "\u53ef\u89c2\u5bdf\u53ef\u7528\u6c60",
+    buyAll: "\u8d2d\u4e70\u5168\u90e8",
+
+    // Market Table Filters & Options
+    filterAnyType: "\u6240\u6709\u7c7b\u578b",
+    filterNewest: "\u6700\u65b0",
+    filterLowestPing: "\u6700\u4f4e Ping",
+    filterFastest: "\u6700\u5feb",
+    filterPrice: "\u4ef7\u683c",
+    filterReset: "\u91cd\u7f6e",
+
+    // Market Table System Headers
+    tableHeaderIp: "IP",
+    tableHeaderDomain: "\u57df\u540d",
+    tableHeaderState: "\u5dde",
+    tableHeaderCity: "\u5eac\u5e02",
+    tableHeaderIsp: "ISP",
+    tableHeaderZip: "\u902e\u7f16",
+    tableHeaderSpeed: "\u901f\u5ea6",
+    tableHeaderPing: "Ping",
+    tableHeaderType: "\u7c7b\u578b",
+    tableHeaderAdded: "\u52a0\u5165\u65e6\u671f",
+    tableHeaderPrice: "\u4ef7\u683c",
+    revealIpTooltip: "\u663e\u793a IP - $0.05",
+    loadingNavaSocks: "\u6b63\u5728\u52a0\u8f7d NAVA SOCKS...",
+    noEndpointsMatch: "\u6ca1\u6709\u7b26\u5408\u7b5b\u9009\u6761\u4ef6\u7684\u7aef\u70b9\u3002",
+    pagePrev: "\u4e0a\u4e00\u9875",
+    pageNext: "\u4e0b\u4e00\u9875",
+
+    // IP Details Panel Buttons
+    ipDetailsHeader: "IP \u8be6\u7ec6\u4fe1\u606f",
+    panelTabInfo: "\u4fe1\u606f",
+    panelTabGeo: "GEO",
+    panelTabBlacklists: "\u9ed1\u540d\u5355",
+    actionBuyIp: "\u8d2d\u4e70 IP"
+  },
+  "es-ar": {
+    enterpriseGrid: "RED PROXY EMPRESARIAL",
+    onlineIps: "75M+ IPs en l\u00ednea",
+    pricing: "Precios y planes",
+    networkSpecs: "Especificaciones de red",
+    globalNodes: "Nodos globales",
+    dashboard: "Panel",
+    topUp: "RECARGAR",
+    signOut: "Cerrar sesi\u00f3n",
+    login: "Iniciar sesi\u00f3n",
+    signup: "Registrarse",
+    createAccount: "Crear cuenta",
+    selectLanguage: "Seleccionar idioma",
+    switchToDarkMode: "Cambiar a modo oscuro",
+    switchToLightMode: "Cambiar a modo claro",
+    darkMode: "Modo oscuro",
+    lightMode: "Modo claro",
+    anonymity: "Anonimato:",
+    automatedGateways: "Gateways automatizados:",
+    availabilityByLocation: "La disponibilidad residencial var\u00eda seg\u00fan la ubicaci\u00f3n",
+    averageResponseLatency: "Latencia promedio de respuesta",
+    calculatedRate: "Tarifa calculada",
+    carrierISP: "Operador/ISP:",
+    compatibleOutOfBox: "Compatible directamente con Puppeteer, Playwright, Selenium, Scrapy y todos los scripts de bots personalizados.",
+    concurrencyLabel: "Concurrencia:",
+    connectionString: "Cadena de conex\u00edn:",
+    copied: "\u00a1Copiado!",
+    copyCode: "Copiar c\u00f3digo",
+    countriesTerritories: "Pa\u00edses y territorios",
+    cryptoOnly: "Solo criptomonedas",
+    cryptoPayments: "Pagos con cripto: USDT / BTC / LTC",
+    datacenterComingSoon: "Datacenter - Pr\u00f3ximamente",
+    eliteTier1: "Elite / Nivel 1",
+    establishingHandshake: "Estableciendo handshake SSL...",
+    executeProxyPing: "Ejecutar ping proxy en vivo",
+    exitIPv4: "IPv4 de salida:",
+    handshakeOk: "Handshake 200 OK",
+    heroDescriptionLead: "Aprovech\u00e1 el acceso a IP residenciales",
+    heroDescriptionRest: ", conectividad residencial confiable e IP residenciales dirigidas por ubicaci\u00f3n. Acceso SOCKS5 residencial con selecci\u00f3n de ubicaci\u00f3n y sesiones flexibles.",
+    heroNetwork: "Red de proxies SOCKS5 residenciales",
+    heroTitle1: "Proxies dif\u00edciles de bloquear.",
+    heroTitle2: "Velocidad inferior a un segundo.",
+    includedEveryPlan: "Incluido en todos los planes:",
+    instantDelivery: "Entrega instant\u00e1nea",
+    instantProvisioning: "Provisionamiento autom\u00e1tico instant\u00e1neo",
+    integration: "Integraci\u00f3n SOCKS5 residencial",
+    latencySuffix: "Latencia",
+    liveGatewaySandbox: "Sandbox de gateway en vivo",
+    loginDashboard: "Ingresar al panel proxy",
+    mobileComingSoon: "M\u00f3vil 4G/5G - Pr\u00f3ximamente",
+    networkUptimeSLA: "SLA de disponibilidad de red",
+    noHiddenFees: "Sin cargos ocultos. Sin compromisos mensuales. El ancho de banda nunca vence. Descuentos autom\u00e1ticos por volumen a medida que aumenta la demanda.",
+    orderNowPrefix: "Ped\u00ed ahora:",
+    plugPlay: "Plug \u0026 Play con 3 l\u00edneas de c\u00f3digo",
+    poolLabel: "Pool:",
+    residentialDynamic: "Residencial Din\u00e1mico",
+    residentialLocations: "Ubicaciones SOCKS5 residenciales",
+    residentialNetwork: "Red residencial SOCKS5",
+    residentialPeerIPs: "IPs residenciales peer",
+    scaleBandwidth: "Escal\u00e1 tu ancho de banda y conserv\u00e1 tu saldo",
+    selectedBandwidth: "Ancho de banda seleccionado:",
+    stickyComingSoon: "ISP residencial Sticky - Pr\u00f3ximamente",
+    targetGeolocation: "Geolocalizaci\u00f3n objetivo:",
+    targetLocation: "Ubicaci\u00f3n objetivo:",
+    totalOrderCost: "Costo total del pedido:",
+    transparentPayg: "Precios transparentes por uso",
+    volumeDiscount: "\u00a1Descuento por volumen aplicado!",
+
+    // Dashboard UI Navigation Terms
+    proxyMarket: "Mercado de Proxies",
+    myProxies: "Mis Proxies",
+    history: "Historial",
+    payments: "Pagos",
+    paymentWalletLabel: "Billetera",
+    paymentAddPayment: "Agregar pago",
+    paymentAddFundsDescription: "Agregá fondos a tu saldo de NAVA SOCKS usando los métodos de pago con criptomonedas compatibles.",
+    paymentCurrentBalance: "Saldo actual",
+    paymentAddPaymentButton: "AGREGAR PAGO",
+    paymentWalletActivity: "Actividad de la billetera",
+    paymentTopupsHistory: "Historial de recargas",
+    paymentTopupsDescription: "Consultá las recargas de tu billetera, incluidos los depósitos de BTC, LTC y USDT.",
+    paymentTopupsHistoryButton: "HISTORIAL DE RECARGAS",
+    paymentWalletSpending: "Gastos de la billetera",
+    paymentExpensesHistory: "Historial de gastos",
+    paymentExpensesDescription: "Consultá el dinero gastado de tu saldo, incluidas las compras de proxies y los cargos por revelar IP.",
+    paymentExpensesHistoryButton: "HISTORIAL DE GASTOS",
+    ipTools: "Herramientas IP",
+    support: "Soporte",
+
+    // Dashboard Layout Frames & Cards
+    controlPlaneLabel: "NAVA SOCKS Control Plane",
+    proxyMarketAndInventory: "Mercado de Proxies e Inventario",
+    dashboardSubDescription: "Compr\u00e1 endpoints residenciales y m\u00f3viles por pa\u00eds, estado y ciudad. Verificaci\u00f3n de ping en vivo y carrito.",
+    gridOnlineLabel: "Red en l\u00ednea",
+    peersLabel: "peers",
+    accountBalance: "Saldo de cuenta",
+    ownedProxies: "Proxies adquiridos",
+    cartLabel: "Carrito",
+    cartEmpty: "Vac\u00edo",
+    visiblePool: "Pool disponible",
+    buyAll: "COMPRAR TODO",
+
+    // Market Table Filters & Options
+    filterAnyType: "Cualquier tipo",
+    filterNewest: "M\u00e1s nuevos",
+    filterLowestPing: "Ping m\u00e1s bajo",
+    filterFastest: "M\u00e1s r\u00e1pidos",
+    filterPrice: "Precio",
+    filterReset: "Restablecer",
+
+    // Market Table System Headers
+    tableHeaderIp: "IP",
+    tableHeaderDomain: "DOMINIO",
+    tableHeaderState: "ESTADO",
+    tableHeaderCity: "CIUDAD",
+    tableHeaderIsp: "ISP",
+    tableHeaderZip: "C\u00d3DIGO POSTAL",
+    tableHeaderSpeed: "VELOCIDAD",
+    tableHeaderPing: "PING",
+    tableHeaderType: "TIPO",
+    tableHeaderAdded: "A\u00d1ADIDO",
+    tableHeaderPrice: "PRECIO",
+    revealIpTooltip: "Revelar IP - $0.05",
+    loadingNavaSocks: "Cargando NAVA SOCKS...",
+    noEndpointsMatch: "No hay proxies que coincidan con los filtros.",
+    pagePrev: "Anterior",
+    pageNext: "Siguiente",
+
+    // IP Details Panel Buttons
+    ipDetailsHeader: "DETALLES DE IP",
+    panelTabInfo: "INFO",
+    panelTabGeo: "GEO",
+    panelTabBlacklists: "LISTAS NEGRAS",
+    actionBuyIp: "COMPRAR IP"
+  },
+    tr: {
+    enterpriseGrid: "KURUMSAL PROXY A\u011eI",
+    onlineIps: "75M+ IP \u00e7evrimi\u00e7i",
+    pricing: "Fiyatlar ve Planlar",
+    networkSpecs: "A\u011f \u00d6zellikleri",
+    globalNodes: "Global D\u00fc\u011f\u00fcmler",
+    dashboard: "Kontrol Paneli",
+    topUp: "BAK\u0130YE Y\u00dcKLE",
+    signOut: "\u00c7\u0131k\u0131\u015f Yap",
+    login: "Giri\u015f Yap",
+    signup: "Kaydol",
+    createAccount: "Hesap Olu\u015ftur",
+    selectLanguage: "Dil se\u00e7",
+    switchToDarkMode: "Koyu moda ge\u00e7",
+    switchToLightMode: "A\u00e7\u0131k moda ge\u00e7",
+    darkMode: "Koyu mod",
+    lightMode: "A\u00e7\u0131k mod",
+    anonymity: "Anonimlik:",
+    automatedGateways: "Otomatik a\u011f ge\u00e7itleri:",
+    availabilityByLocation: "Konut proxy kullan\u0131labilirli\u011fi konuma g\u00f6re de\u011fi\u015fir",
+    averageResponseLatency: "Ortalama yan\u0131t gecikmesi",
+    calculatedRate: "Hesaplanan \u00fccret",
+    carrierISP: "Operat\u00f6r/ISP:",
+    compatibleOutOfBox: "Puppeteer, Playwright, Selenium, Scrapy ve t\u00fcm \u00f6zel bot betikleriyle do\u011frudan uyumludur.",
+    concurrencyLabel: "E\u015fzamanl\u0131l\u0131k:",
+    connectionString: "Ba\u011flant\u0131 dizesi:",
+    copied: "Kopyaland\u0131!",
+    copyCode: "Kodu Kopyala",
+    countriesTerritories: "\u00dclkeler ve b\u00f6lgeler",
+    cryptoOnly: "Yaln\u0131zca kripto",
+    cryptoPayments: "Kripto \u00f6demeleri: USDT / BTC / LTC",
+    datacenterComingSoon: "Datacenter - Yak\u0131nda",
+    eliteTier1: "Elite / Seviye 1",
+    establishingHandshake: "SSL handshake kuruluyor...",
+    executeProxyPing: "Canl\u0131 Proxy Ping \u00c7al\u0131\u015ft\u0131r",
+    exitIPv4: "\u00c7\u0131k\u0131\u015f IPv4:",
+    handshakeOk: "Handshake 200 OK",
+    heroDescriptionLead: "Konut IP eri\u015fimini kullan\u0131n",
+    heroDescriptionRest: ", g\u00fcvenilir konut ba\u011flant\u0131s\u0131 ve konuma g\u00f6re hedeflenmi\u015f konut IP'leri. Konum hedefleme ve esnek oturumlar\u0131 destekleyen konut SOCKS5 eri\u015fimi.",
+    heroNetwork: "Konut SOCKS5 Proxy A\u011f\u0131",
+    heroTitle1: "Engellenmesi zor proxyler.",
+    heroTitle2: "Saniyeden k\u0131sa h\u0131z.",
+    includedEveryPlan: "Her plana dahil:",
+    instantDelivery: "An\u0131nda teslimat",
+    instantProvisioning: "An\u0131nda otomatik provizyon",
+    integration: "Konut SOCKS5 Entegrasyonu",
+    latencySuffix: "Gecikme",
+    liveGatewaySandbox: "Canl\u0131 a\u011f ge\u00e7idi sanal alan\u0131",
+    loginDashboard: "Proxy Paneline Giri\u015f Yap",
+    mobileComingSoon: "Mobil 4G/5G - Yak\u0131nda",
+    networkUptimeSLA: "A\u011f \u00e7al\u0131\u015fma s\u00fcresi SLA",
+    noHiddenFees: "Gizli \u00fccret yok. Ayl\u0131k taahh\u00fct yok. Bant geni\u015fli\u011fi s\u00fcrezi dolmaz. Talep artt\u0131k\u00e7a otomatik hacim indirimleri uygulan\u0131r.",
+    orderNowPrefix: "\u015eimdi sipari\u015f ver:",
+    plugPlay: "3 sat\u0131r kod ile Plug \u0026 Play",
+    poolLabel: "Havuz:",
+    residentialDynamic: "Konut Dinamik",
+    residentialLocations: "Konut SOCKS5 Konumlar\u0131",
+    residentialNetwork: "Konut SOCKS5 A\u011f\u0131",
+    residentialPeerIPs: "Konut e\u015f IP'leri",
+    scaleBandwidth: "Bant geni\u015fli\u011fini art\u0131r\u0131n, bakiyenizi koruyun",
+    selectedBandwidth: "Se\u00e7ilen bant geni\u015fli\u011fi:",
+    stickyComingSoon: "Konut Sticky ISP - Yak\u0131nda",
+    targetGeolocation: "Hedef konum:",
+    targetLocation: "Hedef konum:",
+    totalOrderCost: "Toplam sipari\u015f maliyeti:",
+    transparentPayg: "\u015eeffaf kulland\u0131k\u00e7a \u00f6de fiyatland\u0131rmas\u0131",
+    volumeDiscount: "Hacim indirimi uyguland\u0131!",
+
+    // Dashboard UI Navigation Terms
+    proxyMarket: "Proxy Market",
+    myProxies: "Proxy'lerim",
+    history: "Ge\u00e7mi\u015f",
+    payments: "\u00d6demeler",
+    paymentWalletLabel: "Cüzdan",
+    paymentAddPayment: "Ödeme Ekle",
+    paymentAddFundsDescription: "Desteklenen kripto ödeme yöntemlerini kullanarak NAVA SOCKS bakiyenize para ekleyin.",
+    paymentCurrentBalance: "Mevcut bakiye",
+    paymentAddPaymentButton: "ÖDEME EKLE",
+    paymentWalletActivity: "Cüzdan Etkinliği",
+    paymentTopupsHistory: "Yükleme Geçmişi",
+    paymentTopupsDescription: "BTC, LTC ve USDT yatırımları dahil cüzdan yüklemelerinizi görüntüleyin.",
+    paymentTopupsHistoryButton: "YÜKLEME GEÇMİŞİ",
+    paymentWalletSpending: "Cüzdan Harcamaları",
+    paymentExpensesHistory: "Harcama Geçmişi",
+    paymentExpensesDescription: "Proxy satın alımları ve IP gösterme ücretleri dahil bakiyenizden harcanan tutarı görüntüleyin.",
+    paymentExpensesHistoryButton: "HARCAMA GEÇMİŞİ",
+    ipTools: "IP Ara\u00e7lar\u0131",
+    support: "Destek",
+
+    // Dashboard Layout Frames & Cards
+    controlPlaneLabel: "NAVA SOCKS Control Plane",
+    proxyMarketAndInventory: "Proxy Pazar\u0131 & Envanter",
+    dashboardSubDescription: "\u00dclke, eyalet ve \u015fehre g\u00f6re ISS / mobil u\u00e7 noktalar\u0131 sat\u0131n al\u0131n. Bayraklar, canl\u0131 ping ve sepet kontrol\u00fc.",
+    gridOnlineLabel: "A\u011f \u00e7evrimi\u00e7i",
+    peersLabel: "peers",
+    accountBalance: "Hesap bakiyesi",
+    ownedProxies: "Al\u0131nan proxyler",
+    cartLabel: "Sepet",
+    cartEmpty: "Bo\u015f",
+    visiblePool: "G\u00f6r\u00fcn\u00fcr havuz",
+    buyAll: "T\u00dcM\u00dcN\u00dc SATIN AL",
+
+    // Market Table Filters & Options
+    filterAnyType: "Herhangi bir t\u00fcr",
+    filterNewest: "En yeni",
+    filterLowestPing: "En d\u00fc\u015f\u00fck ping",
+    filterFastest: "En h\u0131zl\u0131",
+    filterPrice: "Fiyat",
+    filterReset: "S\u0131f\u0131rla",
+
+    // Market Table System Headers
+    tableHeaderIp: "IP",
+    tableHeaderDomain: "ALAN ADI",
+    tableHeaderState: "EYALET",
+    tableHeaderCity: "\u015eEH\u0130R",
+    tableHeaderIsp: "ISP",
+    tableHeaderZip: "POSTA KODU",
+    tableHeaderSpeed: "HIZ",
+    tableHeaderPing: "PING",
+    tableHeaderType: "T\u00dcR",
+    tableHeaderAdded: "EKLEND\u0130",
+    tableHeaderPrice: "F\u0130YAT",
+    revealIpTooltip: "IP'yi G\u00f6ster - $0.05",
+    loadingNavaSocks: "NAVA SOCKS Y\u00fckleniyor...",
+    noEndpointsMatch: "Bu filtrelere uygun u\u015f nokta bulunamad\u0131.",
+    pagePrev: "\u00d6nceki",
+    pageNext: "Sonraki",
+
+    // IP Details Panel Buttons
+    ipDetailsHeader: "IP DETAYLARI",
+    panelTabInfo: "B\u0130LG\u0130",
+    panelTabGeo: "GEO",
+    panelTabBlacklists: "KARA L\u0130STELER",
+        actionBuyIp: "IP SATIN AL"
+  },
+};
+
+type SitePreferencesContextValue = {
+  dark: boolean;
+  language: SiteLanguage;
+  setDark: (value: boolean) => void;
+  setLanguage: (value: SiteLanguage) => void;
+  t: (key: TranslationKey) => string;
+};
+
+const SitePreferencesContext =
+  createContext<SitePreferencesContextValue | null>(null);
+
+const THEME_KEY = "navasocks-theme";
+const LANGUAGE_KEY = "navasocks-language";
+
+function applyThemeToDocument(value: boolean) {
+  if (typeof document === "undefined") return;
+
+  const root = document.documentElement;
+  const backgroundColor = value ? "#07101d" : "#f1f5f9";
+
+  root.dataset.theme = value ? "dark" : "light";
+  root.classList.toggle("dark", value);
+  root.style.backgroundColor = backgroundColor;
+  root.style.colorScheme = value ? "dark" : "light";
+  root.style.setProperty("--page-bg", backgroundColor);
+}
+
+export function SitePreferencesProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  // The server and first browser render must use the same value.
+  // The saved preference is applied immediately after hydration.
+  const [dark, setDarkState] = useState(true);
+  const [language, setLanguageState] = useState<SiteLanguage>("en");
+
+  useEffect(() => {
+  const savedTheme =
+    window.localStorage.getItem(THEME_KEY);
+
+  const initialDark =
+    savedTheme === "dark"
+      ? true
+      : savedTheme === "light"
+        ? false
+        : document.documentElement.dataset.theme !==
+            "light";
+
+  setDarkState(initialDark);
+  applyThemeToDocument(initialDark);
+
+  const savedLanguage =
+    window.localStorage.getItem(LANGUAGE_KEY);
+
+  if (
+    savedLanguage &&
+    SITE_LANGUAGES.some(
+      (item) => item.code === savedLanguage
+    )
+  ) {
+    setLanguageState(
+      savedLanguage as SiteLanguage
+    );
+  }
+}, []);
+
+  const setDark = (value: boolean) => {
+    setDarkState(value);
+    applyThemeToDocument(value);
+
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(THEME_KEY, value ? "dark" : "light");
+    }
+  };
+
+  const setLanguage = (value: SiteLanguage) => {
+    setLanguageState(value);
+    window.localStorage.setItem(LANGUAGE_KEY, value);
+  };
+
+  const t = (key: TranslationKey): string => {
+    return SITE_TRANSLATIONS[language]?.[key] ?? SITE_TRANSLATIONS.en[key] ?? key;
+  };
+
+  const value = useMemo(
+    () => ({
+      dark,
+      language,
+      setDark,
+      setLanguage,
+      t,
+    }),
+    [dark, language],
+  );
+
+  return (
+    <SitePreferencesContext.Provider value={value}>
+      {children}
+    </SitePreferencesContext.Provider>
+  );
+}
+
+export function useSitePreferences() {
+  const context = useContext(SitePreferencesContext);
+
+  if (!context) {
+    throw new Error(
+      "useSitePreferences must be used inside SitePreferencesProvider"
+    );
+  }
+
+  return context;
+}

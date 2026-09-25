@@ -1,0 +1,220 @@
+NAVA SOCKS — OPENCODE SECOND-PASS VERIFIED BASELINE
+Generated from the second-pass OpenCode source verification.
+Read-only verification pass: no application files were modified.
+
+1. AUTHENTICATION FLOW: /auth/login → /dashboard
+
+Sequence (confirmed from source):
+1) src/app/auth/login/page.tsx:1,276 — client page and submit handler.
+2) src/app/auth/login/page.tsx:285-295 — POSTs credentials to /api/auth/login.
+3) src/app/api/auth/login/route.ts:13,18 — accepts username or body.email; calls findUserByLogin.
+4) src/lib/auth.ts:46-54 — lookup by username/email.
+5) src/app/api/auth/login/route.ts:23-25 — banned/suspended accounts receive 403.
+6) src/app/api/auth/login/route.ts:27; src/lib/auth.ts:11-13 — bcrypt password verification.
+7) src/app/api/auth/login/route.ts:32-44 — 2FA branch; supplied code is only checked for length 6.
+8) src/app/api/auth/login/route.ts:46 → src/lib/auth.ts:56-65 — setSessionUser writes nsocks_session = user.id.toString(); httpOnly, sameSite=lax, secure only in production, maxAge 7 days.
+9) src/app/auth/login/page.tsx:297,299,305-315 — client redirect to /dashboard or /admin.
+10) src/app/dashboard/layout.tsx:9-13 — getSessionUser(); redirect("/auth/login") when no user.
+11) src/lib/auth.ts:15-44 — reads cookie, parseInt, looks up user, rejects banned/suspended.
+12) src/app/dashboard/page.tsx:246,2023,2037 — dashboard render entry.
+13) src/app/dashboard/page.tsx:331-334,340 — dashboard fetches listings/subscriptions and uses returned user.
+14) src/app/api/listings/route.ts:89,148-151 — guarded listings API returns session user.
+15) src/components/Navbar.tsx:287,314,317 — independently fetches /api/auth/me.
+
+Confirmed facts:
+- nsocks_session contains the raw integer user ID.
+- It is not signed.
+- It is not stored server-side as a session record.
+- Logout deletes the cookie via src/app/api/auth/logout/route.ts:4-12 and src/lib/auth.ts:67-70.
+
+Runtime caveat:
+- Actual HTTP redirect status/behavior was not executed because dependencies were not installed; this portion relies on normal Next.js App Router semantics.
+
+2. /dashboard/history PROTECTION
+
+src/app/dashboard/layout.tsx:9-13 is the ancestor guard:
+const user = await getSessionUser();
+if (!user) { redirect("/auth/login"); }
+
+src/app/dashboard/history/page.tsx has no auth logic. Its useEffect at roughly 289-314 fetches /api/history; it handles non-OK responses.
+
+src/app/api/history/route.ts:14-19 independently returns 401 if getSessionUser() is null.
+
+src/lib/auth.ts:40-43 catches errors in getSessionUser() and returns null, producing fail-closed behavior at the dashboard layout.
+
+Confirmed:
+- The parent dashboard layout contains the auth redirect.
+- The history API independently requires a session.
+- The history page itself contains no client-side auth redirect.
+
+Runtime caveat:
+- Parent-layout execution and actual HTTP 307 redirect were not observed by running the app.
+
+3. SIGNED-OUT /dashboard/history
+
+Expected from source:
+- dashboard/layout.tsx executes getSessionUser()
+- no cookie → getSessionUser() returns null
+- layout redirects to /auth/login
+- page should not render
+
+If the page did render, /api/history would return 401 and the page would show an error state.
+
+The HTTP outcome itself was not runtime-tested.
+
+4. MOST IMPORTANT AUTHENTICATION SECURITY WEAKNESS
+
+Unauthenticated password reset without proof of account ownership.
+
+Location:
+src/app/api/auth/forgot-password/route.ts:17-37, with surrounding 7,19-25,39-44.
+
+Confirmed behavior:
+- POST route requires no session.
+- Caller supplies an email/username.
+- findUserByLogin resolves the account.
+- If newPassword is supplied, lines 31-32 hash it and update users.passwordHash.
+- A mockToken is generated with Math.random().
+- No source file in src/ stores, validates, expires, or otherwise verifies that token.
+- No delivery channel or token table exists in the dependency/source footprint examined.
+- There is no demonstrated rate limiter in the repository.
+
+Why it matters:
+An anonymous caller who knows an account identifier could set that account's password through this route and then log in.
+
+The report identifies a hardcoded admin seed account at src/db/seed.ts:205-215 as further impact context.
+
+5. MOST IMPORTANT DATABASE/SCHEMA INCONSISTENCY
+
+src/db/schema.ts declares columns that src/db/init.ts does not create.
+
+Affected tables and missing columns include:
+
+users:
+provider, transport_host, transport_port, provider_credential_ref,
+access_username, access_password_encrypted, access_host, access_port,
+public_access_host, public_access_port
+
+user_subscriptions:
+same 10 columns
+
+transactions:
+same 10 columns
+
+api_keys:
+same 10 columns
+
+proxy_listings:
+provider, transport_host, transport_port, provider_credential_ref
+
+owned_proxies:
+same 10 columns
+
+Declared locations:
+src/db/schema.ts:15-24,53-62,156-165,196-201,236-239,253-262
+
+init locations:
+src/db/init.ts:8-21,40-52,70-82,101-108,121-142,144-155
+
+Confirmed runtime consumers:
+- src/app/api/history/route.ts:36-44 explicitly projects ownedProxies provider/transport/access/public-access columns.
+- src/app/api/listings/buy/route.ts:45-49 full-selects proxyListings; 97-125 writes provider/transport/access fields.
+- src/app/api/listings/route.ts:131-136 full-selects ownedProxies when authenticated.
+- src/app/api/listings/owned/route.ts:15,33 full-selects ownedProxies.
+
+initDb() is invoked at request time from:
+- src/app/api/health/route.ts:11
+- src/app/api/auth/signup/route.ts:10
+- src/app/api/listings/details/route.ts:420
+
+No migration scripts or migrations directory were found.
+
+Important uncertainty:
+- The live database was not inspected, so it is unknown whether those columns already exist from an external migration or previous setup. The drift is confirmed; whether it is currently fatal in production is not confirmed.
+
+6. MOST IMPORTANT API/UI MISMATCH
+
+Refund status/submission flow is inconsistent.
+
+Caller:
+src/app/dashboard/page.tsx:615 calls fetch("/api/support/tickets?scope=refunds", { cache:"no-store" }). No method means GET.
+
+Submission:
+src/app/dashboard/page.tsx:559-567 calls POST /api/support/tickets.
+
+Server:
+src/app/api/support/tickets/route.ts:10 exports only POST.
+src/app/api/support/tickets/route.ts:12-18 unconditionally returns 410:
+"Refund requests are currently disabled."
+
+Therefore:
+- The UI polls a GET endpoint for refund data, but there is no GET export.
+- The POST submission always returns 410.
+- The UI expects refundProxyIds at dashboard/page.tsx:625.
+
+Runtime caveat:
+- Exact Next.js HTTP status for the missing GET method was not observed because the app was not run.
+
+Runner-up:
+src/app/auth/login/page.tsx:311-315 redirects admin to /admin, but no src/app/admin/** route exists.
+
+7. BIGGEST MAINTAINABILITY PROBLEM
+
+Multiple schema sources of truth with no migration system.
+
+Sources:
+1) src/db/schema.ts — Drizzle definitions.
+2) src/db/init.ts:7-258 — raw CREATE TABLE IF NOT EXISTS statements.
+3) src/app/api/support/create/route.ts:7-65 — route-level creation of dashboard_support_tickets and dashboard_support_messages plus backfill.
+
+No db scripts exist in package.json for generate/push/migrate, and no migrations directory was found.
+
+Consequence:
+Schema changes must be synchronized across disconnected mechanisms, and drift has already occurred.
+
+Another major maintainability issue:
+src/app/dashboard/page.tsx is about 100,557 bytes / 2,037 lines and contains a dashboard tab history implementation in addition to a separate /dashboard/history route.
+
+8. SCOPE CLASSIFICATION
+
+Small/isolated:
+- Refund GET/POST mismatch: dashboard/page.tsx:615 or support/tickets route.
+- Missing /admin target.
+- Refund UI wired to disabled 410 endpoint.
+- Object-level authorization issue in src/app/api/listings/owned/route.ts:32 — update is scoped by id but not userId.
+- Stale fallback-to-demo-user comment in subscriptions route.
+- Stray/backup files in dashboard/history.
+
+Contained multi-file:
+- Session hardening around src/lib/auth.ts:15-65 and login handler; existing cookies would become invalid.
+- Real 2FA around toggle-2fa route, login route, and schema semantics; requires migration for stored values.
+
+Architectural:
+- Correct password reset requires token storage, expiry/one-time-use, delivery channel, and rate limiting.
+- Schema drift/no migrations requires choosing a source of truth and establishing baseline migrations.
+- Payment subsystem has legacy and newer ledgers plus missing in-repo scheduler, requiring broader design work.
+- Dashboard monolith decomposition is cross-cutting.
+- Duplicate theme and translation systems are structural cleanup.
+
+9. PROPOSED INVESTIGATION ORDER
+
+1) src/app/api/auth/forgot-password/route.ts — confirm end-to-end whether any validation exists outside this file and whether production infrastructure adds controls.
+2) src/lib/auth.ts + src/app/api/auth/login/route.ts — map session consumers before any session-format change.
+3) Compare live DB columns with schema.ts/init.ts to determine whether drift is latent or live-breaking.
+4) Audit object-level authorization across API routes, starting with listings/owned.
+5) Runtime-confirm refund API status and /admin redirect once the app can be run.
+6) Trace create_deposit → watcher → crediting and identify who invokes the payment-cycle endpoint.
+7) Decide schema source of truth and migration strategy.
+8) Address structural debt after functional/security priorities.
+
+10. OVERALL VERIFICATION RESULT
+
+All cited code paths required for the analysis were inspected.
+
+The second-pass report distinguishes:
+- VERIFIED: source behavior and exact code locations.
+- RUNTIME/FRAMEWORK ASSUMPTION: behavior not directly executed.
+- UNVERIFIABLE HERE: live database/external deployment state.
+
+No application files were created, modified, deleted, renamed, moved, or formatted during this verification pass.
+No secret values were printed or exposed.

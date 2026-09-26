@@ -1,146 +1,472 @@
-
-
-MUSE SPARK 1.3 FREE
-
-
-
-
 CHALLENGE 1 RESULT
+Scope of work: read-only inspection + one minimal source edit + validation.
+Project: Navasocks (Next.js 16.3.5 App Router, Drizzle ORM, PostgreSQL)
+Date: 2026-09-26
+Source file hand-edited: 1 (src/app/api/listings/owned/route.ts)
+Report file created: 1 (this file)
 
-Working copy: C:\Users\Sire-F\OneDrive\Desktop\My Projects\Navasocks-TEST-MUSE-SPARK
-Note: this copy is not a git repository, so no `git diff` was available.
-The "diff" below was verified by reading the actual source before and after editing.
-
-A. Original vulnerability
-- exact file: src/app/api/listings/owned/route.ts
-- exact line(s): POST handler, line 32 (original numbering); line 4 import line (original)
-- what was wrong:
-  - Line 4 (original): `import { eq } from "drizzle-orm";`
-  - Line 32 (original):
-    `await db.update(ownedProxies).set({ locked: Boolean(locked) }).where(eq(ownedProxies.id, id));`
-  - The route required authentication (401 when no session user) and read the
-    client-supplied `id`/`locked` from the JSON body, but the UPDATE's WHERE
-    clause constrained ONLY the record id. It did not constrain the record to
-    the current session user, even though `sessionUser` was available in scope
-    and the GET handler plus the POST re-select both correctly filter by
-    `ownedProxies.userId = sessionUser.id`.
-
-B. Root cause
-- Any authenticated user could send POST /api/listings/owned with an arbitrary
-  `{"id": <victim record id>, "locked": <bool>}` body. Because the WHERE clause
-  was only `owned_proxies.id = :id`, the database updated whichever row had
-  that id, regardless of its `user_id` column. This is an object-level
-  authorization (IDOR/BOLA) flaw: authentication was present, but ownership
-  authorization on the write was missing. The subsequent re-select
-  (`where(eq(ownedProxies.userId, sessionUser.id))`) only returns the caller's
-  own rows, so the attacker does not see the victim's row in the response, but
-  the victim's `locked` value has already been changed.
-
-C. Change made
-- exact file changed: src/app/api/listings/owned/route.ts (only this source file)
-- concise description of the modification (2 lines, minimum change):
-  - Line 4: `import { eq } from "drizzle-orm";` -> `import { and, eq } from "drizzle-orm";`
-  - Line 32: `.where(eq(ownedProxies.id, id))` ->
-    `.where(and(eq(ownedProxies.id, id), eq(ownedProxies.userId, sessionUser.id)))`
-  - Effect: an authenticated user can now update ONLY the owned-proxy record
-    that matches BOTH the requested record ID AND the current session user's id.
-    A request for another user's record id matches zero rows, so no other
-    user's record is modified. Route, HTTP method (POST), request format
-    (`{id, locked}`), response format (`{success, owned}` / error shapes),
-    GET/PUT behavior, UI, and the authentication implementation were preserved.
-
-D. Files changed
-- complete list of source changes:
-  - src/app/api/listings/owned/route.ts (2 lines: import + POST WHERE clause)
-- No other source file was modified or created.
-- node_modules/ was populated by the required `npm ci` (build tooling only,
-  not a source change).
-- This report file (OPENCODE-CHALLENGE-01-RESULT.txt) is the ONE created artifact.
-
-E. Validation
-- npm ci result:
-  - node_modules was initially MISSING.
-  - First foreground `npm ci` exceeded the 600s tool timeout with a partial
-    install (about 317 node_modules entries, .bin/tsc missing).
-  - Retry in background with `npm ci --no-audit --no-fund` completed
-    successfully: EXIT 0, "added 396 packages in 12m".
-- npm run typecheck result:
-  - PASS. `npm run typecheck` (tsc --noEmit) exited 0 with no errors, after the
-    completed install. (The one earlier failure, "'tsc' is not recognized",
-    was caused solely by the incomplete first install and was resolved by the
-    successful install.)
-- npm run build result:
-  - PARTIAL / ENVIRONMENT-LIMITED. `npm run build` compiled successfully
-    ("Compiled successfully in 85s", "Finished TypeScript in 41s"), proving the
-    edited file compiles, but page-data collection then failed with:
-    `Error: Failed to collect configuration for /api/auth/login` caused by
-    `Error: DATABASE_URL is required` (thrown at src/db/index.ts:7).
-    The environment provides no database URL, so the build cannot collect page
-    data. This failure is in an untouched route (/api/auth/login) and the
-    shared db module, not in the edited file. No code fix was applied for it
-    (out of scope; changing db/auth behavior is prohibited).
-- runtime test result:
-  - NOT POSSIBLE. No database/environment is available in this working copy
-    (DATABASE_URL unset; no test DB provisioned), so a live authenticated
-    cross-user update test could not be performed. No runtime test is claimed
-    or invented. Verification rests on source inspection (before/after reads),
-    TypeScript compilation, and Next.js compilation.
-
-F. Diff scope
-- Unrelated files were untouched: YES.
-- Confirmed by reading the edited file before and after (no git available):
-  only the import line and the POST UPDATE WHERE clause in
-  src/app/api/listings/owned/route.ts differ. Route path, HTTP method, request
-  body handling (`id`/`locked`, "Missing id" 400, "Unauthorized" 401), response
-  JSON shapes, GET handler, PUT stub, src/lib/auth.ts, src/db/schema.ts, and
-  all UI/payment/crypto/localization/theme/dashboard/support/login/password-reset
-  code are unchanged. No .env files, keys, passwords, wallet/private keys,
-  credentials, open-terminal-key.txt, or other secret material were read,
-  printed, exposed, modified, deleted, or renamed. No GitHub changes were made.
-
-G. Problems encountered
-- Every error encountered and how it was resolved:
-  1. `git diff --stat` / `git status` unusable: working copy is not a git
-     repository ("Not a git repository"). Resolved by verifying the change via
-     full file reads before and after editing instead of a git diff.
-  2. Windows PowerShell has no `head` command (initial combined shell command
-     failed on `head -n 50`). Resolved by using PowerShell-native commands only.
-  3. `npm ci` foreground run timed out after 600s with a partial install;
-     node_modules present but incomplete (.bin/tsc missing). Resolved by
-     re-running `npm ci --no-audit --no-fund` in the background to completion
-     (EXIT 0, 396 packages).
-  4. `npm run typecheck` initially failed with "'tsc' is not recognized" due
-     to the incomplete install above. Resolved by the completed install;
-     re-ran typecheck: PASS (exit 0).
-  5. `npm run build` failed at "Collecting page data" for /api/auth/login with
-     "DATABASE_URL is required" (src/db/index.ts:7). Diagnosed by reading
-     src/db/index.ts (no secrets accessed): the db module throws at import
-     when DATABASE_URL is unset, which breaks Next data collection without a
-     database. This is environmental/pre-existing and unrelated to the edited
-     file (which compiled and type-checked cleanly). No code change made for
-     it, per the minimum-change and scope rules; reported here instead of
-     silently ignored.
-
-H. Remaining concerns
-- Findings discovered during inspection but intentionally NOT changed (per the
-  requirement to fix only the one confirmed issue and preserve auth behavior):
-  1. Session representation (src/lib/auth.ts: setSessionUser/getSessionUser):
-     the `nsocks_session` cookie stores the raw numeric user id with no
-     observed signing or encryption (httpOnly, lax, path-scoped only). A
-     tamper-evident session token is not implemented. NOT changed: login/auth
-     implementation must be preserved.
-  2. Silent no-op on non-owned id: POST returns `{success: true, owned: mine}`
-     even when the UPDATE matched zero rows (e.g., id belongs to another
-     user or does not exist). No affected-row check or 403/404 distinction.
-     NOT changed: response format must be preserved.
-  3. `id` from the request body has no strict type/range validation before use
-     in the query (relies on driver coercion for the serial PK). NOT changed:
-     request format and unrelated behavior must be preserved.
-  4. Unused `users` import in src/app/api/listings/owned/route.ts line 3.
-     NOT changed: minimum-change rule.
-  5. PUT handler is a stub returning `{success: true, persisted: false}`.
-     NOT changed: unrelated behavior.
-  6. General observation: GET correctly scopes reads to the session user; only
-     the POST write was missing the ownership predicate, which is the single
-     issue fixed above. No payment, crypto, localization, theme, dashboard,
-     support, login, or password-reset code was touched.
+line 8
+================================================================================
+A. ORIGINAL VULNERABILITY
+================================================================================
+Exact file:
+    src/app/api/listings/owned/route.ts
+Exact line(s):
+    Line 32 (original numbering, before the edit), inside the exported POST handler:
+        await db.update(ownedProxies).set({ locked: Boolean(locked) }).where(eq(ownedProxies.id, id));
+Supporting context:
+    Line 23: export async function POST(req: Request)
+    Line 25: const sessionUser = await getSessionUser();
+    Line 26-28: 401 guard when there is no session user
+    Line 29-31: body parsed; `const { id, locked } = body;` then `if (!id) return ... 400`
+    Line 32: the update
+    Line 33-34: response re-selects rows scoped to sessionUser.id and returns { success, owned }
+What was wrong:
+    The UPDATE statement was restricted by the primary key ONLY. The predicate was
+    `where "owned_proxies"."id" = <caller-supplied id>`.
+    The handler correctly established WHO the caller is (line 25, `sessionUser`), and
+    correctly used that identity everywhere ELSE in the handler:
+        - line 33: `db.select().from(ownedProxies).where(eq(ownedProxies.userId, sessionUser.id))`
+    but the single statement that MUTATES data (line 32) never referenced
+    `sessionUser.id` at all.
+    Consequently, once any authenticated user passed the 401 gate at lines 26-28, the
+    `id` value taken directly from the request body (line 30) was applied as an absolute
+    row selector against the whole `owned_proxies` table. There was no ownership
+    condition to prevent selecting a row owned by a different account.
+    This is a broken object-level authorization control (IDOR / BOLA class): the
+    authorization decision was made for "is this caller logged in" but never for
+    "does this caller own the object being modified".
+Confirmation basis: this was read directly from the source file before editing, not
+inferred. The original file content was read in full (46 lines) prior to any change.
+================================================================================
+B. ROOT CAUSE
+================================================================================
+Why the original update could affect another user's record:
+1. The table does carry ownership. src/db/schema.ts line 244 declares the column:
+        userId: integer("user_id").references(() => users.id).notNull()
+   So the data model supports ownership scoping; the information was available.
+2. The handler had the owner. src/lib/auth.ts lines 15-44 implement getSessionUser(),
+   which returns an object containing `id` (line 30: `id: user.id`). The route reads it
+   at line 25 as `sessionUser`, so `sessionUser.id` was in scope at line 32.
+3. The update did not use it. Line 32 built its WHERE clause from a single predicate,
+   `eq(ownedProxies.id, id)`, where `id` originates from the untrusted request body
+   (line 30: `const { id, locked } = body;`).
+4. `owned_proxies.id` is `serial("id").primaryKey()` (src/db/schema.ts line 243), i.e.
+   a globally unique, monotonically increasing integer. A global identifier is NOT an
+   ownership identifier. Matching on it alone identifies WHICH row in the entire table,
+   not WHO is entitled to change it.
+5. Therefore any authenticated caller who could supply (or guess/enumerate) another
+   account's row id would cause `locked` to be written on that other account's record.
+   The subsequent response (line 33) re-selected only the caller's own rows, so the
+   attacker's returned payload showed their own list - which visually masked the
+   cross-account write. The mutation and the read-back were scoped differently.
+Net effect: authentication was enforced; authorization (object ownership) was not.
+Note on failure mode before the fix: the original code did not throw, did not log, and
+did not signal an error. A cross-owner update would report `success: true`. This is why
+the defect would not surface in ordinary usage or in error monitoring.
+================================================================================
+C. CHANGE MADE
+================================================================================
+Exact file changed:
+    src/app/api/listings/owned/route.ts
+Concise description:
+    Two lines touched, both inside this one file.
+    (1) Line 4 - added `and` to the existing drizzle-orm import:
+            BEFORE: import { eq } from "drizzle-orm";
+            AFTER:  import { and, eq } from "drizzle-orm";
+    (2) Line 32 - added the ownership condition to the UPDATE WHERE clause,
+        conjoining the existing id predicate with the session user's id:
+            BEFORE (line 32, single line):
+                await db.update(ownedProxies).set({ locked: Boolean(locked) }).where(eq(ownedProxies.id, id));
+            AFTER (lines 32-35):
+                await db
+                  .update(ownedProxies)
+                  .set({ locked: Boolean(locked) })
+                  .where(and(eq(ownedProxies.id, id), eq(ownedProxies.userId, sessionUser.id)));
+    The update now matches a record ONLY when both conditions hold:
+        - owned_proxies.id        == requested record id
+        - owned_proxies.user_id   == sessionUser.id (the authenticated caller)
+    Verified generated SQL (compiled with Drizzle, offline, no database involved):
+        BEFORE: update "owned_proxies" set "locked" = $1 where "owned_proxies"."id" = $2
+                params: [false, 42]
+        AFTER:  update "owned_proxies" set "locked" = $1
+                where ("owned_proxies"."id" = $2 and "owned_proxies"."user_id" = $3)
+                params: [false, 42, 7]
+    Preserved exactly (per requirement 4):
+        - route file and path: src/app/api/listings/owned  (unchanged)
+        - HTTP method: POST  (unchanged)
+        - request format: JSON body { id, locked }  (unchanged)
+        - response format: { success: true, owned: [...] }  (unchanged)
+        - the 400 "Missing id" branch (line 31) and the 401 branch (lines 26-28)  (unchanged)
+        - GET handler (lines 9-21) and PUT handler (lines 41-46)  (unchanged)
+        - unrelated behavior, UI, and the authentication implementation  (unchanged)
+        - no code outside this file was edited
+    Deliberate non-change: when 0 rows match (foreign or non-existent id), the handler
+    still returns HTTP 200 { success: true, owned: [...] } with an unchanged caller-owned
+    list. Adding a 404/not-found response would have altered the response format, which
+    requirement 4 forbids. The data protection is nonetheless in force: the foreign row
+    is simply not matched.
+================================================================================
+D. FILES CHANGED
+================================================================================
+Hand-edited source files (complete list - exactly one):
+    1. src/app/api/listings/owned/route.ts   (lines 4 and 32; file grew 46 -> 49 lines)
+Created by this task (exactly one, as required):
+    2. OPENCODE-CHALLENGE-01-RESULT.txt      (this report)
+NOT source changes, but present as a side effect of running the mandated validation
+commands (npm ci / typecheck / build / dev). Listed for full disclosure:
+    - node_modules/                created by `npm ci` (requirement 9)
+    - .next/                       created by `npm run build` and `next dev` (requirement 9)
+    - tsconfig.tsbuildinfo         created by `tsc --noEmit` (tsconfig has "incremental": true)
+    - next-env.d.ts                PRE-EXISTING since 2026-09-22; auto-regenerated by Next.js
+                                   during build/dev. File is Next-owned and marked
+                                   "NOTE: This file should not be edited". Content is the
+                                   standard 2 references + .next types imports. Not hand-edited.
+    - AGENTS.md, CLAUDE.md         AUTO-SCAFFOLDED BY `next dev` at 2026-09-26 20:57:12
+                                   (neither existed before; Next creates both when neither
+                                   exists - see node_modules/next/dist/server/lib/
+                                   generate-agent-files.js line 111). Both were DELETED
+                                   afterward to restore the tree and honor the
+                                   "create ONE report file only" constraint. Disclosed in G.
+Untouched and pre-existing:
+    - OPENCODE-VERIFIED-BASELINE.txt   (created 2026-09-26 20:17:47 by an earlier task;
+                                        not modified during this challenge)
+    - .gitignore, .vercelignore, package.json, package-lock.json, tsconfig.json,
+      next.config.ts, eslint.config.mjs, postcss.config.mjs, drizzle.config.ts
+    - all other 59 files under src/
+Explicitly NOT modified (per requirements 5 and 6):
+    - payment code, crypto code, localization, theme code, dashboard UI, support code,
+      login code, password-reset code
+    - no .env files, API keys, passwords, wallet keys, private keys, credentials,
+      open-terminal-key.txt, or any secret material was read, printed, exposed,
+      modified, deleted, or renamed
+    - no GitHub changes (this working copy is not a git repository and no git command
+      was executed)
+    - no dependency was added, removed, or upgraded; `npm audit fix` was deliberately
+      NOT run despite reported vulnerabilities (see H.12)
+================================================================================
+E. VALIDATION
+================================================================================
+Environment observed before validation:
+    node      : v24.20.0
+    npm       : 12.0.2
+    node_modules : MISSING
+    package-lock.json : PRESENT
+    DATABASE_URL / POSTGRES_URL / PG_URL / DB_URL : NOT SET
+    .env / .env.local : ABSENT
+    PostgreSQL reachable on 127.0.0.1:5432 : NO (ECONNREFUSED)
+E.1  npm ci                                          RESULT: PASS (exit 0)
+    Output (tail):
+        added 396 packages, and audited 397 packages in 4m
+        151 packages are looking for funding
+        5 vulnerabilities (4 moderate, 1 high)
+    Notes:
+    - Completed successfully; node_modules was created from package-lock.json.
+    - Two npm warnings appeared; neither is a failure:
+        * "npm warn install-scripts .npmrc allow-scripts setting is being ignored
+           because package.json declares its own allowScripts field" - informational.
+        * "npm warn deprecated @esbuild-kit/esm-loader / @esbuild-kit/core-utils /
+           eslint@9.39.4" - deprecation notices only.
+    - The 5 reported vulnerabilities are pre-existing lockfile advisories. They were
+      not remediated because dependency changes are out of scope (see H.12).
+    - PowerShell rendered npm's stderr notices as "NativeCommandError" blocks. This is
+      a PowerShell/npm interop artifact on Windows, not a command failure; the exit
+      code was 0.
+E.2  npm run typecheck  (script: "tsc --noEmit")      RESULT: PASS (exit 0)
+    Run twice:
+        - after the source edit,          exit 0
+        - after restoring the tree (final), exit 0
+    No TypeScript errors. The edited file's new `and(...)` usage type-checks against
+    drizzle-orm.
+E.3  npm run build  (script: "next build")            RESULT: PASS on re-run (exit 0),
+                                                        after diagnosing a pre-existing
+                                                        environmental failure
+    --- Build attempt 1: FAILED (exit 1) ---
+        Compiled successfully in 109s          <-- source compiled
+        Finished TypeScript in 44s             <-- build-time TS passed
+        Collecting page data using 3 workers ...
+        Error: Failed to collect configuration for /api/auth/forgot-password
+          [cause]: Error: DATABASE_URL is required
+            at <unknown> (src\db\index.ts:7:9)
+        > Build error occurred
+        Failed to collect page data for /api/auth/forgot-password
+        EXITCODE=1
+        Diagnosis (requirement 9: diagnose, fix only what is necessary):
+        * src/db/index.ts lines 4-8 throw at MODULE SCOPE:
+                const databaseUrl = process.env.DATABASE_URL;
+                if (!databaseUrl) {
+                  throw new Error("DATABASE_URL is required");
+                }
+        * During "Collecting page data", Next.js imports route modules; those import
+          "@/db"; importing "@/db" throws. The build aborts.
+        * DATABASE_URL is not set in the environment, and no .env / .env.local /
+          .env* file exists in the working copy.
+        * This failure is PRE-EXISTING and unrelated to the edit: it occurs in
+          /api/auth/forgot-password, a file this task did not touch, and it occurs
+          AFTER compilation and TypeScript both already passed. Any build of this
+          working copy in this environment fails identically without the edit.
+        Resolution: a syntactically valid PLACEHOLDER connection string was supplied
+        to the build process environment ONLY (in-process variable, not persisted, no
+        file written, no .env created, no real credential):
+                DATABASE_URL=postgres://placeholder@127.0.0.1:5432/placeholder
+        This is sufficient because pg.Pool (src/db/index.ts lines 14-18) does not
+        connect eagerly; page-data collection only imports modules. No source file was
+        changed to make the build pass. The env variable was cleared immediately after.
+    --- Build attempt 2: PASSED (exit 0) ---
+        ▲ Next.js 16.3.5 (Turbopack)
+        ✓ Running next.config.ts took 136ms
+        ✓ Compiled successfully in 9.0s
+        ✓ Finished TypeScript in 15.5s
+        ✓ Generating static pages using 3 workers (22/22) in 3.5s
+        EXITCODE=0
+        Route table includes the modified route as server-rendered on demand:
+            ├ ƒ /api/listings/owned
+            ├ ƒ /api/listings
+            ├ ƒ /api/listings/buy
+            ...
+            ├ ƒ /dashboard
+            └ ƒ /dashboard/history
+        Non-fatal messages observed during static generation (both caught by
+        src/lib/auth.ts lines 40-43, build still succeeded):
+            getSessionUser error: DYNAMIC_SERVER_USAGE ... used `cookies`
+              at src\lib\auth.ts:17:31
+              at src\app\dashboard\layout.tsx:9:22
+          for routes /dashboard/history and /dashboard. These are Next's static-
+          render probes hitting `cookies()` inside a try/catch; they are expected and
+          are not caused by this change.
+    Interpretation: the modified route compiles, type-checks, and is included in the
+    production build output.
+E.4  Runtime test                                    RESULT: PARTIAL ONLY
+    A full runtime authorization test (proving user A cannot update user B's record)
+    COULD NOT BE PERFORMED. It requires a live PostgreSQL instance containing at least
+    two distinct owned_proxies rows owned by two different users.
+    This environment has NO database:
+        - DATABASE_URL not set (and no .env* file exists in the working copy)
+        - nothing listening on 127.0.0.1:5432  ->  ECONNREFUSED
+        - no seeding or database setup was performed (explicitly out of scope)
+    I am NOT claiming a successful ownership-restriction runtime test. It did not
+    happen. The evidence for the ownership fix is therefore:
+        (a) the compiled SQL predicate shown in section C, and
+        (b) typecheck + production build passing, and
+        (c) the partial route-level checks below.
+    What WAS tested: a development server was started on port 3111 with the same
+    placeholder connection string, and three requests were sent to the modified route.
+    Purpose: confirm the edited file still loads as a route handler and that the
+    existing authentication gate is intact (i.e. the edit did not break the handler).
+        TEST A - POST /api/listings/owned, NO session cookie
+            request : {"id":1,"locked":true}
+            response: HTTP 401  {"error":"Unauthorized"}
+            log     : POST /api/listings/owned 401 in 1014ms
+            verdict : EXPECTED / PASS - unauthenticated callers still rejected.
+        TEST B - POST /api/listings/owned, bogus cookie "nsocks_session=999999"
+            response: HTTP 401  {"error":"Unauthorized"}
+            log     : getSessionUser error ... ECONNREFUSED 127.0.0.1:5432
+                      at src\lib\auth.ts:26:20
+                      at async POST (src\app\api\listings\owned\route.ts:25:25)
+                      POST /api/listings/owned 401 in 608ms
+            verdict : EXPECTED / PASS. Note this confirms the fail-closed design of
+                      getSessionUser: on a DB error it returns null (auth.ts lines
+                      40-43), so the route answers 401 rather than proceeding. The
+                      stack trace shows the request DID reach line 25 of the edited
+                      handler, proving the modified file is wired up and executes.
+        TEST C - GET /api/listings/owned, NO session cookie
+            response: HTTP 200  {"owned":[],"user":null}
+            log     : GET /api/listings/owned 200 in 25ms
+            verdict : EXPECTED / PASS - unchanged GET behavior preserved.
+    NOT TESTED (impossible without a database):
+        - POST by owner with their own id  -> row updated
+        - POST by non-owner with another user's id -> row NOT updated
+        - the actual `user_id` predicate taking effect against real rows
+    The dev server was stopped and all of its node processes were terminated afterward.
+================================================================================
+F. DIFF SCOPE
+================================================================================
+CONFIRMED: only one source file was modified, and it is the file named in the task.
+    src/app/api/listings/owned/route.ts
+    Exact hand-applied delta (2 edits, 1 file):
+        line 4 : import { eq } from "drizzle-orm";
+              -> import { and, eq } from "drizzle-orm";
+        line 32: await db.update(ownedProxies).set({ locked: Boolean(locked) }).where(eq(ownedProxies.id, id));
+              -> await db
+              ->   .update(ownedProxies)
+              ->   .set({ locked: Boolean(locked) })
+              ->   .where(and(eq(ownedProxies.id, id), eq(ownedProxies.userId, sessionUser.id)));
+    Lines 1-3 and 5-46 of the original file are byte-for-byte unchanged, including the
+    GET handler, the PUT handler, the 401 and 400 branches, the response payload shape,
+    the `export const dynamic = "force-dynamic"` declaration, and the imports of
+    next/server, @/db, @/db/schema, and @/lib/auth.
+Verification method for "unrelated files were untouched":
+    Working copy is NOT a git repository, so `git diff` is unavailable and no git
+    command was run. Scope was instead confirmed by filesystem modification timestamps
+    excluding node_modules and .next:
+        20:43:20  src\app\api\listings\owned\route.ts     <-- the source edit
+        20:49:03  tsconfig.tsbuildinfo                    <-- tsc incremental artifact
+        20:51:11  next-env.d.ts                           <-- regenerated by Next
+        20:57:12  AGENTS.md, CLAUDE.md                    <-- scaffolded by next dev, then deleted
+    No other file in the working copy (60 files under src/, plus root config files)
+    has a modification time inside this session's window.
+    Directly excluded by requirement 6 - confirmed not present in the modified set:
+        payment code, crypto code, localization, theme code, dashboard UI, support
+        code, login code, password-reset code.
+    SECRET MATERIAL: no .env file, key, credential, wallet key, private key, or
+    open-terminal-key.txt was read, printed, exposed, modified, deleted, or renamed.
+    (Environment variable PRESENCE was checked by name only; no value was ever
+    retrieved or displayed. The DATABASE_URL used for validation is a fabricated
+    placeholder with no real target or credential.)
+    GITHUB: no changes. No git command, push, commit, branch, PR, or issue action was
+    performed.
+================================================================================
+G. PROBLEMS ENCOUNTERED
+================================================================================
+G.1  `npm ci` emitted Windows "NativeCommandError" noise in PowerShell
+     Symptom: red error blocks quoting npm warnings (allow-scripts note, deprecations).
+     Cause: npm writes notices to stderr; PowerShell 5.1 wraps native stderr as
+            NativeCommandError output.
+     Resolution: verified the process exit code instead. EXITCODE=0, 396 packages
+                 installed. No action needed - not a real failure.
+G.2  `npm run build` FAILED on first attempt (exit 1)
+     Symptom: "Error: Failed to collect configuration for /api/auth/forgot-password
+               [cause]: DATABASE_URL is required at src\db\index.ts:7:9"
+     Cause: src/db/index.ts lines 4-8 throws at module scope when DATABASE_URL is
+            unset. During page-data collection Next imports route modules -> @/db ->
+            throw. Confirmed DATABASE_URL and related vars NOT SET and no .env* file
+            exists.
+     Diagnosis of responsibility: PRE-EXISTING and NOT caused by this task's edit -
+            it fails in an untouched file, after compilation and TypeScript already
+            succeeded.
+     Resolution: supplied a placeholder connection string to the build process
+                 environment only (not persisted, no file created, no real
+                 credential). Build then completed with exit 0. No source change was
+                 made to force the build green.
+G.3  Offline SQL verification script failed with a SyntaxError
+     Symptom: "SyntaxError: Unexpected token '.'" in the node --eval payload -
+              `await import(./src/db/schema.ts)` had lost its quotes.
+     Cause: PowerShell's native argument passing stripped the embedded double quotes
+            from the JavaScript passed via -e.
+     Resolution: rewrote the script using single quotes exclusively inside the payload
+                 so no quote characters needed escaping. Re-ran successfully and
+                 produced the before/after SQL shown in section C (exit 0).
+G.4  `next dev` auto-created AGENTS.md and CLAUDE.md in the project root
+     Symptom: dev-server banner reported "Generated AGENTS.md and CLAUDE.md for AI
+               agents"; both files appeared with creation time 2026-09-26 20:57:12
+               (after this challenge started) and neither existed before.
+     Cause: Next.js scaffolds both files when neither exists (node_modules/next/
+            dist/server/lib/generate-agent-files.js line 111).
+     Resolution: both files were deleted to restore the original tree, because the
+                 task permits exactly one file to be created. Disclosed here rather
+                 than left silent. They will be regenerated if `next dev` is run
+                 again; no `next dev` was run afterward.
+G.5  Non-fatal DYNAMIC_SERVER_USAGE messages during static generation
+     Symptom: "getSessionUser error: Route /dashboard couldn't be rendered
+               statically because it used `cookies`" for /dashboard and
+               /dashboard/history.
+     Cause: Next probing static renderability; `cookies()` is called inside
+            getSessionUser's try/catch (src/lib/auth.ts line 17, caught at lines
+            40-43), so it degrades to a caught error.
+     Resolution: none required. Build finished with exit 0 (22/22 pages). Present
+                 before and after the change; unrelated to this task.
+G.6  No database available - runtime ownership test impossible
+     Symptom: ECONNREFUSED 127.0.0.1:5432 on every query; DATABASE_URL unset.
+     Resolution: NOT resolved (and not worked around). Reported honestly as a
+                 limitation in E.4. A real two-user authorization test was NOT run
+                 and is NOT being claimed.
+G.7  No git repository
+     Symptom: `git diff` unavailable for inspecting the change.
+     Resolution: produced the before/after delta manually from the pre-edit file read
+                 in section A/C, and used filesystem timestamps to prove no other
+                 source file was touched (section F).
+G.8  Initial `node_modules` missing
+     Symptom: typecheck/build could not run.
+     Resolution: ran `npm ci` as explicitly required by requirement 9.
+================================================================================
+H. REMAINING CONCERNS
+================================================================================
+The following were discovered during inspection and were DELIBERATELY NOT CHANGED,
+per requirements 5 and 6. None are fixed by this task.
+H.1  [SAME FILE - adjacent] Full-table column selection on ownedProxies
+     src/app/api/listings/owned/route.ts lines 15 and 33 (and 36) call
+     `db.select().from(ownedProxies)` with no explicit projection. Drizzle therefore
+     SELECTs every column declared in src/db/schema.ts lines 242-263, including
+     provider / transport_host / transport_port / provider_credential_ref /
+     access_* / public_access_*. src/db/init.ts lines 144-155 never creates those
+     columns. On an init-provisioned database these SELECTs can fail with a
+     missing-column error (HTTP 500). NOT fixed - this is the schema-drift class of
+     issue and is out of scope for this challenge.
+H.2  [SAME FILE] Silent no-op on unauthorized/nonexistent ids
+     After the fix, a cross-owner or nonexistent `id` simply matches 0 rows and the
+     handler still returns HTTP 200 { success: true, owned: [...] }. The data is now
+     protected, but the caller receives no 404 / "not found" signal. Adding such a
+     response would change the response format, which requirement 4 forbids. Noted
+     for future work.
+H.3  [SAME FILE] `id` is only truthiness-checked
+     Line 31 `if (!id)` rejects only falsy values. Non-numeric or negative `id`
+     (e.g. "abc", -1, a huge value) still reaches the Drizzle predicate. NOT fixed.
+H.4  [SAME FILE] PUT handler returns success unconditionally
+     Lines 44-46 export PUT returning { success: true, persisted: false } with no
+     session check and no effect. Harmless as written, but it advertises an
+     authenticated-looking success. NOT fixed.
+H.5  No rate limiting or audit trail on this mutation. NOT implemented.
+H.6  Session cookie is a raw, unsigned, non-rotating user id
+     src/lib/auth.ts line 58 stores `userId.toString()`; line 23 re-parses it with
+     parseInt. No signature, no server-side session record, no revocation beyond
+     cookie deletion (lines 67-70). Severity HIGH. NOT fixed.
+H.7  Password reset performs no ownership verification (CRITICAL)
+     src/app/api/auth/forgot-password/route.ts lines 27-37 change a user's password
+     given only a username/e-mail; the mockToken at lines 19-25 / 39-44 is never
+     stored or validated anywhere in src/. NOT fixed.
+H.8  2FA weaknesses (HIGH)
+     src/app/api/auth/login/route.ts lines 32-46 accept a code based on length only;
+     src/app/api/auth/toggle-2fa/route.ts line 23 uses a single shared TOTP secret
+     literal for every user. NOT fixed.
+H.9  API/UI mismatches
+     - src/app/dashboard/page.tsx line 615 calls GET on
+       src/app/api/support/tickets/route.ts, which exports only POST (line 10), so
+       the status poll cannot succeed.
+     - The same route returns HTTP 410 unconditionally (lines 12-18) while the
+       dashboard still presents a working refund flow (lines 550-567).
+     - src/app/auth/login/page.tsx lines 311-315 redirect admins to /admin, which has
+       no route.
+     All NOT fixed (support/login/dashboard code excluded by requirement 6).
+H.10 Database schema has three divergent definitions and no migration tooling
+     src/db/schema.ts (Drizzle, 14 tables) vs src/db/init.ts (raw DDL, missing the
+     provider/transport/access columns) vs src/app/api/support/create/route.ts lines
+     7-65 (two more tables created inside a route handler). package.json scripts
+     lines 4-10 contain no db:generate / db:push / db:migrate. NOT addressed.
+H.11 Large maintainability debt
+     src/app/dashboard/page.tsx is ~100 KB / 2,037 lines holding six tabs in one
+     client component; four separate translation dictionaries; three separate theme
+     bootstraps; stray files inside the router tree
+     (src/app/dashboard/history/page.tsx.bak and an extension-less file named "(").
+     NOT addressed.
+H.12 Dependency advisories left untouched
+     `npm ci` reported 5 vulnerabilities (4 moderate, 1 high). `npm audit fix` was
+     deliberately NOT run because changing dependencies is outside this task's scope
+     and would break the "do not modify anything else" constraint.
+H.13 The `users` import in src/app/api/listings/owned/route.ts line 3 appears unused
+     by this route. It was already there before the edit and was left as-is, because
+     removing it would be an unrelated change.
+H.14 Build reproducibility caveat for the next engineer
+     A clean `npm run build` in this working copy will fail until DATABASE_URL is
+     provided (src/db/index.ts lines 4-8). This is a pre-existing condition of the
+     repository + environment, documented in G.2, not a regression from this task.
+================================================================================
+SUMMARY
+================================================================================
+  Vulnerability              : Broken object-level authorization (IDOR) in
+                               POST /api/listings/owned - UPDATE filtered by primary
+                               key only, never by owner.
+  File / line                : src/app/api/listings/owned/route.ts line 32 (original)
+  Fix                        : conjoined `eq(ownedProxies.userId, sessionUser.id)` with
+                               the existing id predicate; added `and` to the import.
+  Source files changed       : 1
+  Report files created       : 1
+  npm ci                     : PASS (exit 0), 396 packages
+  npm run typecheck          : PASS (exit 0)
+  npm run build              : PASS (exit 0) after supplying a placeholder DATABASE_URL
+                               to the build process; first attempt failed on a
+                               PRE-EXISTING missing-env condition (documented, G.2)
+  Ownership runtime test     : NOT PERFORMED - no database available (E.4).
+                               Claimed only: compiled SQL predicate, typecheck,
+                               production build, and 3 route-level checks (401/401/200).
+  Unrelated files touched    : NONE (only tool-generated artifacts, listed in D)
+  Secrets / GitHub           : none read, none exposed, none changed; no git action
